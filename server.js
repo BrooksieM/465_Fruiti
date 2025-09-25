@@ -25,6 +25,9 @@ app.get('/api/recipes', (req, res) => {
     res.json(recipes);
 });
 
+app.get('/', (req, res) => {
+    res.send('this is the post recipe part');
+});
 
 // this is starting the server
 const PORT = 3000;
