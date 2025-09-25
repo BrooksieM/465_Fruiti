@@ -5,7 +5,7 @@ app.use(express.json());
 // the array for recipes
 let recipes = [];
 
-
+// logic for posting recipe
 app.post('/api/recipes', (req, res) => {
     const { name, ingredients, instructions } = req.body;
     if (!name || !ingredients || !instructions) {
