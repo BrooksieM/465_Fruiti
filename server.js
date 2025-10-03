@@ -3,6 +3,10 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+// Accounts API (added)
+const accountsRouter = require('./src/routes/accounts');
+app.use('/api/accounts', accountsRouter);
+
 
 console.log('Loaded file:', __filename);
 
