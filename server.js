@@ -91,6 +91,32 @@ app.get('/api/recipes/:id', (req, res) => {
     res.status(200).json(recipe);
 });
 
+// TODO: ALLOW USER TO VIEW MULTIPLE THUMBAILS OF RECIPES
+
+//post a review of the recipe
+app.post('/api/recipes/:id/reviews', (req, res) => {
+    const id = Number(req.params.id);
+    const { review } = req.body;
+    //Validating the input
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
+    if (!review) {
+        return res.status(400).json({ error: 'Missing review field' });
+    }
+    //Check if there's an recipe with the ID specified by the user
+    const recipe = recipes.find(r => r.id === id);
+    if (!recipe) {
+        return res.status(404).json({ error: 'Recipe not found in System' });
+    }
+    //If reviews array does not exist, create it
+    if (!recipe.reviews) {
+        recipe.reviews = [];
+    }
+    //Add the new review to the reviews array
+    recipe.reviews.push(review);
+    res.status(201).json({ message: 'Review added', review });
+  });
 // this is starting the server
 const PORT = 3000;
 app.listen(PORT, () => {
