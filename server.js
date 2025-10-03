@@ -3,6 +3,11 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+// Comments API (added on comments_service branch)
+const commentsRouter = require('./src/routes/comments');
+app.use('/api/comments', commentsRouter);
+
+
 
 console.log('Loaded file:', __filename);
 
