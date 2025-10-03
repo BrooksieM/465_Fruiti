@@ -94,7 +94,7 @@ app.get('/api/recipes/:id', (req, res) => {
 // TODO: ALLOW USER TO VIEW MULTIPLE THUMBAILS OF RECIPES
 
 //post a review of the recipe
-app.post('/api/recipes/:id/reviews', (req, res) => {
+app.post('/api/recipes/:id/rating', (req, res) => {
     const id = Number(req.params.id);
     const { review } = req.body;
     //Validating the input
@@ -117,6 +117,7 @@ app.post('/api/recipes/:id/reviews', (req, res) => {
     recipe.reviews.push(review);
     res.status(201).json({ message: 'Review added', review });
   });
+
 // this is starting the server
 const PORT = 3000;
 app.listen(PORT, () => {
