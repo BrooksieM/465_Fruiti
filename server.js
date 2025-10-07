@@ -67,7 +67,7 @@ app.get('/api/seller_subscription', (req, res) => {
     res.send('This is the subscription plan selection page');
 });
 
-
+// inputting payment information
 
 
 
