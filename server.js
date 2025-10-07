@@ -53,12 +53,49 @@ app.delete('/api/recipes/:id', (req, res) => {
   res.status(200).json({ message: 'Recipe deleted', deletedRecipe });
 });
 
+
+
+// SELLER APPLICATION SERVICE //////////////////////////////////
+
+//view application of becoming a seller
+app.get('/api/seller_application', (req, res) => {
+    res.send('This is the seller application page');
+});
+
+//selecting subscription plan / 3
+app.get('/api/seller_subscription', (req, res) => {
+    res.send('This is the subscription plan selection page');
+});
+
+
+
+
+
+
+////////////////////////END OF SELLER APP///////////////
+
+
+
+
+
+
+
+
+
+
+
+
 // this is starting the server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Routes:\n  POST   /api/recipes    \n  GET    /api/recipes\n  DELETE /api/recipes/:id`);
 });
+
+
+
+
+
 
 
 /*
@@ -77,3 +114,7 @@ DELETE method
 	Copy and paste the code below to CMD after the server is started
 		curl -X DELETE http://localhost:3000/api/recipes/1
 */
+
+
+
+
