@@ -137,6 +137,26 @@ app.get('/api/seller_subscription/:id', (req, res) => {
 
 ////////////////////////END OF SELLER APP///////////////
 
+
+// CONTACT US SERVICE //////////////////////////////////
+
+//view contact us page
+app.get('/api/contact_us', (req, res) => {
+    res.send('This is the contact us page');
+});
+
+//submit a contact us form
+app.post('/api/contact_us', (req, res) => {
+    const { name, email, message } = req.body;     
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+    res.status(200).json({ message: 'Contact form submitted successfully.' });
+});
+
+
+////////////////////////END OF CONTACT US///////////////
+
 // this is starting the server
 const PORT = 3000;
 app.listen(PORT, () => {
