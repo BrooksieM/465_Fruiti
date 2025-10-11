@@ -4,6 +4,36 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+// Load environment variables from .env file
+require('dotenv').config();
+
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client using environment variables
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+// Your existing code here...
+console.log('Supabase connected!');
+
+async function testConnection() {
+  // Simple test - adjust based on your table structure
+  const { data, error } = await supabase
+    .from('your_table_name')  // Replace with your actual table
+    .select('*')
+    .limit(1);
+
+  if (error) {
+    console.error('Connection failed:', error);
+  } else {
+    console.log('Connection successful!', data);
+  }
+}
+
+testConnection();
+
 console.log('Loaded file:', __filename);
 
 // the array for recipes
