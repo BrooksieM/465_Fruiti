@@ -4,6 +4,31 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+// Load environment variables from .env file
+require('dotenv').config();
+
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client using environment variables
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+async function testConnection() {
+  // Simple test - adjust based on your table structure
+  const { data, error } = await supabase
+    .from('userInfo')  // Replace with your actual table
+    .select('*');
+
+  if (error) {
+    console.error('Connection failed:', error);
+  } else {
+    console.log('Connection successful!');
+  }
+}
+testConnection();
+
 console.log('Loaded file:', __filename);
 
 // the array for recipes
@@ -12,6 +37,185 @@ let recipes = [
     {id: 2, name: 'Blueberry Pie', ingredients: ['blueberry'], instructions: ['Make an blueberry']}
 ];
 
+// ========== RECIPES CRUD OPERATIONS (Supabase) ==========
+
+// POST endpoint to create a recipe
+app.post('/api/recipes', async (req, res) => {
+    try {
+        const { name, ingredients, instructions } = req.body;
+        
+        // Check if all required fields are satisfied
+        if (!name || !ingredients || !instructions) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Insert into Supabase (auto-increment ID handled by database)
+        const { data, error } = await supabase
+            .from('recipes')
+            .insert([
+                { 
+                    name, 
+                    ingredients, 
+                    instructions,
+                    created_at: new Date().toISOString()
+                }
+            ])
+            .select();
+
+        if (error) {
+            console.error('Insert error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Respond with the created recipe (Supabase returns the inserted row)
+        res.status(201).json(data[0]);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET endpoint to retrieve all recipes
+app.get('/api/recipes', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipes')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Select error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Return the array of recipes in JSON format
+        res.json(data);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// DELETE endpoint to delete a recipe with the specified id
+app.delete('/api/recipes/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        
+        // Validating the input
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Invalid recipe ID' });
+        }
+
+        // Check if recipe exists
+        const { data: existingRecipe, error: checkError } = await supabase
+            .from('recipes')
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        if (checkError) {
+            return res.status(404).json({ error: 'Recipe not found' });
+        }
+
+        // Delete recipe from Supabase
+        const { error } = await supabase
+            .from('recipes')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.status(200).json({ 
+            message: 'Recipe deleted successfully',
+            deletedId: id 
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET endpoint to get a specific recipe by ID
+app.get('/api/recipes/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Invalid recipe ID' });
+        }
+
+        const { data, error } = await supabase
+            .from('recipes')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return res.status(404).json({ error: 'Recipe not found' });
+            }
+            console.error('Select error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PUT endpoint to update a recipe
+app.put('/api/recipes/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        const { name, ingredients, instructions } = req.body;
+        
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Invalid recipe ID' });
+        }
+
+        // Check if recipe exists
+        const { data: existingRecipe, error: checkError } = await supabase
+            .from('recipes')
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        if (checkError) {
+            return res.status(404).json({ error: 'Recipe not found' });
+        }
+
+        // Update recipe in Supabase
+        const { data, error } = await supabase
+            .from('recipes')
+            .update({
+                name,
+                ingredients,
+                instructions,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Update error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json({
+            message: 'Recipe updated successfully',
+            recipe: data[0]
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+/*
 // POST endpoint to create a product
 app.post('/api/recipes', (req, res) => {
     const { name, ingredients, instructions } = req.body;
@@ -52,6 +256,8 @@ app.delete('/api/recipes/:id', (req, res) => {
   const [deletedRecipe] = recipes.splice(idx, 1);
   res.status(200).json({ message: 'Recipe deleted', deletedRecipe });
 });
+*/
+
 
 ////// NUTRITION SERVICE ////////////////////////////////////////////////
 
@@ -127,7 +333,7 @@ app.get('/api/articles/:id', (req, res) => {
 
 /////// END ARTICLES SERVICE //////////////////////////////////////////
 
-// SELLER APPLICATION SERVICE //////////////////////////////////
+// SELLER_APPLICATION SERVICE //////////////////////////////////
 
 let subscriptions = [
     { id: 1, name: 'Monthly', price: 5.99, duration: '1 month' },
