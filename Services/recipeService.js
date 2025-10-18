@@ -1,10 +1,3 @@
-
-// the array for recipes
-let recipes = [
-    {id: 1, name: 'Apple Pie', ingredients: ['apple'], instructions: ['Make an apple pie']},
-    {id: 2, name: 'Blueberry Pie', ingredients: ['blueberry'], instructions: ['Make an blueberry']}
-];
-
 // ========== RECIPES CRUD OPERATIONS (Supabase) ==========
 
 // POST endpoint to create a recipe
