@@ -1,6 +1,8 @@
-////////comment_service//////
-(() => {
-  // ensure shared store exists
+// Services/commentService.js
+// In-memory comments per recipe with CRUD + like
+
+module.exports = function (app, _supabase) {
+  // Reuse the global store so comments persist while the process is alive
   const store = (globalThis.__store = globalThis.__store || {
     accounts: [],
     nextAccountId: 1,
@@ -9,6 +11,8 @@
   });
   if (!store.commentsByRecipe) store.commentsByRecipe = {};
   if (!store.nextCommentIdByRecipe) store.nextCommentIdByRecipe = {};
+
+  // Ensure a recipe bucket exists and return its key
   const ensureRecipe = (recipeId) => {
     const key = String(recipeId);
     if (!store.commentsByRecipe[key]) {
@@ -18,18 +22,18 @@
     return key;
   };
 
-  // helpers
+  // Small helpers
   const toId = (v, kind) => {
     const n = Number(v);
     if (!Number.isInteger(n) || n <= 0) throw new Error(`invalid ${kind} id`);
     return n;
   };
-  const status = (e) => (/not found|valid .* required/i.test(e.message) ? 400 : 400); // simple map
+  const status = (_e) => 400;
 
-  // dev ping
+  // Health check
   app.get('/api/comments/__ping', (_req, res) => res.json({ ok: true }));
 
-  // POST /api/comments?recipe=1  { text }
+  // Create a comment for a recipe (?recipe=ID), body: { text }
   app.post('/api/comments', (req, res) => {
     try {
       const recipeId = toId(req.query.recipe, 'recipe');
@@ -45,8 +49,7 @@
     }
   });
 
-  // GET /api/comments?recipe=1            -> list
-  // GET /api/comments?recipe=1&comment=1  -> single
+  // List comments for a recipe, or fetch one via ?comment=ID
   app.get('/api/comments', (req, res) => {
     try {
       const recipeId = toId(req.query.recipe, 'recipe');
@@ -63,7 +66,7 @@
     }
   });
 
-  // PUT /api/comments?recipe=1&comment=1  { text }
+  // Update comment text (?recipe=ID&comment=ID)
   app.put('/api/comments', (req, res) => {
     try {
       const recipeId = toId(req.query.recipe, 'recipe');
@@ -80,7 +83,7 @@
     }
   });
 
-  // PUT /api/comments/like?recipe=1&comment=1
+  // Increment like counter (?recipe=ID&comment=ID)
   app.put('/api/comments/like', (req, res) => {
     try {
       const recipeId = toId(req.query.recipe, 'recipe');
@@ -95,7 +98,7 @@
     }
   });
 
-  // DELETE /api/comments?recipe=1&comment=1
+  // Delete a comment (?recipe=ID&comment=ID)
   app.delete('/api/comments', (req, res) => {
     try {
       const recipeId = toId(req.query.recipe, 'recipe');
@@ -109,15 +112,4 @@
       res.status(status(e)).json({ error: e.message });
     }
   });
-})();
-
-/* CMD tests:
-curl.exe "http://localhost:3000/api/comments/__ping"
-curl.exe -X POST "http://localhost:3000/api/comments?recipe=1" -H "Content-Type: application/json" -d "{\"text\":\"Nice pie!\"}"
-curl.exe "http://localhost:3000/api/comments?recipe=1"
-curl.exe "http://localhost:3000/api/comments?recipe=1&comment=1"
-curl.exe -X PUT "http://localhost:3000/api/comments?recipe=1&comment=1" -H "Content-Type: application/json" -d "{\"text\":\"Edited\"}"
-curl.exe -X PUT "http://localhost:3000/api/comments/like?recipe=1&comment=1"
-curl.exe -X DELETE "http://localhost:3000/api/comments?recipe=1&comment=1"
-*/
-////////comment_service end//////
+};

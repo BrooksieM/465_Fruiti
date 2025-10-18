@@ -1,18 +1,24 @@
-////////account_service/////
-(() => {
-  // shared in-memory store (safe-init if it already exists)
+// Services/accountService.js
+// Exposes CRUD-style endpoints for in-memory "accounts" (no DB)
+// The module exports a function that receives Express `app` and optional `supabase`
+
+module.exports = function (app, _supabase) {
+  // Simple in-memory store shared across services via globalThis
   const store = (globalThis.__store = globalThis.__store || {
     accounts: [],
     nextAccountId: 1,
     commentsByRecipe: {},
     nextCommentIdByRecipe: {},
   });
+
+  // Defensive normalization in case hot-reload altered values
   if (!Array.isArray(store.accounts)) store.accounts = [];
   if (!Number.isInteger(store.nextAccountId)) {
-    store.nextAccountId = (store.accounts.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1) || 1;
+    store.nextAccountId =
+      (store.accounts.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1) || 1;
   }
 
-  // helpers
+  // Helpers
   const toId = (v) => {
     const n = Number(v);
     if (!Number.isInteger(n) || n <= 0) throw new Error('invalid id');
@@ -25,9 +31,11 @@
   };
   const status = (e) => (/not found/i.test(e.message) ? 404 : 400);
 
-  // routes
+  // Health check for Postman / readiness
   app.get('/api/accounts/__ping', (_req, res) => res.json({ ok: true }));
 
+  // Create account
+  // Body: { handle, email, ...extra }
   app.post('/api/accounts', (req, res) => {
     try {
       const { handle, email, ...extra } = req.body || {};
@@ -47,8 +55,10 @@
     }
   });
 
+  // List accounts
   app.get('/api/accounts', (_req, res) => res.json(store.accounts));
 
+  // Get one account
   app.get('/api/accounts/:id', (req, res) => {
     try {
       res.json(mustAccount(toId(req.params.id)));
@@ -57,6 +67,8 @@
     }
   });
 
+  // Update account (partial)
+  // Body can include: handle, email, and any additional fields
   app.put('/api/accounts/:id', (req, res) => {
     try {
       const a = mustAccount(toId(req.params.id));
@@ -70,6 +82,7 @@
     }
   });
 
+  // Set/replace avatar URL
   app.put('/api/accounts/:id/profile-picture', (req, res) => {
     try {
       const a = mustAccount(toId(req.params.id));
@@ -82,6 +95,7 @@
     }
   });
 
+  // Upsert payment method details
   app.put('/api/accounts/:id/payment-method', (req, res) => {
     try {
       const a = mustAccount(toId(req.params.id));
@@ -94,6 +108,7 @@
     }
   });
 
+  // Delete account by ID
   app.delete('/api/accounts/:id', (req, res) => {
     try {
       const id = toId(req.params.id);
@@ -105,16 +120,4 @@
       res.status(status(e)).json({ error: e.message });
     }
   });
-})();
-
-/* CMD tests:
-curl.exe "http://localhost:3000/api/accounts/__ping"
-curl.exe -X POST "http://localhost:3000/api/accounts" -H "Content-Type: application/json" -d "{\"handle\":\"buyer7\",\"email\":\"b7@example.com\"}"
-curl.exe "http://localhost:3000/api/accounts"
-curl.exe "http://localhost:3000/api/accounts/1"
-curl.exe -X PUT "http://localhost:3000/api/accounts/1" -H "Content-Type: application/json" -d "{\"handle\":\"buyer77\"}"
-curl.exe -X PUT "http://localhost:3000/api/accounts/1/profile-picture" -H "Content-Type: application/json" -d "{\"url\":\"https://img.example.com/a.png\"}"
-curl.exe -X PUT "http://localhost:3000/api/accounts/1/payment-method" -H "Content-Type: application/json" -d "{\"brand\":\"visa\",\"last4\":\"4242\"}"
-curl.exe -X DELETE "http://localhost:3000/api/accounts/1"
-*/
-////////account_service end//////
+};

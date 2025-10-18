@@ -1,21 +1,33 @@
-////////admin_shit/////
+// Services/adminService.js
+// Lightweight admin endpoints (placeholders now; wire to real admin logic later)
 
-//view all logged in users
-app.get('/api/admin/account', (req, res) => {
-  // Implement logic to retrieve all logged in users
-  res.json({ message: 'This is where the user list would go.' });
-});
+module.exports = function (app, supabase) {
+  // Sanity probe for service wiring
+  app.get('/api/admin/__ping', (_req, res) => res.json({ ok: true }));
 
-//delete a users account
-app.delete('/api/admin/account/:id', (req, res) => {
-  // Implement logic to delete a user's account
-  res.json({ message: 'User account deleted successfully.' });
-});
+  // Example list endpoint (replace with a real query if needed)
+  app.get('/api/admin/health', async (_req, res) => {
+    try {
+      // If you later depend on Supabase, expand checks here
+      const up = !!supabase;
+      res.json({ up, time: new Date().toISOString() });
+    } catch (e) {
+      res.status(500).json({ error: String(e?.message || e) });
+    }
+  });
 
-//restore a users account
-app.post('/api/admin/account/:id/restore', (req, res) => {
-  // Implement logic to restore a user's account
-  res.json({ message: 'User account restored successfully.' });
-});
+  // Placeholder admin account listing
+  app.get('/api/admin/account', (_req, res) => {
+    res.json({ message: 'This is where the user list would go.' });
+  });
 
-////////admin_shit end//////
+  // Placeholder delete
+  app.delete('/api/admin/account/:id', (_req, res) => {
+    res.json({ message: 'User account deleted successfully.' });
+  });
+
+  // Placeholder restore
+  app.post('/api/admin/account/:id/restore', (_req, res) => {
+    res.json({ message: 'User account restored successfully.' });
+  });
+};
