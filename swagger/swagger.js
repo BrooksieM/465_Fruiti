@@ -3,7 +3,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
 module.exports = (app, PORT) => {
-  const options = {
+    // copied from rm
+    const options = {
     definition: {
       openapi: '3.0.0',
       info: {
@@ -18,7 +19,7 @@ module.exports = (app, PORT) => {
         },
       ],
     },
-    // Correct path from swagger folder to your Services folder
+    // path to services folder
     apis: ['../Services/*.js'],
   };
 
