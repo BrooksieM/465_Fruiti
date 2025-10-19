@@ -18,13 +18,17 @@ module.exports = (app, PORT) => {
         },
       ],
     },
-    apis: [path.join(__dirname, '../Services/*.js')],
+    apis: 
+    [
+      path.join(__dirname, './docs/fruitstand.js'),
+      path.join(__dirname, '../Services/*.js')
+    ],
   };
 
   const specs = swaggerJsdoc(options);
   
   // add debug logging (from chatGPT suggestion)
-  console.log('Swagger looking for files in:', path.join(__dirname, '../Services/*.js'));
+  console.log('Swagger looking for files in:', path.join(__dirname, './docs/fruitstand.js'));
   console.log('Number of paths found:', specs.paths ? Object.keys(specs.paths).length : 0);
   
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
