@@ -87,7 +87,7 @@ export default function AboutUs() {
             About Us
           </h1>
           <p className="text-xl text-black/70 mb-8">
-            This page is coming soon. Continue prompting to add content here!
+            Frontend Design is so hard, I hate working on the frontend
           </p>
           <Link
             to="/"
