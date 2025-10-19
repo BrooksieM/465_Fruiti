@@ -1,15 +1,27 @@
-//swagger set up
+// swagger/swagger.js
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
-// SERVICES
-require('./Services/accountService')(app, supabase);
-require('./Services/adminService')(app, supabase);
-require('./Services/articleService')(app, supabase);
-require('./Services/authService')(app, supabase);
-require('./Services/commentService')(app, supabase);
-require('./Services/contactService')(app, supabase);
-require('./Services/fruitstandService')(app, supabase);
-require('./Services/nutritionService')(app, supabase);
-require('./Services/recipeService')(app, supabase);
-require('./Services/sellerApplicationService')(app, supabase);
+module.exports = (app, PORT) => {
+  const options = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Fruiti API',
+        version: '1.0.0',
+        description: 'API documentation for the Fruiti project',
+      },
+      servers: [
+        {
+          url: `http://localhost:${PORT}`,
+          description: 'Dev server',
+        },
+      ],
+    },
+    // Correct path from swagger folder to your Services folder
+    apis: ['../Services/*.js'],
+  };
+
+  const specs = swaggerJsdoc(options);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+};

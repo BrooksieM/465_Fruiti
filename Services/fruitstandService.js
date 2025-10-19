@@ -1,6 +1,33 @@
 // ========== FRUIT STANDS CRUD OPERATIONS (Supabase) ==========
 
 // GET endpoint to search for nearby fruit stands
+module.exports = (app, supabase) => {
+    /**
+   * @swagger
+   * /fruitstands/search:
+   *   get:
+   *     summary: Get all fruit stands
+   *     description: Returns a list of all fruit stands from the database
+   *     responses:
+   *       200:
+   *         description: A list of fruit stands
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: string
+   *                     description: Fruit stand ID
+   *                   name:
+   *                     type: string
+   *                     description: Name of the fruit stand
+   *                   location:
+   *                     type: string
+   *                     description: Location of the fruit stand
+   */
 app.get('/api/fruitstands/search', async (req, res) => {
     try 
     {
@@ -355,3 +382,4 @@ app.get('/api/fruitstands', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+};
