@@ -1,8 +1,4 @@
-// Services/fruitstandService.js
-// Supabase-backed CRUD and search for fruit stands
-
-module.exports = function (app, supabase) 
-{
+// ========== FRUIT STANDS CRUD OPERATIONS (Supabase) ==========
 
 // GET endpoint to search for nearby fruit stands
 module.exports = (app, supabase) => {
@@ -265,8 +261,7 @@ app.get('/api/fruitstands/:id', async (req, res) => {
 
         if (error) 
         {
-            if (error.code === 'PGRST116') 
-            {
+            if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Fruit stand not found' });
             }
             console.error('Select error:', error);
@@ -413,6 +408,4 @@ app.get('/api/fruitstands', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-  };
-  
 };
