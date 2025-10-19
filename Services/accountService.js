@@ -1,4 +1,5 @@
 ////////account_service/////
+module.exports = (app, _supabase) => {
 (() => {
   // shared in-memory store (safe-init if it already exists)
   const store = (globalThis.__store = globalThis.__store || {
@@ -106,7 +107,7 @@
     }
   });
 })();
-
+};
 /* CMD tests:
 curl.exe "http://localhost:3000/api/accounts/__ping"
 curl.exe -X POST "http://localhost:3000/api/accounts" -H "Content-Type: application/json" -d "{\"handle\":\"buyer7\",\"email\":\"b7@example.com\"}"

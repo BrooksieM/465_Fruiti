@@ -3,6 +3,7 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+const PORT = 3000;
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -32,21 +33,28 @@ testConnection();
 console.log('Loaded file:', __filename);
 
 // SERVICES
-require('./Services/accountService')(app, supabase);
-require('./Services/adminService')(app, supabase);
-require('./Services/articleService')(app, supabase);
-require('./Services/authService')(app, supabase);
-require('./Services/commentService')(app, supabase);
-require('./Services/contactService')(app, supabase);
+//require('./Services/accountService')(app, supabase);
+//require('./Services/adminService')(app, supabase);
+//require('./Services/articleService')(app, supabase);
+//require('./Services/authService')(app, supabase);
+//require('./Services/commentService')(app, supabase);
+//require('./Services/contactService')(app, supabase);
 require('./Services/fruitstandService')(app, supabase);
-require('./Services/nutritionService')(app, supabase);
-require('./Services/recipeService')(app, supabase);
-require('./Services/sellerApplicationService')(app, supabase);
+//require('./Services/nutritionService')(app, supabase);
+//require('./Services/recipeService')(app, supabase);
+//require('./Services/sellerApplicationService')(app, supabase);
+
+const swaggerSetup = require('./swagger/swagger');
+
+swaggerSetup(app, PORT);
 
 
 
-// this is starting the server
-const PORT = 3000;
+app.get('/', (req, res) => {
+  res.send('Welcome to the Fruiti API!');
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Routes:\n  POST   /api/recipes    \n  GET    /api/recipes\n  DELETE /api/recipes/:id`);
