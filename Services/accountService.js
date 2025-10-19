@@ -120,12 +120,15 @@ module.exports = function (app, supabase)
   });
 
   // PUT /api/accounts/:id -> update account
-  app.put('/api/accounts/:id', async (req, res) => {
-    try {
+  app.put('/api/accounts/:id', async (req, res) => 
+  {
+    try 
+    {
       const id = Number(req.params.id);
       const { handle, email, avatar } = req.body || {};
 
-      if (!Number.isInteger(id) || id <= 0) {
+      if (!Number.isInteger(id) || id <= 0) 
+      {
         return res.status(400).json({ error: 'Invalid account ID' });
       }
 
@@ -136,12 +139,14 @@ module.exports = function (app, supabase)
         .eq('id', id)
         .single();
 
-      if (checkError) {
+      if (checkError) 
+      {
         return res.status(404).json({ error: 'Account not found' });
       }
 
       // If handle or email is being updated, check for conflicts
-      if (handle || email) {
+      if (handle || email) 
+      {
         const { data: conflictAccount, error: conflictError } = await supabase
           .from('accounts')
           .select('handle, email')
@@ -149,14 +154,17 @@ module.exports = function (app, supabase)
           .neq('id', id)
           .limit(1);
 
-        if (conflictError) {
+        if (conflictError) 
+        {
           console.error('Conflict check error:', conflictError);
           return res.status(500).json({ error: 'Error checking account conflicts' });
         }
 
-        if (conflictAccount && conflictAccount.length > 0) {
+        if (conflictAccount && conflictAccount.length > 0) 
+        {
           const conflict = conflictAccount[0];
-          if (handle && conflict.handle === handle) {
+          if (handle && conflict.handle === handle) 
+          {
             return res.status(409).json({ error: 'Handle already exists' });
           }
           if (email && conflict.email === email) {
