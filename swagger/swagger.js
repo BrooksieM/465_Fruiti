@@ -1,10 +1,9 @@
-// swagger/swagger.js
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 
 module.exports = (app, PORT) => {
-    // copied from rm
-    const options = {
+  const options = {
     definition: {
       openapi: '3.0.0',
       info: {
@@ -19,10 +18,15 @@ module.exports = (app, PORT) => {
         },
       ],
     },
-    // path to services folder
-    apis: ['../Services/*.js'],
+    apis: [path.join(__dirname, '../Services/*.js')],
   };
 
   const specs = swaggerJsdoc(options);
+  
+  // add debug logging (from chatGPT suggestion)
+  console.log('Swagger looking for files in:', path.join(__dirname, '../Services/*.js'));
+  console.log('Number of paths found:', specs.paths ? Object.keys(specs.paths).length : 0);
+  
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 };
