@@ -1,6 +1,6 @@
 // Services/sellerApplicationService.js
 
-module.exports = function (app, _supabase) 
+module.exports = function (app, supabase) 
 {
   // GET /api/seller_subscriptions -> get all subscription plans
   app.get('/api/seller_subscriptions', async (req, res) => 

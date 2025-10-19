@@ -1,6 +1,6 @@
 // Services/articleService.js
 
-module.exports = function (app, _supabase) 
+module.exports = function (app, supabase) 
 {
   // GET /api/articles?ids=1,2,3  -> list by ids (order preserved). No ids -> return all.
   app.get('/api/articles', async (req, res) => 
