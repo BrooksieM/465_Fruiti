@@ -1,5 +1,4 @@
 //server.js
-
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -16,15 +15,19 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-async function testConnection() {
-  // Simple test - adjust based on your table structure
+async function testConnection() 
+{
+  // Simple test
   const { data, error } = await supabase
-    .from('userInfo')  // Replace with your actual table
+    .from('userInfo') 
     .select('*');
 
-  if (error) {
+  if (error) 
+  {
     console.error('Connection failed:', error);
-  } else {
+  } 
+  else 
+  {
     console.log('Connection successful!');
   }
 }
@@ -33,6 +36,11 @@ testConnection();
 console.log('Loaded file:', __filename);
 
 // SERVICES
+require('./Services/accountService')(app, supabase);
+require('./Services/adminService')(app, supabase);
+require('./Services/articleService')(app, supabase);
+//require('./Services/authService')(app, supabase);
+require('./Services/commentService')(app, supabase);
 //require('./Services/accountService')(app, supabase);
 //require('./Services/adminService')(app, supabase);
 //require('./Services/articleService')(app, supabase);
@@ -56,6 +64,10 @@ app.get('/', (req, res) =>
 });
 
 
+// this is starting the server
+const PORT = 3000;
+app.listen(PORT, () => 
+  {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Routes:\n  POST   /api/recipes    \n  GET    /api/recipes\n  DELETE /api/recipes/:id`);
