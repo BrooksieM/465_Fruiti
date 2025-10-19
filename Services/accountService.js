@@ -1,6 +1,7 @@
 // Services/accountService.js
 
-module.exports = function (app, _supabase) 
+module.exports = function (app, supabase) 
+
 {
   // Dev ping
   app.get('/api/accounts/__ping', (_req, res) => res.json({ ok: true }));

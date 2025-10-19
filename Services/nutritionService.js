@@ -1,6 +1,6 @@
 // Services/nutritionService.js
 
-module.exports = function (app, _supabase) 
+module.exports = function (app, supabase) 
 {
   // GET /api/nutrition/:id -> return nutrition for fruit id
   app.get('/api/nutrition/:id', async (req, res) => 
