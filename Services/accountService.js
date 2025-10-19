@@ -356,3 +356,16 @@ module.exports = function (app, supabase)
     }
   });
 };
+})();
+};
+/* CMD tests:
+curl.exe "http://localhost:3000/api/accounts/__ping"
+curl.exe -X POST "http://localhost:3000/api/accounts" -H "Content-Type: application/json" -d "{\"handle\":\"buyer7\",\"email\":\"b7@example.com\"}"
+curl.exe "http://localhost:3000/api/accounts"
+curl.exe "http://localhost:3000/api/accounts/1"
+curl.exe -X PUT "http://localhost:3000/api/accounts/1" -H "Content-Type: application/json" -d "{\"handle\":\"buyer77\"}"
+curl.exe -X PUT "http://localhost:3000/api/accounts/1/profile-picture" -H "Content-Type: application/json" -d "{\"url\":\"https://img.example.com/a.png\"}"
+curl.exe -X PUT "http://localhost:3000/api/accounts/1/payment-method" -H "Content-Type: application/json" -d "{\"brand\":\"visa\",\"last4\":\"4242\"}"
+curl.exe -X DELETE "http://localhost:3000/api/accounts/1"
+*/
+////////account_service end//////
