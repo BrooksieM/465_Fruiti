@@ -3,7 +3,6 @@
 
 module.exports = function (app, supabase) 
 {
-    // ========== FRUIT STANDS CRUD OPERATIONS (Supabase) ==========
 
 // GET endpoint to search for nearby fruit stands
 app.get('/api/fruitstands/search', async (req, res) => {
