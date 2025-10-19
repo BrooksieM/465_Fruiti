@@ -44,13 +44,14 @@ require('./Services/fruitstandService')(app, supabase);
 //require('./Services/recipeService')(app, supabase);
 //require('./Services/sellerApplicationService')(app, supabase);
 
+//swagger 
 const swaggerSetup = require('./swagger/swagger');
-
 swaggerSetup(app, PORT);
 
 
-
-app.get('/', (req, res) => {
+//defauklt route
+app.get('/', (req, res) => 
+{
   res.send('Welcome to the Fruiti API!');
 });
 
