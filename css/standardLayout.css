@@ -1,9 +1,17 @@
+body
+{
+    background-color: rgba(230,230,250,0.35);
+    font-family: Arial, sans-serif;
+}
+
 /* black bar across screen */
 .black-bar 
 {
     background-color: black;
     width: 100%;
-    height: 50px; 
+    height: 3px; 
+    margin-top: 100px;
+
 }
 
 /* standard page layout */
