@@ -1,0 +1,49 @@
+/* black bar across screen */
+.black-bar 
+{
+    background-color: black;
+    width: 100%;
+    height: 50px; 
+}
+
+/* standard page layout */
+.page-layout 
+{
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.content 
+{
+    margin-top: 20px;
+}
+
+/* rounded button */
+.rounded-button 
+{
+    background-color: rgba(230,230,250,0.35); /* Figma purple */
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+}
+
+/* search bar */
+.search-bar 
+{
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font: 16px Arial, sans-serif;
+}
