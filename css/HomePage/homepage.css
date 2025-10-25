@@ -1,5 +1,6 @@
 /* container for homepages images */
-.homepage-images {
+.homepage-images 
+{
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
@@ -8,9 +9,12 @@
     margin: 100px auto 0; /* Changed from margin-left to auto margins */
     width: fit-content;
     height: auto;
+
+  
 }
 
-.fruit-card {
+.fruit-card 
+{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -21,14 +25,32 @@
 }
 
 .homepage-images img {
-    width: 200px;
-    height: 200px;
+    width: 225px;
+    height: 225px;
     object-fit: cover;
     border-radius: 8px;
 }
 
-.fruit-card p {
+.fruit-card p 
+{
     margin-top: 10px;
     font-size: 16px;
     font-weight: 500;
+}
+
+
+.card-container 
+{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-container p 
+{
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
 }
