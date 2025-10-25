@@ -105,6 +105,8 @@ body
 /* SEARCH BAR */
 .search-bar 
 {
+  /* can remove if wanna stick with og design */
+  padding-left: 100px; 
   flex: 1;
   display: flex;
   align-items: center;
