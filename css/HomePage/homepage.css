@@ -25,7 +25,7 @@
 }
 
 .homepage-images img {
-    width: 225px;
+    width: 250px;
     height: 225px;
     object-fit: cover;
     border-radius: 8px;
@@ -35,7 +35,7 @@
 {
     margin-top: 10px;
     font-size: 16px;
-    font-weight: 500;
+    /* font-weight: 500; */
 }
 
 
@@ -51,6 +51,10 @@
 {
   margin-top: 10px;
   font-size: 16px;
-  font-weight: 500;
   text-align: center;
+  font-weight: bold;
+  /* did not know this existed, cool af */
+  text-transform: capitalize; 
+  
+  color: #222222;
 }
