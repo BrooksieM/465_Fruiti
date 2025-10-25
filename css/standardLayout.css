@@ -94,9 +94,12 @@ body
   align-items: center;
 }
 
+/* chat helped with transform scale */
 .navbar .logo img 
 {
   height: 40px;
+  transform: scale(2.5); 
+  transform-origin: center;
 }
 
 /* SEARCH BAR */
