@@ -8,7 +8,7 @@ module.exports = function (app, supabase)
   // POST /api/accounts -> create new account
   app.post('/api/accounts', async (req, res) => {
     try {
-      const { handle, email, avatar } = req.body || {};
+      const { handle, email, avatar, password } = req.body || {};
 
       // Validate required fields
       if (!handle || !email) {
@@ -52,7 +52,8 @@ module.exports = function (app, supabase)
             email,
             avatar: avatar || null,
             payment_method: null,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            password: password
           }
         ])
         .select();

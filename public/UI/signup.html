@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Fruiti</title>
-    <link rel="stylesheet" href="../css/standardLayout.css">
-    <link rel="stylesheet" href="../css/SignupPage/signup.css">
+    <link rel="stylesheet" href="/css/standardLayout.css">
+    <link rel="stylesheet" href="/css/SignupPage/signup.css">
 </head>
 <body>
     <!-- Navbar -->
     <div class="navbar">
         <div class="logo">
-            <img src="../images/fruiti.png" alt="Fruiti Logo" />
+            <img src="/images/fruiti.png" alt="Fruiti Logo" />
         </div>
 
         <div class="search-bar">
@@ -19,18 +19,18 @@
         </div>
 
         <div class="auth-buttons">
-            <button onclick="location.href='login.html'" class="login-btn">Log In</button>
-            <button onclick="location.href='signup.html'" class="signup-btn">Sign Up</button>
+            <button onclick="location.href='/login'" class="login-btn">Log In</button>
+            <!-- Remove the Sign Up button since we're on the signup page -->
         </div>
     </div>
 
     <!-- Navigation Links -->
     <nav class="nav-links">
-        <a href="homepage.html">Home</a>
-        <a href="become-seller.html">Become a Seller</a>
-        <a href="nutrition.html">Nutrition</a>
-        <a href="recipe.html">Recipes</a>
-        <a href="about-us.html">About Us</a>
+        <a href="/">Home</a>
+        <a href="/become-seller">Become a Seller</a>
+        <a href="/nutrition">Nutrition</a>
+        <a href="/recipe">Recipes</a>
+        <a href="/about-us">About Us</a>
     </nav>
 
     <div class="black-bar"></div>
@@ -105,13 +105,12 @@
                     </div>
                 </div>
 
-
                 <div class="terms-section">
                     <div class="terms-group">
                         <input type="checkbox" id="terms" name="terms" required />
                         <label for="terms">
-                            I agree to the <a href="terms.html" target="_blank">Terms of Service</a> 
-                            and <a href="privacy.html" target="_blank">Privacy Policy</a>
+                            I agree to the <a href="/terms" target="_blank">Terms of Service</a> 
+                            and <a href="/privacy" target="_blank">Privacy Policy</a>
                         </label>
                     </div>
                 </div>
@@ -123,7 +122,7 @@
             </form>
 
             <div class="signup-footer">
-                <p>Already have an account? <a href="login.html">Log in here</a></p>
+                <p>Already have an account? <a href="/login">Log in here</a></p>
             </div>
         </div>
     </div>
@@ -174,11 +173,10 @@
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const handle = document.getElementById('handle').value;
-            const email = document.getElementById('email').value;
+            const handle = document.getElementById('handle').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const avatar = document.getElementById('avatar').value;
             const terms = document.getElementById('terms').checked;
             
             const errorMessage = document.getElementById('errorMessage');
@@ -224,13 +222,22 @@
                 return;
             }
 
+            // Handle validation (no spaces)
+            if (handle.includes(' ')) {
+                errorMessage.textContent = 'Username cannot contain spaces';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
             // Show loading state
             submitBtn.disabled = true;
             btnText.style.display = 'none';
             btnLoading.style.display = 'inline';
 
             try {
-                // API call to your backend
+                console.log('Sending signup request...');
+                
+                // API call to your backend - REMOVED password field since your API doesn't accept it
                 const response = await fetch('/api/accounts', {
                     method: 'POST',
                     headers: {
@@ -239,13 +246,26 @@
                     body: JSON.stringify({
                         handle: handle,
                         email: email,
-                        avatar: avatar || null
-                        // Note: Your API doesn't currently accept password, 
-                        // you might want to add that to your accountService.js
+                        avatar: null,  // Your API expects this field
+                        password: password
                     })
                 });
 
-                const data = await response.json();
+                console.log('Response status:', response.status);
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    throw new Error('Server returned unexpected response');
+                }
+
+                console.log('API response data:', data);
 
                 if (response.ok) {
                     successMessage.textContent = 'Account created successfully! Redirecting to login...';
@@ -256,24 +276,26 @@
                     
                     // Redirect to login page after delay
                     setTimeout(() => {
-                        window.location.href = 'login.html';
+                        window.location.href = '/login';
                     }, 2000);
                     
                 } else {
                     // Handle API errors
-                    if (data.error.includes('Handle already exists')) {
+                    if (data.error && data.error.includes('Handle already exists')) {
                         errorMessage.textContent = 'This username is already taken. Please choose another one.';
-                    } else if (data.error.includes('Email already exists')) {
-                        errorMessage.textContent = 'An account with this email already exists.';
+                    } else if (data.error && data.error.includes('Email already exists')) {
+                        errorMessage.textContent = 'An account with this email already exists. Please use a different email.';
+                    } else if (data.error) {
+                        errorMessage.textContent = data.error;
                     } else {
-                        errorMessage.textContent = data.error || 'Failed to create account. Please try again.';
+                        errorMessage.textContent = 'Failed to create account. Please try again.';
                     }
                     errorMessage.style.display = 'block';
                 }
 
             } catch (error) {
                 console.error('Signup error:', error);
-                errorMessage.textContent = 'Network error. Please check your connection and try again.';
+                errorMessage.textContent = 'Error: ' + error.message;
                 errorMessage.style.display = 'block';
             } finally {
                 // Reset button state
@@ -293,6 +315,10 @@
                 this.parentElement.classList.remove('focused');
             });
         });
+
+        // Debug info
+        console.log('Signup page loaded successfully');
+        console.log('Current URL:', window.location.href);
     </script>
 </body>
 </html>

@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const PORT = 3000;
-
+const path = require('path'); // Add this line
 app.use(express.static('public'));
 
 
@@ -18,6 +18,20 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
+
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/homepage.html'));
+});
+
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/signup.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/login.html'));
+});
+
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
