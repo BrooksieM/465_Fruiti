@@ -19,7 +19,7 @@
     </div>
 
     <div class="auth-buttons">
-      <button class="login-btn">Log In</button>
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
       <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
     </div>
   </div>
@@ -34,62 +34,129 @@
 
   <div class="black-bar"></div>
 
-  <div class="container">
+ <div class="container">
     <div class="center">
       <div class="card">
         <h1>Log In</h1>
         <p class="sub">Welcome back</p>
-        <label>Username or Email</label>
-        <input id="username" type="text" placeholder="username or email" />
-        <label>Password</label>
-        <input id="password" type="password" placeholder="••••••••" />
-        <div class="actions">
-          <button class="btn primary full" id="loginBtn">Sign In</button>
-        </div>
-        <div class="msg" id="msg"></div>
+
+        <form id="loginForm">
+          <label for="username">Username or Email</label>
+          <input id="username" type="text" placeholder="username or email" required />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="••••••••" required />
+
+          <div class="actions">
+            <button class="btn primary full" id="loginBtn" type="submit">
+              <span class="btn-text">Sign In</span>
+              <span class="btn-loading" style="display:none;">⏳ Signing in...</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="msg error" id="errorMessage" style="display:none;"></div>
+        <div class="msg success" id="successMessage" style="display:none;"></div>
+
         <div class="hint">Not a member yet? <a href="signup.html">Sign up</a></div>
         <div class="muted">Demo: verifies the user exists; password isn't validated server-side.</div>
       </div>
     </div>
   </div>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    
-    async function loginDemo() {
-      const u = $('username').value.trim();
-      const p = $('password').value;
-      $('msg').textContent = '';
-      
-      if (!u || !p) {
-        $('msg').textContent = 'Please enter username and password.';
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loginBtn = document.getElementById('loginBtn');
+    const btnText = loginBtn.querySelector('.btn-text');
+    const btnLoading = loginBtn.querySelector('.btn-loading');
+
+    // Hide previous messages
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none';
+
+    // Basic validation
+    if (!username || !password) {
+        errorMessage.textContent = 'Please enter both username/email and password.';
+        errorMessage.style.display = 'block';
         return;
-      }
-      
-      try {
-        const r = await fetch('/api/accounts/search?q=' + encodeURIComponent(u));
-        const j = await r.json();
-        
-        if (!r.ok) throw new Error(j.error || 'Login failed');
-        
-        const hit = (j.accounts || []).find(a => 
-          (a.handle || '').toLowerCase() === u.toLowerCase() || 
-          (a.email || '').toLowerCase() === u.toLowerCase()
-        );
-        
-        $('msg').textContent = hit 
-          ? ('Success! Logged in as ' + (hit.handle || hit.email)) 
-          : 'User not found.';
-      } catch(e) {
-        $('msg').textContent = e.message || 'Login failed';
-      }
     }
-    
-    $('loginBtn').onclick = loginDemo;
-    
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Enter') loginDemo();
+
+    // Show loading state
+    loginBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+
+    try {
+        console.log('Sending login request...');
+
+        // Fetch all accounts from API
+        const response = await fetch('/api/accounts'); 
+        console.log('Response status:', response.status);
+
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            console.error('Non-JSON response:', text.substring(0, 200));
+            throw new Error('Server returned unexpected response');
+        }
+
+        console.log('API response data:', data);
+
+        // Fix: API returns a plain array
+        const accounts = data;
+        const user = accounts.find(a =>
+            (a.handle || '').trim().toLowerCase() === username.toLowerCase() ||
+            (a.email || '').trim().toLowerCase() === username.toLowerCase()
+        );
+
+        if (user) {
+            successMessage.textContent = '✅ Logged in successfully! Redirecting...';
+            successMessage.style.display = 'block';
+
+            // Simulate session/login for demo
+            localStorage.setItem('user', JSON.stringify(user));
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            errorMessage.textContent = 'User not found. Please check your username or email.';
+            errorMessage.style.display = 'block';
+        }
+
+    } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.textContent = 'Error: ' + error.message;
+        errorMessage.style.display = 'block';
+    } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+});
+
+// Optional: focus/blur UX for input fields
+document.querySelectorAll('.form-group input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
     });
+    input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+    });
+});
+
+console.log('Login page loaded successfully');
+
   </script>
 </body>
 </html>
