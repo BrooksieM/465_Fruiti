@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="../css/standardLayout.css">
+  <link rel="stylesheet" href="../css/LoginPage/loginPage.css">
+  
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="../images/fruiti.png" alt="Fruiti Logo" />
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+    <div class="auth-buttons">
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="become-seller.html">Become a Seller</a>
+    <a href="nutrition.html">Nutrition</a>
+    <a href="recipe.html">Recipes</a>
+    <a href="about-us.html">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+ <div class="container">
+    <div class="center">
+      <div class="card">
+        <h1>Log In</h1>
+        <p class="sub">Welcome back</p>
+
+        <form id="loginForm">
+          <label for="username">Username or Email</label>
+          <input id="username" type="text" placeholder="username or email" required />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="••••••••" required />
+
+          <div class="actions">
+            <button class="btn primary full" id="loginBtn" type="submit">
+              <span class="btn-text">Sign In</span>
+              <span class="btn-loading" style="display:none;">⏳ Signing in...</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="msg error" id="errorMessage" style="display:none;"></div>
+        <div class="msg success" id="successMessage" style="display:none;"></div>
+
+        <div class="hint">Not a member yet? <a href="signup.html">Sign up</a></div>
+        <div class="muted">Demo: verifies the user exists; password isn't validated server-side.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loginBtn = document.getElementById('loginBtn');
+    const btnText = loginBtn.querySelector('.btn-text');
+    const btnLoading = loginBtn.querySelector('.btn-loading');
+
+    // Hide previous messages
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none';
+
+    // Basic validation
+    if (!username || !password) {
+        errorMessage.textContent = 'Please enter both username/email and password.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    // Show loading state
+    loginBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+
+    try {
+        console.log('Sending login request...');
+
+        // Fetch all accounts from API
+        const response = await fetch('/api/accounts'); 
+        console.log('Response status:', response.status);
+
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            console.error('Non-JSON response:', text.substring(0, 200));
+            throw new Error('Server returned unexpected response');
+        }
+
+        console.log('API response data:', data);
+
+        // Fix: API returns a plain array
+        const accounts = data;
+        const user = accounts.find(a =>
+            (a.handle || '').trim().toLowerCase() === username.toLowerCase() ||
+            (a.email || '').trim().toLowerCase() === username.toLowerCase()
+        );
+
+        if (user) {
+            successMessage.textContent = 'Logged in successfully! Redirecting...';
+            successMessage.style.display = 'block';
+
+            // Simulate session/login for demo
+            localStorage.setItem('user', JSON.stringify(user));
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            errorMessage.textContent = 'User not found. Please check your username or email.';
+            errorMessage.style.display = 'block';
+        }
+
+    } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.textContent = 'Error: ' + error.message;
+        errorMessage.style.display = 'block';
+    } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+});
+
+// Optional: focus/blur UX for input fields
+document.querySelectorAll('.form-group input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+    });
+});
+
+console.log('Login page loaded successfully');
+
+
+  </script>
+</body>
+</html>
