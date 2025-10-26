@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="../css/standardLayout.css">
+  <link rel="stylesheet" href="../css/LoginPage/loginPage.css">
+  <!-- <style>
+    
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+    }
+
+    .card {
+      width: 420px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(17,24,39,.06);
+      padding: 30px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .sub {
+      color: #666;
+      margin: 0 0 20px;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+      font-size: 14px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: #8a73ff;
+      box-shadow: 0 0 0 2px rgba(138, 115, 255, 0.2);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .full {
+      flex: 1;
+    }
+
+    .btn {
+      height: 44px;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn.primary {
+      background-color: #6f49ff;
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background-color: #5c3ce0;
+    }
+
+    .msg {
+      min-height: 18px;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #374151;
+      text-align: center;
+    }
+
+    .hint {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .hint a {
+      color: #6f49ff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .hint a:hover {
+      text-decoration: underline;
+    }
+
+    .muted {
+      margin-top: 15px;
+      color: #666;
+      font-size: 12px;
+      text-align: center;
+    }
+
+  </style> -->
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="../images/fruiti.png" alt="Fruiti Logo" />
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+    <div class="auth-buttons">
+      <button class="login-btn">Log In</button>
+      <button class="signup-btn" onclick="location.href='signup.html'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="homepage.html">Home</a>
+    <a href="become-seller.html">Become a Seller</a>
+    <a href="nutrition.html">Nutrition</a>
+    <a href="recipe.html">Recipe</a>
+    <a href="about-us.html">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <div class="container">
+    <div class="center">
+      <div class="card">
+        <h1>Log In</h1>
+        <p class="sub">Welcome back</p>
+        <label>Username or Email</label>
+        <input id="username" type="text" placeholder="username or email" />
+        <label>Password</label>
+        <input id="password" type="password" placeholder="••••••••" />
+        <div class="actions">
+          <button class="btn primary full" id="loginBtn">Sign In</button>
+        </div>
+        <div class="msg" id="msg"></div>
+        <div class="hint">Not a member yet? <a href="signup.html">Sign up</a></div>
+        <div class="muted">Demo: verifies the user exists; password isn't validated server-side.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    
+    async function loginDemo() {
+      const u = $('username').value.trim();
+      const p = $('password').value;
+      $('msg').textContent = '';
+      
+      if (!u || !p) {
+        $('msg').textContent = 'Please enter username and password.';
+        return;
+      }
+      
+      try {
+        const r = await fetch('/api/accounts/search?q=' + encodeURIComponent(u));
+        const j = await r.json();
+        
+        if (!r.ok) throw new Error(j.error || 'Login failed');
+        
+        const hit = (j.accounts || []).find(a => 
+          (a.handle || '').toLowerCase() === u.toLowerCase() || 
+          (a.email || '').toLowerCase() === u.toLowerCase()
+        );
+        
+        $('msg').textContent = hit 
+          ? ('Success! Logged in as ' + (hit.handle || hit.email)) 
+          : 'User not found.';
+      } catch(e) {
+        $('msg').textContent = e.message || 'Login failed';
+      }
+    }
+    
+    $('loginBtn').onclick = loginDemo;
+    
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loginDemo();
+    });
+  </script>
+</body>
+</html>
