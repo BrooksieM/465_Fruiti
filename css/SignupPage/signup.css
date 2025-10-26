@@ -367,3 +367,33 @@
         color: #ffffff;
     }
 }
+
+.search-bar-modified 
+{
+  /* can remove if wanna stick with og design */
+  padding-left: -80px; 
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 40px;
+  position: relative;
+}
+
+.search-bar-modified input 
+{
+  width: 400px;
+  max-width: 100%;
+  padding: 10px 45px 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.search-bar-modified input:focus 
+{
+  border-color: #8a73ff;
+  box-shadow: 0 0 0 2px rgba(138, 115, 255, 0.2);
+}
