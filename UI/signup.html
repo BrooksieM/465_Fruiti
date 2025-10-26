@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Fruiti</title>
+    <link rel="stylesheet" href="../css/standardLayout.css">
+    <link rel="stylesheet" href="../css/SignupPage/signup.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">
+            <img src="../images/fruiti.png" alt="Fruiti Logo" />
+        </div>
+
+        <div class="search-bar-modified">
+            <input type="text" placeholder="Search Fruit" />
+        </div>
+
+        <div class="auth-buttons">
+            <button onclick="location.href='login.html'" class="login-btn">Log In</button>
+        </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="nav-links">
+        <a href="homepage.html">Home</a>
+        <a href="become-seller.html">Become a Seller</a>
+        <a href="nutrition.html">Nutrition</a>
+        <a href="recipe.html">Recipes</a>
+        <a href="about-us.html">About Us</a>
+    </nav>
+
+    <div class="black-bar"></div>
+
+    <!-- Main Content -->
+    <div class="page-layout">
+        <!-- Signup Frame -->
+        <div class="signup-frame">
+            <div class="signup-header">
+                <h2>Create your account</h2>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+
+            <form class="signup-form" id="signupForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="handle">Username *</label>
+                        <input 
+                            type="text" 
+                            id="handle" 
+                            name="handle" 
+                            placeholder="Choose a username" 
+                            required
+                        />
+                        <small>This will be your public display name</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="Enter your email" 
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Create a password (min. 6 characters)" 
+                            required 
+                            minlength="6"
+                        />
+                        <div class="password-strength">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            placeholder="Confirm your password" 
+                            required 
+                        />
+                    </div>
+                </div>
+
+
+                <div class="terms-section">
+                    <div class="terms-group">
+                        <input type="checkbox" id="terms" name="terms" required />
+                        <label for="terms">
+                            I agree to the <a href="terms.html" target="_blank">Terms of Service</a> 
+                            and <a href="privacy.html" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-loading" style="display: none;">Creating Account...</span>
+                </button>
+            </form>
+
+            <div class="signup-footer">
+                <p>Already have an account? <a href="login.html">Log in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strengthBar');
+            let strength = 0;
+            
+            // Length checks
+            if (password.length >= 6) strength += 1;
+            if (password.length >= 8) strength += 1;
+            // Complexity checks
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Update strength bar
+            strengthBar.className = 'strength-bar';
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+            } else if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+
+        // Real-time password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (confirmPassword && password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+            } else if (confirmPassword && password === confirmPassword) {
+                errorMessage.style.display = 'none';
+            }
+        });
+
+        // Form submission to your API
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const handle = document.getElementById('handle').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const avatar = document.getElementById('avatar').value;
+            const terms = document.getElementById('terms').checked;
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Validation
+            if (!handle || !email || !password || !confirmPassword) {
+                errorMessage.textContent = 'Please fill in all required fields';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters long';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (!terms) {
+                errorMessage.textContent = 'Please agree to the Terms of Service and Privacy Policy';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMessage.textContent = 'Please enter a valid email address';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+
+            try {
+                // API call to your backend
+                const response = await fetch('/api/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        handle: handle,
+                        email: email,
+                        avatar: avatar || null
+                        // Note: Your API doesn't currently accept password, 
+                        // you might want to add that to your accountService.js
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = 'Account created successfully! Redirecting to login...';
+                    successMessage.style.display = 'block';
+                    
+                    // Clear form
+                    document.getElementById('signupForm').reset();
+                    
+                    // Redirect to login page after delay
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    
+                } else {
+                    // Handle API errors
+                    if (data.error.includes('Handle already exists')) {
+                        errorMessage.textContent = 'This username is already taken. Please choose another one.';
+                    } else if (data.error.includes('Email already exists')) {
+                        errorMessage.textContent = 'An account with this email already exists.';
+                    } else {
+                        errorMessage.textContent = data.error || 'Failed to create account. Please try again.';
+                    }
+                    errorMessage.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.textContent = 'Network error. Please check your connection and try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        });
+
+        // Handle input focus for better UX
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
+</body>
+</html>
