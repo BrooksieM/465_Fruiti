@@ -34,9 +34,9 @@ app.get('/login', (req, res) => {
 
 
 async function testConnection() {
-  // Simple test - adjust based on your table structure
+  // Simple test
   const { data, error } = await supabase
-    .from('userInfo')  // Replace with your actual table
+    .from('userInfo')
     .select('*');
 
   if (error) {
