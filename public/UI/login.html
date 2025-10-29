@@ -65,7 +65,8 @@
   </div>
 
 <script>
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) 
+    {
     e.preventDefault();
 
     const username = document.getElementById('username').value.trim();
@@ -76,12 +77,12 @@
     const btnText = loginBtn.querySelector('.btn-text');
     const btnLoading = loginBtn.querySelector('.btn-loading');
 
-    // Hide previous messages
     errorMessage.style.display = 'none';
     successMessage.style.display = 'none';
 
-    // Basic validation
-    if (!username || !password) {
+    // validation
+    if (!username || !password) 
+    {
         errorMessage.textContent = 'Please enter both username/email and password.';
         errorMessage.style.display = 'block';
         return;
