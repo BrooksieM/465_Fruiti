@@ -32,6 +32,11 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/login.html'));
 });
 
+app.get('/nutrition', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/nutrition.html'));
+});
+
+
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
