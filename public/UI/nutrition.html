@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nutrition</title>
-  <link rel="stylesheet" href="../css/standardLayout.css">
-  <link rel="stylesheet" href="../css/NutritionPage/nutrition.css">
+  <link rel="stylesheet" href="../css/standardLayout.css"/>
+  <link rel="stylesheet" href="../css/NutritionPage/nutrition.css"/>
 </head>
 <body>
+  <!-- SAME HEADER AS HOMEPAGE -->
   <div class="navbar">
     <div class="logo">
-      <img src="../images/fruiti.png" alt="Fruiti" />
+      <img src="../images/fruiti.png" alt="Fruiti"/>
     </div>
     <div class="search-bar">
-      <input type="text" placeholder="Search Fruit" />
+      <input type="text" placeholder="Search Fruit"/>
     </div>
     <div class="auth-buttons">
       <button onclick="location.href='/login'" class="login-btn">Log In</button>
@@ -31,44 +32,69 @@
 
   <div class="black-bar"></div>
 
+  <!-- HERO: slideshow updates per fruit -->
   <div class="hero-strip">
-    <img src="../images/placeholder/fruitproj1jpg.jpg" alt="Assorted fruits banner">
-    <div class="hero-badge">FRUITS</div>
+    <div class="hero-slides" id="heroSlides"></div>
+    <div class="hero-badge" id="heroBadge">GRAPES</div>
   </div>
 
   <main class="page-layout">
-    <h1 class="page-title">Health Benefits of Fruit</h1>
+    <h1 class="page-title" id="pageTitle">Health Benefits of Grapes</h1>
 
     <section class="nutrition-grid">
+      <!-- LEFT: changes with fruit -->
       <article class="nutrition-copy">
-        <p class="lead">
-          Fruits supply fiber, vitamins, minerals, and antioxidants that support heart health, gut health,
-          steady energy, and immunity. Below is a quick nutrition snapshot for grapes.
+        <p class="lead" id="introCopy">
+          Grapes are nature’s candy — bursting with antioxidants, vitamins, and hydration. Below is a quick nutrition
+          snapshot along with fun facts and farm-fresh visuals.
         </p>
 
         <div class="nutrition-card">
           <div class="card-head">
-            <h2>Grapes</h2>
-            <span class="chip">Per 100 g</span>
+            <h2 id="fruitName">Grapes</h2>
+            <span class="chip" id="serving">Per 100 g</span>
           </div>
 
           <div class="stat-grid">
-            <div><span>Calories</span><strong>69 kcal</strong></div>
-            <div><span>Carbs</span><strong>18.1 g</strong></div>
-            <div><span>Fiber</span><strong>0.9 g</strong></div>
-            <div><span>Sugar</span><strong>15.5 g</strong></div>
-            <div><span>Protein</span><strong>0.72 g</strong></div>
-            <div><span>Fat</span><strong>0.16 g</strong></div>
+            <div><span>Calories</span><strong id="calories">69 kcal</strong></div>
+            <div><span>Carbs</span><strong id="carbs">18.1 g</strong></div>
+            <div><span>Fiber</span><strong id="fiber">0.9 g</strong></div>
+            <div><span>Sugar</span><strong id="sugar">15.5 g</strong></div>
+            <div><span>Protein</span><strong id="protein">0.72 g</strong></div>
+            <div><span>Fat</span><strong id="fat">0.16 g</strong></div>
           </div>
 
-          <p class="muted">Grapes provide polyphenols (like resveratrol) and hydration; great as a fresh snack or in salads.</p>
+          <p class="muted" id="note">
+            Grapes contain polyphenols such as resveratrol, which support heart and brain health.
+          </p>
         </div>
+
+        <section class="facts">
+          <h3 id="factsTitle">Grape Fun Facts</h3>
+          <ul id="factsList">
+            <li>About 80% water, naturally hydrating.</li>
+            <li>Resveratrol is concentrated in red & purple skins.</li>
+            <li>Over 8,000 named varieties worldwide.</li>
+            <li>An average cluster has ~75 grapes.</li>
+            <li>Farm microclimates strongly shape flavor.</li>
+            <li>Seedless table grapes are bred for crisp sweetness.</li>
+          </ul>
+        </section>
+
+        <section class="gallery">
+          <h3>Gallery</h3>
+          <div class="gallery-grid" id="galleryGrid"></div>
+        </section>
       </article>
 
-      <aside class="nutrition-aside">
-        <img class="poster" src="../images/placeholder/fruitproj3jpg.jpg" alt="Health benefits of fruit">
+      <!-- RIGHT: fruit picker -->
+      <aside class="fruit-picker">
+        <h3 class="picker-title">Browse Fruits</h3>
+        <div id="pickerList" class="picker-list"></div>
       </aside>
     </section>
   </main>
+
+  <script src="../js/nutrition.js"></script>
 </body>
 </html>

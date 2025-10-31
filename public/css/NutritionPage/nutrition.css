@@ -1,22 +1,65 @@
+/* Page + hero (TALLER hero) */
 .page-layout{max-width:1100px;margin:26px auto 54px;padding:0 24px}
 .page-title{text-align:center;font-size:28px;margin:0 0 14px}
 
 .hero-strip{position:relative}
-.hero-strip img{width:100%;height:260px;object-fit:cover;object-position:center;display:block}
-.hero-badge{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:#fff;border:3px solid #2b2b2b;border-radius:16px;padding:4px 16px;font-weight:800;letter-spacing:.06em}
+.hero-slides{position:relative;width:100%;height:380px;overflow:hidden} /* was 260px —> now taller */
+.hero-frame{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:0;transition:opacity .8s ease-in-out
+}
+.hero-frame.show{opacity:1}
+.hero-badge{
+  position:absolute;left:50%;transform:translateX(-50%);
+  bottom:16px;background:#fff;border:3px solid #2b2b2b;border-radius:16px;
+  padding:6px 18px;font-weight:800;letter-spacing:.06em
+}
 
-.nutrition-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:start;margin-top:18px}
-@media (max-width:900px){.nutrition-grid{grid-template-columns:1fr}}
+/* Two-column main area */
+.nutrition-grid{
+  display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:start;margin-top:18px
+}
+@media(max-width:1000px){
+  .nutrition-grid{grid-template-columns:1fr}
+}
 
 .lead{color:#6b7280;margin:6px 0 14px}
-
 .nutrition-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(17,24,39,.06)}
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .card-head h2{margin:0}
 .chip{background:#eef8f2;color:#1f8a57;border-radius:999px;padding:6px 10px;font-size:12px}
-
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0}
 .stat-grid>div{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;display:flex;justify-content:space-between}
-
 .muted{color:#6b7280;margin:0}
-.poster{width:100%;border-radius:18px;border:1px solid #e5e7eb;box-shadow:0 6px 18px rgba(17,24,39,.06)}
+
+/* Facts + gallery */
+.facts{margin-top:18px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(17,24,39,.06)}
+.facts h3{margin:0 0 10px;font-size:18px}
+.facts ul{margin:0 0 0 18px}
+.facts li{margin:6px 0;color:#374151}
+
+.gallery{margin-top:18px}
+.gallery h3{margin:0 0 12px;font-size:18px}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.gallery-grid img{width:100%;height:180px;object-fit:cover;border-radius:14px;border:1px solid #e5e7eb;box-shadow:0 4px 14px rgba(17,24,39,.06)}
+@media(max-width:900px){
+  .gallery-grid{grid-template-columns:1fr 1fr}
+  .gallery-grid img{height:160px}
+}
+
+/* Fruit picker (right bar) */
+.fruit-picker{
+  position:sticky;top:90px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;
+  padding:16px;box-shadow:0 6px 18px rgba(17,24,39,.06)
+}
+.picker-title{margin:0 0 12px;font-size:18px}
+.picker-list{display:flex;flex-direction:column;gap:10px}
+.picker-item{
+  display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #e5e7eb;border-radius:12px;
+  background:#fff;cursor:pointer;transition:transform .05s ease-in-out
+}
+.picker-item:hover{transform:translateY(-1px)}
+.picker-item.active{outline:3px solid rgba(43,182,115,.25)}
+.picker-thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;border:1px solid #e5e7eb}
+.picker-name{font-weight:600}
