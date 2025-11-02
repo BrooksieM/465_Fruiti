@@ -121,12 +121,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           <a href="${article.hyperlink}" target="_blank" rel="noopener noreferrer">
             <img src="${article.thumbnail}" alt="${article.title}">
           </a>
+          <p>${article.title}</p>
         </div>
-        <p>${article.title}</p>
       </div>
     `;
 
-    // Clear out the dynamic section (optional, so you can mix static + dynamic)
     // sections[0].innerHTML = "";
     // sections[1].innerHTML = "";
 
