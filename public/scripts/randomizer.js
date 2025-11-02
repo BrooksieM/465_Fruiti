@@ -14,11 +14,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // randomize all articles
     const shuffled = result.data.sort(() => Math.random() - 0.5);
 
-    // picking 5 random articles
-    const selected = shuffled.slice(0, 5);
+    // picking 4 random articles
+    const selected = shuffled.slice(0, 4);
 
-    const topRow = selected.slice(0, 3);
-    const bottomRow = selected.slice(3, 5);
+    const topRow = selected.slice(0, 2);
+    const bottomRow = selected.slice(2, 4);
 
     const makeCard = (article) => `
       <div class="card-container">
