@@ -71,8 +71,13 @@ body {
   background-color: #019456;
 }
 
-/* NAVIGATION BAR - GRID LAYOUT */
-.navbar {
+html 
+{
+  overflow-y: scroll;
+}
+/* NAIGATION BAR */
+.navbar 
+{
   width: 100%;
   background-color: #f7f6fc;
   padding: 10px 40px;
