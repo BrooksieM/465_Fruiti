@@ -32,6 +32,15 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/login.html'));
 });
 
+app.get(['/recipe', '/recipes', '/recipe.html', '/UI/recipe.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'UI', 'recipe.html'));
+});
+
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  maxAge: 0
+}));
 
 async function testConnection() {
   // Simple test - adjust based on your table structure

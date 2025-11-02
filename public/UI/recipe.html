@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recipes</title>
+  <link rel="stylesheet" href="../css/standardLayout.css"/>
+  <link rel="stylesheet" href="../css/RecipePage/recipe.css"/>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo"><img src="../images/fruiti.png" alt="Fruiti"/></div>
+    <div class="search-bar"><input type="text" id="globalSearch" placeholder="Search Fruit"/></div>
+    <div class="auth-buttons">
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/UI/become-seller.html">Become a Seller</a>
+    <a href="/UI/nutrition.html">Nutrition</a>
+    <a class="active" href="/recipe">Recipes</a>
+    <a href="/UI/about-us.html">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <main class="page">
+    <div class="chips-row" id="chipsRow">
+      <button class="chip" data-chip="Apple Pie">
+        <span>Apple Pie</span>
+        <svg viewBox="0 0 24 24" class="x"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <h1 class="page-title">Apple Pie</h1>
+
+    <section class="cards" id="cards"></section>
+  </main>
+
+  <script src="../js/recipe.js?v=1008"></script>
+</body>
+</html>
