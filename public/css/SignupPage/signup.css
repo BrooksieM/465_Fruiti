@@ -29,7 +29,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #6f49ff, #8a73ff, #6f49ff);
+    background: linear-gradient(90deg, #017d49, #019456, #017d49);
     background-size: 200% 100%;
     animation: shimmer 3s ease-in-out infinite;
 }
@@ -50,7 +50,7 @@
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #6f49ff, #8a73ff);
+    background: linear-gradient(135deg, #017d49, #019456);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -100,9 +100,9 @@
 }
 
 .form-group input:focus {
-    border-color: #6f49ff;
+    border-color: #017d49;
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 0 0 3px rgba(111, 73, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(1, 125, 73, 0.1);
     transform: translateY(-1px);
 }
 
@@ -112,7 +112,7 @@
 }
 
 .form-group.focused label {
-    color: #6f49ff;
+    color: #017d49;
 }
 
 .form-group small {
@@ -169,7 +169,7 @@
     width: 18px;
     height: 18px;
     margin-top: 0.2rem;
-    accent-color: #6f49ff;
+    accent-color: #017d49;
     flex-shrink: 0;
 }
 
@@ -182,7 +182,7 @@
 }
 
 .terms-group a {
-    color: #6f49ff;
+    color: #017d49;
     text-decoration: none;
     font-weight: 500;
 }
@@ -194,7 +194,7 @@
 /* Submit Button */
 .submit-btn {
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #6f49ff, #8a73ff);
+    background: linear-gradient(135deg, #017d49, #019456);
     color: white;
     border: none;
     border-radius: 12px;
@@ -212,7 +212,7 @@
 
 .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(111, 73, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(1, 125, 73, 0.3);
 }
 
 .submit-btn:active {
@@ -230,7 +230,7 @@
     text-align: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid rgba(111, 73, 255, 0.1);
+    border-top: 1px solid rgba(1, 125, 73, 0.1);
 }
 
 .signup-footer p {
@@ -240,7 +240,7 @@
 }
 
 .signup-footer a {
-    color: #6f49ff;
+    color: #017d49;
     text-decoration: none;
     font-weight: 500;
 }
@@ -347,7 +347,7 @@
 
 /* Focus styles for accessibility */
 .form-group input:focus-visible {
-    outline: 2px solid #6f49ff;
+    outline: 2px solid #017d49;
     outline-offset: 2px;
 }
 
@@ -394,6 +394,6 @@
 
 .search-bar-modified input:focus 
 {
-  border-color: #8a73ff;
-  box-shadow: 0 0 0 2px rgba(138, 115, 255, 0.2);
+  border-color: #017d49;
+  box-shadow: 0 0 0 2px rgba(1, 125, 73, 0.2);
 }
