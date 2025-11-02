@@ -11,13 +11,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Randomize all articles
+    // randomize all articles
     const shuffled = result.data.sort(() => Math.random() - 0.5);
 
-    // Pick only 5 random ones
+    // picking 5 random articles
     const selected = shuffled.slice(0, 5);
 
-    // Split 3 top, 2 bottom
     const topRow = selected.slice(0, 3);
     const bottomRow = selected.slice(3, 5);
 
