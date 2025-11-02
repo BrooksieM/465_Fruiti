@@ -81,12 +81,12 @@ label {
 }
 
 .btn.primary {
-  background-color: #6f49ff;
+  background-color: #017d49;
   color: #fff;
 }
 
 .btn.primary:hover {
-  background-color: #5c3ce0;
+  background-color: #019456;
 }
 
 .msg {
@@ -104,7 +104,7 @@ label {
 }
 
 .hint a {
-  color: #6f49ff;
+  color: #017d49;
   font-weight: 700;
   text-decoration: none;
 }
