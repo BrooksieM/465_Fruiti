@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings Page</title>
 <link rel="stylesheet" href="../css/standardLayout.css">
-<link rel="stylesheet" href="../css/SettingsPage/settings.css">
+<link rel="stylesheet" href="../css/SettingsPage/settingspage.css">
 
 </head>
 
@@ -274,9 +274,16 @@
 
         <!-- Danger Zone -->
         <div class="danger-zone">
+            <h3>Session</h3>
+            <p>Manage your current session</p>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <p>Permanently delete your account and all associated data</p>
+                <button class="delete-btn" onclick="showDeleteConfirmation()">Delete Account</button>
+            </div>
             <h3>Danger Zone</h3>
-            <p>Permanently delete your account and all associated data</p>
-            <button class="delete-btn" onclick="showDeleteConfirmation()">Delete Account</button>
+
         </div>
     </div>
 </div>
@@ -298,6 +305,72 @@
 </div>
 
 <script>
+    function updateNavigationForLoggedInUser(user) {
+        const authButtons = document.querySelector('.auth-buttons');
+        
+        if (user) {
+            authButtons.innerHTML = `
+                <div class="user-welcome">
+                    <span class="welcome-text">Hi, ${user.username || user.handle}</span>
+                    <button class="settings-btn" onclick="goToSettings()">
+                        ⚙️ Settings
+                    </button>
+                </div>
+            `;
+        } else {
+            authButtons.innerHTML = `
+                <button class="login-btn" onclick="location.href='/login'">Log In</button>
+                <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+            `;
+        }
+    }
+
+    function goToSettings() {
+        location.href='/settings';
+    }
+
+    function checkAuthStatus() {
+        try {
+            const userData = localStorage.getItem('user');
+            
+            if (userData) {
+                const user = JSON.parse(userData);
+                updateNavigationForLoggedInUser(user);
+                updateFormFieldsWithUserData(user);
+            } else {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.log('Error checking auth status:', error);
+        }
+    }
+
+    function updateFormFieldsWithUserData(user) {
+        const displayNameField = document.getElementById('displayName');
+        const usernameField = document.getElementById('username');
+        const emailField = document.getElementById('email');
+        const bioField = document.getElementById('bio');
+        
+        if (displayNameField) displayNameField.value = user.displayName || user.name || '';
+        if (usernameField) usernameField.value = user.username || user.handle || '';
+        if (emailField) emailField.value = user.email || '';
+        if (bioField) bioField.value = user.bio || 'I love fresh fruits and healthy recipes!';
+        
+        if (user.avatar) {
+            const avatarPreview = document.getElementById('avatarPreview');
+            if (avatarPreview) avatarPreview.src = user.avatar;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+    });
+    
     // Tab Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
