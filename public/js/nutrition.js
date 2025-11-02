@@ -1,5 +1,6 @@
-// Rotating hero & dynamic fruit content (5s interval) with fruit-specific farm images.
-const FALLBACK = "../images/placeholder/fruitproj3jpg.jpg";
+// public/js/nutrition.js
+
+const FALLBACK = "/images/placeholder/fruitproj3jpg.jpg";
 
 const FRUITS = [
   {
@@ -17,21 +18,20 @@ const FRUITS = [
       "Resveratrol is concentrated in red & purple grape skins.",
       "Over 8,000 named varieties worldwide.",
       "An average cluster has ~75 grapes.",
-      "Farm microclimates strongly shape flavor.",
-      "Seedless table grapes are bred for crisp sweetness.",
-      "Vineyard trellis height affects sun exposure and tannins."
+      "Vineyard microclimates shape flavor and tannins.",
+      "Seedless table grapes are bred for crisp sweetness."
     ],
     hero: [
-      "../images/grapes/grapes1.jpg",
-      "../images/grapes/grapes2.jpg",
-      "../images/grapes/grape-farm.jpg"        // grape farm / vineyard
+      "/images/grapes/grapes1.jpg",
+      "/images/grapes/grape-farm.jpg",
+      "/images/grapes/grapes2.jpg"
     ],
     gallery: [
-      "../images/grapes/grapes1.jpg",
-      "../images/grapes/grapes2.jpg",
-      "../images/grapes/grape-farm.jpg"
+      "/images/grapes/grapes1.jpg",
+      "/images/grapes/grape-farm.jpg",
+      "/images/grapes/grapes2.jpg"
     ],
-    pickerThumb: "../images/grapes/grapes1.jpg"
+    pickerThumb: "/images/grapes/grapes1.jpg"
   },
   {
     id: "strawberries",
@@ -51,16 +51,16 @@ const FRUITS = [
       "Raised-bed farms improve drainage and sweetness."
     ],
     hero: [
-      "../images/strawberries/strawberry1.jpg",
-      "../images/strawberries/strawberry2.jpg",
-      "../images/strawberries/strawberry-farm.jpg" // fields / rows of strawberries
+      "/images/strawberries/strawberry1.jpg",
+      "/images/strawberries/strawberry-farm.jpg",
+      "/images/strawberries/strawberry2.jpg"
     ],
     gallery: [
-      "../images/strawberries/strawberry1.jpg",
-      "../images/strawberries/strawberry2.jpg",
-      "../images/strawberries/strawberry-farm.jpg"
+      "/images/strawberries/strawberry1.jpg",
+      "/images/strawberries/strawberry-farm.jpg",
+      "/images/strawberries/strawberry2.jpg"
     ],
-    pickerThumb: "../images/strawberries/strawberry1.jpg"
+    pickerThumb: "/images/strawberries/strawberry1.jpg"
   },
   {
     id: "watermelon",
@@ -80,16 +80,16 @@ const FRUITS = [
       "Sandy, warm farm soils yield sweeter melons."
     ],
     hero: [
-      "../images/watermelon/watermelon1.jpg",
-      "../images/watermelon/watermelon2.jpg",
-      "../images/watermelon/watermelon-farm.jpg"  // melon fields / farm
+      "/images/watermelon/watermelon1.jpg",
+      "/images/watermelon/watermelon-farm.jpg",
+      "/images/watermelon/watermelon2.jpg"
     ],
     gallery: [
-      "../images/watermelon/watermelon1.jpg",
-      "../images/watermelon/watermelon2.jpg",
-      "../images/watermelon/watermelon-farm.jpg"
+      "/images/watermelon/watermelon1.jpg",
+      "/images/watermelon/watermelon-farm.jpg",
+      "/images/watermelon/watermelon2.jpg"
     ],
-    pickerThumb: "../images/watermelon/watermelon1.jpg"
+    pickerThumb: "/images/watermelon/watermelon1.jpg"
   },
   {
     id: "pineapple",
@@ -109,20 +109,20 @@ const FRUITS = [
       "Tropical farm elevation affects acidity and sugar balance."
     ],
     hero: [
-      "../images/pineapple/pineapple1.jpg",
-      "../images/pineapple/pineapple2.jpg",
-      "../images/pineapple/pineapple-farm.jpg"    // pineapple farm rows
+      "/images/pineapple/pineapple1.jpg",
+      "/images/pineapple/pineapple-farm.jpg",
+      "/images/pineapple/pineapple2.jpg"
     ],
     gallery: [
-      "../images/pineapple/pineapple1.jpg",
-      "../images/pineapple/pineapple2.jpg",
-      "../images/pineapple/pineapple-farm.jpg"
+      "/images/pineapple/pineapple1.jpg",
+      "/images/pineapple/pineapple-farm.jpg",
+      "/images/pineapple/pineapple2.jpg"
     ],
-    pickerThumb: "../images/pineapple/pineapple1.jpg"
+    pickerThumb: "/images/pineapple/pineapple1.jpg"
   }
 ];
 
-// Elements
+// ------- Element refs
 const slidesEl = document.getElementById("heroSlides");
 const badgeEl = document.getElementById("heroBadge");
 const pageTitleEl = document.getElementById("pageTitle");
@@ -145,6 +145,7 @@ const pickerListEl = document.getElementById("pickerList");
 
 let slideTimer = null;
 
+// ------- slideshow frames
 function buildSlides(imgs) {
   slidesEl.innerHTML = "";
   imgs.forEach((src, i) => {
@@ -157,6 +158,7 @@ function buildSlides(imgs) {
   });
 }
 
+// ------- 5s rotation
 function startSlideshow() {
   const frames = [...document.querySelectorAll(".hero-frame")];
   if (!frames.length) return;
@@ -166,9 +168,10 @@ function startSlideshow() {
     frames[i].classList.remove("show");
     i = (i + 1) % frames.length;
     frames[i].classList.add("show");
-  }, 5000); // 5 seconds
+  }, 5000);
 }
 
+// ------- render per fruit
 function renderFruit(fruit) {
   badgeEl.textContent = fruit.badge;
   pageTitleEl.textContent = `Health Benefits of ${fruit.name}`;
@@ -205,6 +208,7 @@ function renderFruit(fruit) {
   startSlideshow();
 }
 
+// ------- right sidebar picker
 function buildPicker() {
   pickerListEl.innerHTML = "";
   FRUITS.forEach((f, idx) => {
@@ -233,7 +237,7 @@ function buildPicker() {
   });
 }
 
-// Init
+// ------- init
 (function init() {
   buildPicker();
   renderFruit(FRUITS[0]); // default to grapes
