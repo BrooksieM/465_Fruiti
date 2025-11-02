@@ -15,7 +15,7 @@
     font-size: 2.5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #6f49ff, #8a73ff);
+    background: linear-gradient(135deg, #017d49, #019456);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -48,11 +48,11 @@
 
 .nav-btn:hover {
     background: rgba(111, 73, 255, 0.1);
-    color: #6f49ff;
+    color: #019456;
 }
 
 .nav-btn.active {
-    background: #6f49ff;
+    background: #017d49;
     color: white;
 }
 
@@ -69,9 +69,9 @@
 .settings-frame {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(111, 73, 255, 0.15);
+    box-shadow: 0 5px 20px #7cf8c4;
     padding: 2.5rem;
-    border: 1px solid rgba(111, 73, 255, 0.1);
+    border: 1px solid #017d49;
     margin-bottom: 2rem;
 }
 
@@ -106,7 +106,7 @@
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #6f49ff;
+    border: 3px solid #017d49;
 }
 
 .avatar-actions {
@@ -118,7 +118,7 @@
 .avatar-btn {
     padding: 0.5rem 1rem;
     background: rgba(111, 73, 255, 0.1);
-    color: #6f49ff;
+    color: #017d49;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -193,7 +193,7 @@
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-    border-color: #6f49ff;
+    border-color: #017d49;
     background: rgba(255, 255, 255, 0.95);
     box-shadow: 0 0 0 3px rgba(111, 73, 255, 0.1);
 }
@@ -236,7 +236,7 @@
 .checkbox-group input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #6f49ff;
+    accent-color: #017d49;
 }
 
 .checkbox-group label {
@@ -271,7 +271,7 @@
 
 .save-btn {
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #6f49ff, #8a73ff);
+    background: linear-gradient(135deg, #017d49, #019456);
     color: white;
     border: none;
     border-radius: 12px;
@@ -283,7 +283,7 @@
 
 .save-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(111, 73, 255, 0.3);
+    box-shadow: 0 10px 25px #019456;
 }
 
 .save-btn:disabled {
@@ -505,6 +505,6 @@
 .form-group input:focus-visible,
 .form-group textarea:focus-visible,
 .form-group select:focus-visible {
-    outline: 2px solid #6f49ff;
+    outline: 2px solid #017d49;
     outline-offset: 2px;
 }
