@@ -125,7 +125,7 @@
 
             // Simulate session/login for demo
             localStorage.setItem('user', JSON.stringify(user));
-
+            updateNavigationForLoggedInUser(user);
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
@@ -158,7 +158,52 @@ document.querySelectorAll('.form-group input').forEach(input => {
 
 console.log('Login page loaded successfully');
 
+// Update navigation based on login status
+function updateNavigationForLoggedInUser(user) {
+    const authButtons = document.querySelector('.auth-buttons');
+    
+    if (user) {
+        // User is logged in - replace buttons with settings button
+        authButtons.innerHTML = `
+            <div class="user-welcome">
+                <span class="welcome-text">Hi, ${user.username || user.handle}</span>
+                <button class="settings-btn" onclick="goToSettings()">
+                    ⚙️ Settings
+                </button>
+            </div>
+        `;
+    } else {
+        // User is not logged in - show login/signup buttons
+        authButtons.innerHTML = `
+            <button class="login-btn" onclick="location.href='/login'">Log In</button>
+            <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+        `;
+    }
+}
 
+// Settings page navigation function
+function goToSettings() {
+    location.href='/settings';
+}
+
+// Check auth status when page loads
+function checkAuthStatus() {
+    try {
+        const userData = localStorage.getItem('user');
+        
+        if (userData) {
+            const user = JSON.parse(userData);
+            updateNavigationForLoggedInUser(user);
+        }
+    } catch (error) {
+        console.log('Error checking auth status:', error);
+    }
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthStatus();
+});
   </script>
 </body>
 </html>

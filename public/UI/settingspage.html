@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings Page</title>
+<link rel="stylesheet" href="../css/standardLayout.css">
+<link rel="stylesheet" href="../css/SettingsPage/settingspage.css">
+
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="../images/fruiti.png" alt="Placeholder for logo" />
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+
+    <div class="auth-buttons">
+      <button onclick="location.href='/login'" class="login-btn">Log In</button>
+      <button onclick="location.href='/signup'" class="signup-btn">Sign Up</button>
+    </div>
+
+
+  </div>
+
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="become-seller.html">Become a Seller</a>
+      <a href="nutrition.html">Nutrition</a>
+      <a href="recipe.html">Recipes</a>
+      <a href="about-us.html">About Us</a>
+    </nav>
+
+  <div class="black-bar"></div>
+
+  <!-- Main Content -->
+  <div class="page-layout">
+    <div class="settings-container">
+        <!-- Settings Header -->
+        <div class="settings-header">
+            <h1>Account Settings</h1>
+            <p>Manage your Fruiti account preferences and information</p>
+        </div>
+
+        <!-- Settings Navigation -->
+        <div class="settings-nav">
+            <button class="nav-btn active" data-tab="profile">Profile</button>
+            <button class="nav-btn" data-tab="security">Security</button>
+            <button class="nav-btn" data-tab="notifications">Notifications</button>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+
+        <!-- Profile Tab -->
+        <div class="settings-tab active" id="profile-tab">
+            <div class="settings-frame">
+                <div class="tab-header">
+                    <h2>Profile Information</h2>
+                    <p>Update your personal details and profile picture</p>
+                </div>
+
+                <form class="settings-form" id="profileForm">
+                    <div class="avatar-section">
+                        <div class="avatar-preview">
+                            <img src="/images/default-avatar.png" alt="Profile Avatar" id="avatarPreview">
+                        </div>
+                        <div class="avatar-actions">
+                            <button type="button" class="avatar-btn" onclick="document.getElementById('avatarUpload').click()">
+                                Upload New Photo
+                            </button>
+                            <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                            <button type="button" class="avatar-btn remove-btn">Remove Photo</button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="displayName">Display Name</label>
+                            <input 
+                                type="text" 
+                                id="displayName" 
+                                name="displayName" 
+                                placeholder="Enter your display name"
+                                value="John Doe"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Choose a username"
+                                value="johndoe123"
+                            />
+                            <small>This is your unique identifier on Fruiti</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="Enter your email"
+                                value="john.doe@example.com"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea 
+                                id="bio" 
+                                name="bio" 
+                                placeholder="Tell us about yourself..."
+                                rows="4"
+                            >I love fresh fruits and healthy recipes!</textarea>
+                            <small>Brief description about yourself (max 200 characters)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">
+                            <span class="btn-text">Save Changes</span>
+                            <span class="btn-loading" style="display: none;">Saving...</span>
+                        </button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Tab -->
+        <div class="settings-tab" id="security-tab">
+            <div class="settings-frame">
+                <div class="tab-header">
+                    <h2>Security Settings</h2>
+                    <p>Manage your password and account security</p>
+                </div>
+
+                <form class="settings-form" id="securityForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input 
+                                type="password" 
+                                id="currentPassword" 
+                                name="currentPassword" 
+                                placeholder="Enter current password"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input 
+                                type="password" 
+                                id="newPassword" 
+                                name="newPassword" 
+                                placeholder="Enter new password"
+                                required
+                                minlength="6"
+                            />
+                            <div class="password-strength">
+                                <div class="strength-bar" id="securityStrengthBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                            <input 
+                                type="password" 
+                                id="confirmNewPassword" 
+                                name="confirmNewPassword" 
+                                placeholder="Confirm new password"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="security-options">
+                        <h3>Additional Security</h3>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="twoFactor" name="twoFactor">
+                            <label for="twoFactor">Enable Two-Factor Authentication</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="loginAlerts" name="loginAlerts" checked>
+                            <label for="loginAlerts">Send login alert emails</label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">
+                            <span class="btn-text">Update Password</span>
+                            <span class="btn-loading" style="display: none;">Updating...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+
+        <!-- Notifications Tab -->
+        <div class="settings-tab" id="notifications-tab">
+            <div class="settings-frame">
+                <div class="tab-header">
+                    <h2>Notification Settings</h2>
+                    <p>Choose how you want to be notified</p>
+                </div>
+
+                <form class="settings-form" id="notificationsForm">
+                    <div class="notification-section">
+                        <h3>Email Notifications</h3>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emailRecipes" name="emailRecipes" checked>
+                            <label for="emailRecipes">New recipe recommendations</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emailNutrition" name="emailNutrition" checked>
+                            <label for="emailNutrition">Nutrition tips and updates</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emailPromotions" name="emailPromotions">
+                            <label for="emailPromotions">Promotional offers</label>
+                        </div>
+                    </div>
+
+                    <div class="notification-section">
+                        <h3>Push Notifications</h3>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="pushComments" name="pushComments" checked>
+                            <label for="pushComments">New comments on my recipes</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="pushLikes" name="pushComments" checked>
+                            <label for="pushLikes">Likes on my content</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="pushFruitStands" name="pushFruitStands">
+                            <label for="pushFruitStands">New fruit stands nearby</label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">
+                            <span class="btn-text">Update Notifications</span>
+                            <span class="btn-loading" style="display: none;">Updating...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+            <h3>Session</h3>
+            <p>Manage your current session</p>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <p>Permanently delete your account and all associated data</p>
+                <button class="delete-btn" onclick="showDeleteConfirmation()">Delete Account</button>
+            </div>
+            <h3>Danger Zone</h3>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Delete Account</h2>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="confirm-delete-btn" onclick="deleteAccount()">Yes, Delete My Account</button>
+                <button class="cancel-delete-btn" onclick="hideDeleteConfirmation()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateNavigationForLoggedInUser(user) {
+        const authButtons = document.querySelector('.auth-buttons');
+        
+        if (user) {
+            authButtons.innerHTML = `
+                <div class="user-welcome">
+                    <span class="welcome-text">Hi, ${user.username || user.handle}</span>
+                    <button class="settings-btn" onclick="goToSettings()">
+                        ⚙️ Settings
+                    </button>
+                </div>
+            `;
+        } else {
+            authButtons.innerHTML = `
+                <button class="login-btn" onclick="location.href='/login'">Log In</button>
+                <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+            `;
+        }
+    }
+
+    function goToSettings() {
+        location.href='/settings';
+    }
+
+    function checkAuthStatus() {
+        try {
+            const userData = localStorage.getItem('user');
+            
+            if (userData) {
+                const user = JSON.parse(userData);
+                updateNavigationForLoggedInUser(user);
+                updateFormFieldsWithUserData(user);
+            } else {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.log('Error checking auth status:', error);
+        }
+    }
+
+    function updateFormFieldsWithUserData(user) {
+        const displayNameField = document.getElementById('displayName');
+        const usernameField = document.getElementById('username');
+        const emailField = document.getElementById('email');
+        const bioField = document.getElementById('bio');
+        
+        if (displayNameField) displayNameField.value = user.displayName || user.name || '';
+        if (usernameField) usernameField.value = user.username || user.handle || '';
+        if (emailField) emailField.value = user.email || '';
+        if (bioField) bioField.value = user.bio || 'I love fresh fruits and healthy recipes!';
+        
+        if (user.avatar) {
+            const avatarPreview = document.getElementById('avatarPreview');
+            if (avatarPreview) avatarPreview.src = user.avatar;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+    });
+    
+    // Tab Navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons and tabs
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.settings-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Show corresponding tab
+            const tabId = this.getAttribute('data-tab') + '-tab';
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Password strength indicator (for security tab)
+    document.getElementById('newPassword')?.addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('securityStrengthBar');
+        let strength = 0;
+        
+        if (password.length >= 6) strength += 1;
+        if (password.length >= 8) strength += 1;
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        
+        strengthBar.className = 'strength-bar';
+        if (password.length === 0) {
+            strengthBar.style.width = '0%';
+        } else if (strength <= 2) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength <= 4) {
+            strengthBar.classList.add('strength-medium');
+        } else {
+            strengthBar.classList.add('strength-strong');
+        }
+    });
+
+    // Password confirmation validation
+    document.getElementById('confirmNewPassword')?.addEventListener('input', function() {
+        const password = document.getElementById('newPassword').value;
+        const confirmPassword = this.value;
+        const errorMessage = document.getElementById('errorMessage');
+
+        if (confirmPassword && password !== confirmPassword) {
+            errorMessage.textContent = 'Passwords do not match';
+            errorMessage.style.display = 'block';
+        } else if (confirmPassword && password === confirmPassword) {
+            errorMessage.style.display = 'none';
+        }
+    });
+
+    // Form submissions
+    document.querySelectorAll('.settings-form').forEach(form => {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('.save-btn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                successMessage.textContent = 'Settings updated successfully!';
+                successMessage.style.display = 'block';
+
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                errorMessage.textContent = 'Error updating settings. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        });
+    });
+
+    // Avatar upload preview
+    document.getElementById('avatarUpload')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Delete account functions
+    function showDeleteConfirmation() {
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function deleteAccount() {
+        // Implement account deletion logic here
+        alert('Account deletion would be implemented here');
+        hideDeleteConfirmation();
+    }
+
+    // Handle input focus for better UX
+    document.querySelectorAll('.form-group input, .form-group textarea, .form-group select').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+</script>
+</body>
+</html>

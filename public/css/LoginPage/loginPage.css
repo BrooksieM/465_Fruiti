@@ -119,3 +119,35 @@ label {
   font-size: 12px;
   text-align: center;
 }
+
+/* Settings button styles */
+.settings-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.settings-btn:hover {
+  background: #5a6268;
+}
+
+/* User welcome section */
+.user-welcome {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.welcome-text {
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}

@@ -32,6 +32,9 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/login.html'));
 });
 
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/settingspage.html'));
+});
 app.get('/nutrition', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/nutrition.html'));
 });
