@@ -69,7 +69,52 @@ module.exports = function (app, supabase)
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  // Add this to your server routes
+app.post('/api/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
 
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        // Find user by username or email
+        const { data: users, error } = await supabase
+            .from('accounts')
+            .select('*')
+            .or(`handle.eq.${username},email.eq.${username}`);
+
+        if (error) {
+            console.error('Database error:', error);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (!users || users.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const user = users[0];
+
+        // Verify password using bcrypt
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Remove password from response for security
+        const { password: _, ...userWithoutPassword } = user;
+        
+        res.json({ 
+            success: true, 
+            user: userWithoutPassword 
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
   // GET /api/accounts -> get all accounts
   app.get('/api/accounts', async (req, res) => {
     try {

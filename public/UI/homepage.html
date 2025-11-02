@@ -21,10 +21,11 @@
     </div>
 
 
-    <div class="auth-buttons">
-      <button onclick="location.href='/login'" class="login-btn">Log In</button>
-      <button onclick="location.href='/signup'" class="signup-btn">Sign Up</button>
-    </div>
+<div class="auth-buttons" id="authButtons">
+    <!-- Default state - show login/signup -->
+    <button class="login-btn" onclick="location.href='/login'">Log In</button>
+    <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+</div>
 
 
   </div>
@@ -43,6 +44,7 @@
 
 
 <script src="/scripts/randomizer.js"></script>
+<script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
 
 </html>

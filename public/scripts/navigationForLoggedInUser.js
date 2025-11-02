@@ -1,0 +1,229 @@
+// navigationForLoggedInUser.js
+
+// Debug function to check localStorage
+function debugUserData() {
+    console.log('=== DEBUG: Checking localStorage ===');
+    const userData = localStorage.getItem('user');
+    
+    if (!userData) {
+        console.log('❌ No user data found in localStorage');
+        console.log('All localStorage items:', Object.keys(localStorage));
+        return null;
+    }
+    
+    try {
+        const user = JSON.parse(userData);
+        console.log('✅ User data found:', user);
+        console.log('🔑 User ID:', user.id);
+        return user;
+    } catch (error) {
+        console.log('❌ Error parsing user data:', error);
+        return null;
+    }
+}
+
+// Update navigation based on login status
+function updateNavigationForLoggedInUser(user) {
+    const authButtons = document.getElementById('authButtons');
+    console.log('🔄 Updating navigation for user:', user);
+    
+    if (user && user.id) {
+        // User is logged in - show profile dropdown
+        const avatarUrl = user.avatar || '../images/default-avatar.png';
+        const username = user.username || user.handle || 'User';
+        
+        authButtons.innerHTML = `
+            <div class="user-menu">
+                <button class="profile-dropdown-btn" id="profileDropdownBtn">
+                    <img src="${avatarUrl}" alt="Profile" class="profile-avatar" 
+                         onerror="this.src='../images/default-avatar.png'">
+                </button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-username">${username}</div>
+                        <div class="dropdown-status" onclick="setStatus()">Set status</div>
+                    </div>
+                    
+                    <div class="dropdown-section">
+                        <button class="dropdown-item" onclick="goToProfile()">
+                            <span>👤</span> Profile
+                        </button>
+                        <button class="dropdown-item" onclick="goToRepositories()">
+                            <span>📁</span> Repositories
+                        </button>
+                        <button class="dropdown-item" onclick="goToStars()">
+                            <span>⭐</span> Stars
+                        </button>
+                        <button class="dropdown-item" onclick="goToGists()">
+                            <span>💾</span> Gists
+                        </button>
+                    </div>
+                    
+                    <div class="dropdown-section">
+                        <button class="dropdown-item" onclick="goToOrganizations()">
+                            <span>🏢</span> Organizations
+                        </button>
+                        <button class="dropdown-item" onclick="goToEnterprises()">
+                            <span>💼</span> Enterprises
+                        </button>
+                        <button class="dropdown-item" onclick="goToSponsors()">
+                            <span>❤️</span> Sponsors
+                        </button>
+                    </div>
+                    
+                    <div class="dropdown-section">
+                        <button class="dropdown-item" onclick="goToSettings()">
+                            <span>⚙️</span> Settings
+                        </button>
+                        <button class="dropdown-item" onclick="goToCopilot()">
+                            <span>🤖</span> Copilot settings
+                        </button>
+                        <button class="dropdown-item" onclick="goToFeaturePreview()">
+                            <span>🔮</span> Feature preview
+                        </button>
+                        <button class="dropdown-item" onclick="goToAppearance()">
+                            <span>🎨</span> Appearance
+                        </button>
+                        <button class="dropdown-item" onclick="goToAccessibility()">
+                            <span>♿</span> Accessibility
+                        </button>
+                        <button class="dropdown-item" onclick="goToEnterprise()">
+                            <span>🚀</span> Try Enterprise
+                        </button>
+                    </div>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <div class="dropdown-section">
+                        <button class="dropdown-item" onclick="logout()">
+                            <span>🚪</span> Sign out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Initialize dropdown functionality
+        initializeProfileDropdown();
+        console.log('✅ Navigation updated with profile dropdown');
+    } else {
+        console.log('❌ No user found, keeping login/signup buttons');
+    }
+}
+
+// Profile dropdown functionality
+function initializeProfileDropdown() {
+    const dropdownBtn = document.getElementById('profileDropdownBtn');
+    const dropdown = document.getElementById('profileDropdown');
+    
+    if (dropdownBtn && dropdown) {
+        // Toggle dropdown on button click
+        dropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('show');
+        });
+        
+        // Prevent dropdown from closing when clicking inside
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        console.log('✅ Dropdown functionality initialized');
+    }
+}
+
+// Navigation functions for dropdown items
+function goToProfile() {
+    window.location.href = 'profile.html';
+}
+
+function goToRepositories() {
+    window.location.href = 'repositories.html';
+}
+
+function goToStars() {
+    window.location.href = 'stars.html';
+}
+
+function goToGists() {
+    window.location.href = 'gists.html';
+}
+
+function goToOrganizations() {
+    window.location.href = 'organizations.html';
+}
+
+function goToEnterprises() {
+    window.location.href = 'enterprises.html';
+}
+
+function goToSponsors() {
+    window.location.href = 'sponsors.html';
+}
+
+function goToSettings() {
+    location.href = '/settings';
+}
+
+function goToCopilot() {
+    alert('Copilot settings would open here');
+}
+
+function goToFeaturePreview() {
+    alert('Feature preview would open here');
+}
+
+function goToAppearance() {
+    alert('Appearance settings would open here');
+}
+
+function goToAccessibility() {
+    alert('Accessibility settings would open here');
+}
+
+function goToEnterprise() {
+    alert('Enterprise trial would start here');
+}
+
+function setStatus() {
+    const status = prompt('Set your status (e.g., 🍎 Buying fruits, 🥤 Available, etc.):');
+    if (status) {
+        const statusElement = document.querySelector('.dropdown-status');
+        if (statusElement) {
+            statusElement.textContent = status;
+        }
+        localStorage.setItem('userStatus', status);
+    }
+}
+
+// Logout function
+function logout() {
+    console.log('🚪 Logging out...');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userStatus');
+    window.location.href = '/';
+}
+
+// Check authentication status when page loads
+function checkAuthStatus() {
+    console.log('🔍 Checking authentication status...');
+    const user = debugUserData();
+    
+    if (user && user.id) {
+        console.log('✅ User is authenticated, updating navigation...');
+        updateNavigationForLoggedInUser(user);
+    } else {
+        console.log('❌ User not authenticated, keeping default buttons');
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page loaded, checking auth status...');
+    checkAuthStatus();
+});
