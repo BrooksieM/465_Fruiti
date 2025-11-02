@@ -2,119 +2,129 @@
 
 module.exports = function (app, supabase) 
 {
+  const bcrypt = require('bcrypt');
   // Dev ping
   app.get('/api/accounts/__ping', (_req, res) => res.json({ ok: true }));
 
   // POST /api/accounts -> create new account
-  app.post('/api/accounts', async (req, res) => {
-    try {
-      const { handle, email, avatar, password } = req.body || {};
+app.post('/api/accounts', async (req, res) => {
+  try {
+    const { handle, email, avatar, password } = req.body || {};
 
-      // Validate required fields
-      if (!handle || !email) {
-        return res.status(400).json({ error: 'Handle and email are required' });
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-      }
-
-      // Check if handle or email already exists
-      const { data: existingAccount, error: checkError } = await supabase
-        .from('accounts')
-        .select('handle, email')
-        .or(`handle.eq.${handle},email.eq.${email}`)
-        .limit(1);
-
-      if (checkError) {
-        console.error('Check existing account error:', checkError);
-        return res.status(500).json({ error: 'Error checking existing account' });
-      }
-
-      if (existingAccount && existingAccount.length > 0) {
-        const conflict = existingAccount[0];
-        if (conflict.handle === handle) {
-          return res.status(409).json({ error: 'Handle already exists' });
-        }
-        if (conflict.email === email) {
-          return res.status(409).json({ error: 'Email already exists' });
-        }
-      }
-
-      // Insert new account
-      const { data, error } = await supabase
-        .from('accounts')
-        .insert([
-          {
-            handle,
-            email,
-            avatar: avatar || null,
-            payment_method: null,
-            created_at: new Date().toISOString(),
-            password: password
-          }
-        ])
-        .select();
-
-      if (error) {
-        console.error('Account insert error:', error);
-        return res.status(500).json({ error: error.message });
-      }
-
-      res.status(201).json(data[0]);
-    } catch (error) {
-      console.error('Server error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    // Validate required fields
+    if (!handle || !email || !password) {
+      return res.status(400).json({ error: 'Handle, email, and password are required' });
     }
-  });
-  // Add this to your server routes
-app.post('/api/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password are required' });
-        }
-
-        // Find user by username or email
-        const { data: users, error } = await supabase
-            .from('accounts')
-            .select('*')
-            .or(`handle.eq.${username},email.eq.${username}`);
-
-        if (error) {
-            console.error('Database error:', error);
-            return res.status(500).json({ error: 'Database error' });
-        }
-
-        if (!users || users.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const user = users[0];
-
-        // Verify password using bcrypt
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        
-        if (!isValidPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Remove password from response for security
-        const { password: _, ...userWithoutPassword } = user;
-        
-        res.json({ 
-            success: true, 
-            user: userWithoutPassword 
-        });
-
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
+    // Check if handle or email already exists
+    const { data: existingAccount, error: checkError } = await supabase
+      .from('accounts')
+      .select('handle, email')
+      .or(`handle.eq.${handle},email.eq.${email}`)
+      .limit(1);
+
+    if (checkError) {
+      console.error('Check existing account error:', checkError);
+      return res.status(500).json({ error: 'Error checking existing account' });
+    }
+
+    if (existingAccount && existingAccount.length > 0) {
+      const conflict = existingAccount[0];
+      if (conflict.handle === handle) {
+        return res.status(409).json({ error: 'Handle already exists' });
+      }
+      if (conflict.email === email) {
+        return res.status(409).json({ error: 'Email already exists' });
+      }
+    }
+
+    // Hash the password before storing
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Insert new account with hashed password
+    const { data, error } = await supabase
+      .from('accounts')
+      .insert([
+        {
+          handle,
+          email,
+          avatar: avatar || null,
+          payment_method: null,
+          password: hashedPassword, // Store the hashed password
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Account insert error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.status(201).json(data[0]);
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
+  // /api/login
+  app.post('/api/login', async (req, res) => {
+      try {
+          const { username, password } = req.body;
+
+          if (!username || !password) {
+              return res.status(400).json({ error: 'Username and password are required' });
+          }
+
+          // Find user by username or email
+          const { data: users, error } = await supabase
+              .from('accounts')
+              .select('*')
+              .or(`handle.eq.${username},email.eq.${username}`);
+
+          if (error) {
+              console.error('Database error:', error);
+              return res.status(500).json({ error: 'Database error' });
+          }
+
+          if (!users || users.length === 0) {
+              return res.status(401).json({ error: 'Invalid credentials' });
+          }
+
+          const user = users[0];
+
+          // Verify password using bcrypt
+          const isValidPassword = await bcrypt.compare(password, user.password);
+          
+          if (!isValidPassword) {
+              return res.status(401).json({ error: 'Invalid credentials' });
+          }
+
+          // Remove password from response for security
+          const { password: _, ...userWithoutPassword } = user;
+          
+          res.json({ 
+              success: true, 
+              user: userWithoutPassword 
+          });
+
+      } catch (error) {
+          console.error('Login error:', error);
+          res.status(500).json({ error: 'Internal server error' });
+      }
+  });
   // GET /api/accounts -> get all accounts
   app.get('/api/accounts', async (req, res) => {
     try {
@@ -164,9 +174,6 @@ app.post('/api/login', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-
-  // PUT /api/accounts/:id -> update account
-  const bcrypt = require('bcrypt');
 
 app.put('/api/accounts/:id', async (req, res) => {
     try {
