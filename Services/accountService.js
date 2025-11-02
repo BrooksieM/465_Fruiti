@@ -121,10 +121,12 @@ module.exports = function (app, supabase)
   });
 
   // PUT /api/accounts/:id -> update account
-  app.put('/api/accounts/:id', async (req, res) => {
+  const bcrypt = require('bcrypt');
+
+app.put('/api/accounts/:id', async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { handle, email, avatar } = req.body || {};
+      const { handle, email, avatar, password } = req.body || {};
 
       if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({ error: 'Invalid account ID' });
@@ -174,6 +176,15 @@ module.exports = function (app, supabase)
       if (handle !== undefined) updateData.handle = handle;
       if (email !== undefined) updateData.email = email;
       if (avatar !== undefined) updateData.avatar = avatar;
+      
+      // Hash password if provided
+      if (password !== undefined) {
+        if (password.length < 6) {
+          return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+        }
+        const saltRounds = 10;
+        updateData.password = await bcrypt.hash(password, saltRounds);
+      }
 
       const { data, error } = await supabase
         .from('accounts')
@@ -193,6 +204,40 @@ module.exports = function (app, supabase)
     }
   });
 
+// Verify password
+app.post('/api/accounts/:id/verify-password', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        const { password } = req.body;
+
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Invalid account ID' });
+        }
+
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+
+        // Get the user's current hashed password
+        const { data: account, error } = await supabase
+            .from('accounts')
+            .select('password')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            return res.status(404).json({ error: 'Account not found' });
+        }
+
+        // Verify the provided password against the hashed password
+        const isValid = await bcrypt.compare(password, account.password);
+        
+        res.json({ isValid });
+    } catch (error) {
+        console.error('Password verification error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
   // PUT /api/accounts/:id/profile-picture -> update profile picture
   app.put('/api/accounts/:id/profile-picture', async (req, res) => {
     try {

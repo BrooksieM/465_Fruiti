@@ -125,12 +125,6 @@
           </div>
           
           <form class="settings-form" id="securityForm">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="currentPassword">Current Password</label>
-                <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password" required />
-              </div>
-            </div>
 
             <div class="form-row">
               <div class="form-group">
@@ -414,6 +408,7 @@ document.getElementById('profileForm').addEventListener('submit', async function
         const formData = {
             handle: document.getElementById('username').value.trim(),
             email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value.trim(),
             // Note: Add avatar support when you implement file upload
             // avatar: document.getElementById('avatarPreview').src
         };
@@ -450,6 +445,87 @@ document.getElementById('profileForm').addEventListener('submit', async function
     } catch (error) {
         console.error('❌ Profile update error:', error);
         showError('Error updating profile: ' + error.message);
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+});
+
+// Security form submission with password update
+document.getElementById('securityForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    console.log('🔄 Security form submitted');
+    
+    const user = debugUserData();
+    if (!user || !user.id) {
+        showError('Please log in to update your password');
+        return;
+    }
+
+    const submitBtn = this.querySelector('.save-btn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+
+    // Show loading state
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    hideMessages();
+
+    try {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        // Validation
+        if (!newPassword || !confirmNewPassword) {
+            throw new Error('Both new password fields are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw new Error('New password must be at least 6 characters long');
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            throw new Error('New passwords do not match');
+        }
+
+        console.log('📤 Updating password for user:', user.id);
+
+        // Update password using PUT endpoint
+        const formData = {
+            password: newPassword
+        };
+
+        const response = await fetch(`/api/accounts/${user.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(responseData.error || `Failed to update password`);
+        }
+
+        console.log('✅ Password update successful');
+        
+        // Clear password fields
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+        document.getElementById('securityStrengthBar').style.width = '0%';
+        document.getElementById('securityStrengthBar').className = 'strength-bar';
+        
+        showSuccess('Password updated successfully!');
+
+    } catch (error) {
+        console.error('❌ Password update error:', error);
+        showError('Error: ' + error.message);
     } finally {
         // Reset button state
         submitBtn.disabled = false;
@@ -497,7 +573,7 @@ function hideMessages() {
 function logout() {
     console.log('🚪 Logging out...');
     localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    location.href = '/';
 }
 
 // Tab Navigation
@@ -557,7 +633,7 @@ document.getElementById('confirmNewPassword')?.addEventListener('input', functio
 
 // Other form submissions (security, notifications)
 document.querySelectorAll('.settings-form').forEach(form => {
-    if (form.id !== 'profileForm') {
+    if (form.id !== 'profileForm' && form.id !== 'securityForm') {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -571,11 +647,11 @@ document.querySelectorAll('.settings-form').forEach(form => {
             hideMessages();
 
             try {
-                // Simulate API call for other forms
+                // Simulate API call for notifications
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                showSuccess('Settings updated successfully!');
+                showSuccess('Notification settings updated successfully!');
             } catch (error) {
-                showError('Error updating settings. Please try again.');
+                showError('Error updating notification settings. Please try again.');
             } finally {
                 submitBtn.disabled = false;
                 btnText.style.display = 'inline';
@@ -642,7 +718,7 @@ function deleteAccount() {
         localStorage.removeItem('user');
         hideDeleteConfirmation();
         alert('Account deletion would be implemented here. Redirecting to home page...');
-        window.location.href = 'index.html';
+        location.href = '/';
     }, 1000);
 }
 
