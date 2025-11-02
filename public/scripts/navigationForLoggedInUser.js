@@ -31,7 +31,7 @@ function updateNavigationForLoggedInUser(user) {
         // User is logged in - show profile dropdown
         const avatarUrl = user.avatar || '../images/default-avatar.png';
         const username = user.username || user.handle || 'User';
-        
+        const email = user.email;
         authButtons.innerHTML = `
             <div class="user-menu">
                 <button class="profile-dropdown-btn" id="profileDropdownBtn">
@@ -41,58 +41,25 @@ function updateNavigationForLoggedInUser(user) {
                 <div class="profile-dropdown" id="profileDropdown">
                     <div class="dropdown-header">
                         <div class="dropdown-username">${username}</div>
-                        <div class="dropdown-status" onclick="setStatus()">Set status</div>
-                    </div>
-                    
-                    <div class="dropdown-section">
-                        <button class="dropdown-item" onclick="goToProfile()">
-                            <span>👤</span> Profile
-                        </button>
-                        <button class="dropdown-item" onclick="goToRepositories()">
-                            <span>📁</span> Repositories
-                        </button>
-                        <button class="dropdown-item" onclick="goToStars()">
-                            <span>⭐</span> Stars
-                        </button>
-                        <button class="dropdown-item" onclick="goToGists()">
-                            <span>💾</span> Gists
-                        </button>
-                    </div>
-                    
-                    <div class="dropdown-section">
-                        <button class="dropdown-item" onclick="goToOrganizations()">
-                            <span>🏢</span> Organizations
-                        </button>
-                        <button class="dropdown-item" onclick="goToEnterprises()">
-                            <span>💼</span> Enterprises
-                        </button>
-                        <button class="dropdown-item" onclick="goToSponsors()">
-                            <span>❤️</span> Sponsors
-                        </button>
+                        <div class="dropdown-email">${email}</div>
                     </div>
                     
                     <div class="dropdown-section">
                         <button class="dropdown-item" onclick="goToSettings()">
-                            <span>⚙️</span> Settings
+                            <span>⚙️</span> Account Preferences
                         </button>
-                        <button class="dropdown-item" onclick="goToCopilot()">
-                            <span>🤖</span> Copilot settings
+
+                    </div>
+                    
+                    <div class="dropdown-section">
+                        <button class="dropdown-item" onclick="goToStars()">
+                            <span>⭐</span> Saved Recipes
                         </button>
-                        <button class="dropdown-item" onclick="goToFeaturePreview()">
-                            <span>🔮</span> Feature preview
-                        </button>
-                        <button class="dropdown-item" onclick="goToAppearance()">
-                            <span>🎨</span> Appearance
-                        </button>
-                        <button class="dropdown-item" onclick="goToAccessibility()">
-                            <span>♿</span> Accessibility
-                        </button>
-                        <button class="dropdown-item" onclick="goToEnterprise()">
-                            <span>🚀</span> Try Enterprise
+                        <button class="dropdown-item" onclick="goToFruitStand()">
+                            <span>❤️</span> Favorite Fruit Stands
                         </button>
                     </div>
                     
-                    <div class="dropdown-divider"></div>
                     
                     <div class="dropdown-section">
                         <button class="dropdown-item" onclick="logout()">
@@ -142,64 +109,20 @@ function goToProfile() {
     window.location.href = 'profile.html';
 }
 
-function goToRepositories() {
-    window.location.href = 'repositories.html';
-}
 
 function goToStars() {
     window.location.href = 'stars.html';
 }
 
-function goToGists() {
-    window.location.href = 'gists.html';
-}
 
 function goToOrganizations() {
     window.location.href = 'organizations.html';
-}
-
-function goToEnterprises() {
-    window.location.href = 'enterprises.html';
-}
-
-function goToSponsors() {
-    window.location.href = 'sponsors.html';
 }
 
 function goToSettings() {
     location.href = '/settings';
 }
 
-function goToCopilot() {
-    alert('Copilot settings would open here');
-}
-
-function goToFeaturePreview() {
-    alert('Feature preview would open here');
-}
-
-function goToAppearance() {
-    alert('Appearance settings would open here');
-}
-
-function goToAccessibility() {
-    alert('Accessibility settings would open here');
-}
-
-function goToEnterprise() {
-    alert('Enterprise trial would start here');
-}
-
-function setStatus() {
-    const status = prompt('Set your status (e.g., 🍎 Buying fruits, 🥤 Available, etc.):');
-    if (status) {
-        const statusElement = document.querySelector('.dropdown-status');
-        if (statusElement) {
-            statusElement.textContent = status;
-        }
-        localStorage.setItem('userStatus', status);
-    }
-}
 
 // Logout function
 function logout() {

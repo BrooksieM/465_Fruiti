@@ -16,9 +16,10 @@
     <div class="search-bar">
       <input type="text" placeholder="Search Fruit" />
     </div>
-    <div class="auth-buttons">
-      <button onclick="location.href='/login'" class="login-btn">Log In</button>
-      <button onclick="location.href='/signup'" class="signup-btn">Sign Up</button>
+    <div class="auth-buttons" id="authButtons">
+        <!-- Default state - show login/signup -->
+        <button class="login-btn" onclick="location.href='/login'">Log In</button>
+        <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
     </div>
   </div>
 
@@ -46,7 +47,8 @@
           <button class="nav-btn active" data-tab="profile">Profile</button>
           <button class="nav-btn" data-tab="security">Security</button>
           <button class="nav-btn" data-tab="notifications">Notifications</button>
-          <button class="nav-btn" data-tab="danger">Danger Zone</button>
+          <button class="nav-btn" data-tab="danger">Delete Account</button>
+          <button class="nav-btn" data-tab="sign-out">Sign Out</button>
         </div>
       </div>
 
@@ -216,20 +218,29 @@
         <!-- Danger Zone Tab -->
         <div class="settings-tab" id="danger-tab">
           <div class="tab-header">
-            <h2>Danger Zone</h2>
-            <p>Irreversible and destructive actions</p>
+            <h2>Delete Account</h2>
           </div>
           
           <div class="settings-form">
             <div class="danger-zone">
-              <h3>Sign Out</h3>
-              <p>Sign out of your account on this device</p>
-              <button class="logout-btn" onclick="logout()">Sign Out</button>
-
-              <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #ff8182;">
                 <h3 style="color: #d1242f;">Delete Account</h3>
                 <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
                 <button class="delete-btn" onclick="showDeleteConfirmation()">Delete Account</button>
+              </div>
+            </div>
+          </div>
+
+        <!-- Sign Out Tab -->
+        <div class="settings-tab" id="sign-out-tab">
+          <div class="tab-header">
+            <h2>Sign Out</h2>
+          </div>
+          
+          <div class="settings-form">
+            <div class="sign-out-zone">
+                <h3>Sign Out</h3>
+                <p>Sign out of your account on this device</p>
+                <button class="logout-btn" onclick="logout()">Sign Out</button>
               </div>
             </div>
           </div>
@@ -253,7 +264,7 @@
       </div>
     </div>
   </div>
-
+<script src="/scripts/navigationForLoggedInUser.js"></script>
   <script>
 // User data management
 let originalUserData = null;
@@ -279,43 +290,30 @@ function debugUserData() {
         return null;
     }
 }
-
-// Navigation functions
-function updateNavigationForLoggedInUser(user) {
-    const authButtons = document.querySelector('.auth-buttons');
-    
-    if (user && user.id) {
-        authButtons.innerHTML = `
-            <div class="user-welcome">
-                <span class="welcome-text">Hi, ${user.username || user.handle || 'User'}</span>
-                <button class="settings-btn" onclick="goToSettings()">⚙️ Settings</button>
-            </div>
-        `;
-    }
-}
-
-function goToSettings() {
-    location.href='/settings';
-}
-
-// Authentication
+// Add this function to check authentication status and load user data
 function checkAuthStatus() {
-    console.log('🔍 Checking authentication status...');
+    console.log('🔐 Checking authentication status...');
     
     const user = debugUserData();
     
     if (user && user.id) {
-        console.log('✅ User is authenticated with ID:', user.id);
-        updateNavigationForLoggedInUser(user);
+        console.log('✅ User is authenticated, loading profile data');
         initializeFormWithUserData(user);
+        
+        // Update navigation for logged in user
+        if (typeof updateNavigationForLoggedInUser === 'function') {
+            updateNavigationForLoggedInUser(user);
+        }
     } else {
-        console.log('❌ User not authenticated, redirecting to login...');
+        console.log('❌ User not authenticated');
+        showError('Please log in to access settings');
+        
+        // Optionally redirect to login page after a delay
         setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1000);
+            window.location.href = '/login';
+        }, 2000);
     }
 }
-
 // Form management
 function initializeFormWithUserData(user) {
     console.log('📝 Initializing form with user data:', user);

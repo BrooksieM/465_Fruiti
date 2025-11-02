@@ -349,6 +349,28 @@
     margin: 0 0 16px 0;
 }
 
+/* Danger Zone */
+.sign-out-zone {
+    margin-top: 32px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+.sign-out-zone h3 {
+    color: #d1242f;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.sign-out-zone p {
+    color: #656d76;
+    font-size: 14px;
+    margin: 0 0 16px 0;
+}
+
 .logout-btn {
     background: #656d76;
     color: white;
