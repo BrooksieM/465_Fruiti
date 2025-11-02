@@ -76,6 +76,10 @@ body
   background-color: #5c3ce0;
 }
 
+html 
+{
+  overflow-y: scroll;
+}
 /* NAIGATION BAR */
 .navbar 
 {
