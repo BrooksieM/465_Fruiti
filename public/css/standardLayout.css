@@ -1,38 +1,33 @@
-* 
-{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', Arial, sans-serif;
 }
 
-/* figma color */
-body 
-{
-  background-color: rgba(230,230,250,0.35);
+body {
+  background-color: rgba(230, 230, 250, 0.35);
   color: #333;
+  overflow-y: scroll;
 }
 
-.page-layout 
-{
+.page-layout {
   margin: 0 auto;
   max-width: 1200px;
   padding: 20px;
 }
 
-/* BLACK BAR*/
-.black-bar 
-{
-  background-color: black;
+.black-bar {
+  background-color: #017d49;
   width: 100%;
   height: 3px;
   margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(1, 125, 73, 0.4);
 }
 
 /* BUTTONS */
 .rounded-button,
-.auth-buttons button 
-{
+.auth-buttons button {
   border: none;
   border-radius: 12px;
   padding: 10px 24px;
@@ -41,21 +36,21 @@ body
   transition: all 0.2s ease-in-out;
 }
 
-/* Reuse theme colors */
 .rounded-button {
-  background-color: rgba(230,230,250,0.35);
+  background-color: rgba(230, 230, 250, 0.35);
   color: white;
 }
 
 .rounded-button:hover {
-  background-color: rgba(200,200,240,0.5);
+  background-color: rgba(200, 200, 240, 0.5);
 }
 
-/* sign in buttons */
+/* AUTH BUTTONS */
 .auth-buttons {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-self: end;
 }
 
 .auth-buttons .login-btn {
@@ -68,12 +63,12 @@ body
 }
 
 .auth-buttons .signup-btn {
-  background-color: #6f49ff;
+  background-color: #017d49;
   color: #fff;
 }
 
 .auth-buttons .signup-btn:hover {
-  background-color: #5c3ce0;
+  background-color: #019456;
 }
 
 html 
@@ -84,45 +79,40 @@ html
 .navbar 
 {
   width: 100%;
-  background-color: #f7f6fc; /* figma */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  background-color: #f7f6fc;
   padding: 10px 40px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 40px;
+  align-items: center;
 }
 
 /* LOGO */
-.navbar .logo 
-{
+.navbar .logo {
   display: flex;
   align-items: center;
+  justify-self: start;
 }
 
-/* chat helped with transform scale */
-.navbar .logo img 
-{
+.navbar .logo img {
   height: 40px;
-  transform: scale(2.5); 
+  transform: scale(2.5);
   transform-origin: center;
 }
 
 /* SEARCH BAR */
-.search-bar 
-{
-  /* can remove if wanna stick with og design */
-  padding-left: 100px; 
-  flex: 1;
+.search-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 40px;
   position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 350px; /* Adjust this to control search bar width */
 }
 
-.search-bar input 
-{
-  width: 400px;
-  max-width: 100%;
+.search-bar input {
+  width: 100%;
   padding: 10px 45px 10px 20px;
   border: 1px solid #ddd;
   border-radius: 20px;
@@ -131,14 +121,12 @@ html
   transition: all 0.2s ease-in-out;
 }
 
-.search-bar input:focus 
-{
+.search-bar input:focus {
   border-color: #8a73ff;
   box-shadow: 0 0 0 2px rgba(138, 115, 255, 0.2);
 }
 
-.search-bar .icon 
-{
+.search-bar .icon {
   position: absolute;
   right: 15px;
   font-size: 18px;
@@ -146,50 +134,69 @@ html
   cursor: pointer;
 }
 
-/* NAV LINKS */
-.nav-links 
-{
-  display: flex;
+/* NAV LINKS - GRID LAYOUT */
+.nav-links {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
   justify-content: center;
-  align-items: center;
   gap: 20px;
   background-color: #f7f6fc;
   padding: 10px 0;
 }
 
-.nav-links a 
-{
+.nav-links a {
   user-select: none;
   text-decoration: none;
   color: #333;
   font-size: 14px;
   padding: 6px 12px;
   border-radius: 6px;
-  display: block;
+  text-align: center;
   transition: background-color 0.2s ease-in-out;
 }
 
-.nav-links a:hover 
-{
-  background-color: #e8e7f3;
+.nav-links a:hover {
+  background-color: #d4f4e7;
 }
 
-.nav-links a.active 
-{
-  background-color: #ddd;
+.nav-links a.active {
+  background-color: #019456;
+  color: white;
   font-weight: 500;
 }
 
+/* RESPONSIVE DESIGN */
+@media (max-width: 900px) {
+  .navbar {
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+  }
 
-/* ====== RESPONSIVE DESIGN, chatted this ====== */
-@media (max-width: 900px) 
-{
-  .search-bar,
-  .nav-links 
-  {
+  .search-bar {
     display: none;
   }
-  .menu-icon {
-    display: block;
+
+  .nav-links {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 10px 20px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 15px;
+  }
+
+  .auth-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-links a {
+    width: 100%;
   }
 }
