@@ -68,12 +68,12 @@ body
 }
 
 .auth-buttons .signup-btn {
-  background-color: #6f49ff;
+  background-color: #017d49;
   color: #fff;
 }
 
 .auth-buttons .signup-btn:hover {
-  background-color: #5c3ce0;
+  background-color: #019456;
 }
 
 html 
