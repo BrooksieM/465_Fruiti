@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Uploaded images
+public/images/recipes/
+
+# Environment files
+.env
+
+# Logs and OS/system files
+*.log
+.DS_Store
+Thumbs.db
+
+# Optional: IDE/editor files
+.vscode/
+.idea/
