@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Recipes</title>
-  <link rel="stylesheet" href="../css/standardLayout.css"/>
-  <link rel="stylesheet" href="../css/RecipePage/recipe.css"/>
+  <meta charset="utf-8" />
+  <title>Recipes • Fruiti</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../css/standardLayout.css" />
+  <link rel="stylesheet" href="../css/RecipePage/recipe.css" />
 </head>
 <body>
-  <div class="navbar">
-    <div class="logo"><img src="../images/fruiti.png" alt="Fruiti"/></div>
-    <div class="search-bar"><input type="text" id="globalSearch" placeholder="Search Fruit"/></div>
+  <header class="navbar">
+    <div class="logo"><a href="/"><img src="../images/fruiti.png" alt="Fruiti" height="36" /></a></div>
+    <div class="search-bar"><input type="text" placeholder="Search Fruit" /></div>
     <div class="auth-buttons">
       <button class="login-btn" onclick="location.href='/login'">Log In</button>
       <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
     </div>
-  </div>
+  </header>
 
   <nav class="nav-links">
     <a href="/">Home</a>
@@ -27,20 +27,76 @@
 
   <div class="black-bar"></div>
 
-  <main class="page">
-    <div class="chips-row" id="chipsRow">
-      <button class="chip" data-chip="Apple Pie">
-        <span>Apple Pie</span>
-        <svg viewBox="0 0 24 24" class="x"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
+  <main class="recipe-page">
+    <div class="chips">
+      <span class="chip" id="chip-q">Apple Pie</span>
+      <button class="chip-clear" id="chip-clear" title="Clear">×</button>
     </div>
 
-    <h1 class="page-title">Apple Pie</h1>
+    <h1 class="title">Recipes</h1>
 
-    <section class="cards" id="cards"></section>
+    <!-- cards grid -->
+    <section class="grid" id="cards" aria-live="polite"></section>
+
+    <!-- create form -->
+    <section class="create" aria-labelledby="createTitle">
+      <h2 id="createTitle">Create Recipe</h2>
+      <div class="form-row">
+        <input id="rTitle" placeholder="Title" />
+        <select id="rDiff">
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
+        </select>
+      </div>
+      <input id="rSummary" placeholder="Short summary" />
+      <!-- paste URL OR upload file -->
+      <div class="form-row">
+        <input id="rCover" placeholder="Cover image URL (/images/...)" />
+        <input id="rCoverFile" type="file" accept="image/*" />
+      </div>
+      <div class="form-row">
+        <input id="rServ" placeholder="Servings" />
+        <input id="rMin" placeholder="Minutes" />
+      </div>
+      <textarea id="rIngr" placeholder="Ingredients (one per line)"></textarea>
+      <textarea id="rSteps" placeholder="Steps (one per line)"></textarea>
+      <button id="createBtn" class="btn-primary">Create</button>
+    </section>
+
+    <!-- detail drawer -->
+    <section class="drawer" id="drawer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+      <div class="drawer-inner">
+        <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
+        <h2 id="dTitle" class="drawer-title"></h2>
+        <img id="dCover" alt="" class="detail-img" hidden />
+        <p class="muted" id="dSummary"></p>
+        <div class="muted meta" id="dMeta"></div>
+        <div class="muted meta" id="dCounts"></div>
+
+        <h3>Ingredients</h3>
+        <ul id="dIngr"></ul>
+
+        <h3>Steps</h3>
+        <ol id="dSteps"></ol>
+
+        <div class="like-row">
+          <button id="likeBtn" class="btn-like">❤️ Like</button>
+          <button id="unlikeBtn" class="btn-outline">💔 Unlike</button>
+        </div>
+
+        <h3>Add Review</h3>
+        <div class="form-row">
+          <input id="revRating" placeholder="Rating 1-5" value="5" />
+          <input id="revBody" placeholder="Your review" />
+          <button id="revSend" class="btn-primary">Submit</button>
+        </div>
+
+        <div id="revList" class="reviews"></div>
+      </div>
+    </section>
   </main>
 
-  <!-- cache-busted once (bump num when you change recipe.js) -->
-  <script src="../js/recipe.js?v=3002"></script>
+  <script src="/js/recipe.js"></script>
 </body>
 </html>

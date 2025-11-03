@@ -6,6 +6,9 @@ app.use(express.json());
 const PORT = 3000;
 const path = require('path'); // Add this line
 app.use(express.static('public'));
+app.use('/recipes', require('./Services/recipesLocal'))
+const recipesLocal = require('./Services/recipesLocal');
+
 
 
 // Load environment variables from .env file
@@ -80,6 +83,9 @@ app.get('/', (req, res) =>
 {
   res.send('Welcome to the Fruiti API!');
 });
+
+app.use('/recipes', recipesLocal);
+
 
 
 app.listen(PORT, () => {
