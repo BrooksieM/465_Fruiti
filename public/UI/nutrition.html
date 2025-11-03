@@ -16,9 +16,10 @@
     <div class="search-bar">
       <input type="text" placeholder="Search Fruit"/>
     </div>
-    <div class="auth-buttons">
-      <button onclick="location.href='/login'" class="login-btn">Log In</button>
-      <button onclick="location.href='/signup'" class="signup-btn">Sign Up</button>
+    <div class="auth-buttons" id="authButtons">
+        <!-- Default state - show login/signup -->
+        <button class="login-btn" onclick="location.href='/login'">Log In</button>
+        <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
     </div>
   </div>
 
@@ -94,7 +95,7 @@
       </aside>
     </section>
   </main>
-
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
   <script src="../js/nutrition.js"></script>
 </body>
 </html>
