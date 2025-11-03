@@ -57,38 +57,20 @@
 </div>
 <div class="spacing"></div>
 
-    
+<script src="/scripts/gmaps/complete.js"></script>
+<!-- <script src="/scripts/gmaps/mapconfig.js"></script>
+<script src="/scripts/gmaps/maputils.js"></script>
+<script src="/scripts/gmaps/markermanage.js"></script>
+<script src="/scripts/gmaps/search.js"></script>
+<script src="/scripts/gmaps/initialization.js"></script> -->
 
 <script src="/scripts/randomizer.js"></script>
 
 <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbZkgPg-CPzz-Y1gK5i4RBjF5jh7bsL5o&callback=initMap"
-    async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbZkgPg-CPzz-Y1gK5i4RBjF5jh7bsL5o&loading=async&callback=initMap"
+      async defer
   ></script>
-  <script>
-    function initMap() {
-      // Example location: New York City
-      const myLocation = { lat: 40.7128, lng: -74.0060 };
-
-      // Create the map
-      const map = new google.maps.Map(document.getElementById("map"), {
-        center: myLocation,
-        zoom: 12,
-      });
-
-      // Add a marker
-      const marker = new google.maps.Marker({
-        position: myLocation,
-        map: map,
-        title: "Hello, NYC!",
-      });
-
-      // Optional: Add click listener to marker
-      marker.addListener("click", () => {
-        alert("Marker clicked!");
-      });
-    }
-  </script>
+ 
 </body>
 
 </html>
