@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const shuffled = result.data.sort(() => Math.random() - 0.5);
 
     // picking 4 random articles
-    const selected = shuffled.slice(0, 4);
+    const selected = shuffled.slice(0, 6);
 
-    const topRow = selected.slice(0, 2);
-    const bottomRow = selected.slice(2, 4);
+    const topRow = selected.slice(0, 3);
+    const bottomRow = selected.slice(3, 6);
 
     const makeCard = (article) => `
       <div class="card-container">
