@@ -16,10 +16,10 @@
   box-shadow:0 10px 24px rgba(17,24,39,.06)
 }
 .card h2{font-size:32px;margin:2px 0 10px}
+
 .media{border-radius:22px;border:2px solid #dedee6;overflow:hidden}
 .media img{width:100%;height:320px;object-fit:cover;display:block}
 
-/* stat pill under image (green and amber versions like prototype) */
 .stats{
   margin-top:12px;background:#d9f1d9;border:2px solid #97d29c;border-radius:28px;
   display:flex;align-items:center;justify-content:space-between;padding:10px 16px
