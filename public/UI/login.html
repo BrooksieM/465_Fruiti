@@ -63,83 +63,9 @@
       </div>
     </div>
   </div>
-
+<script src="/scripts/login.js"></script>
 <script>
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
-    const loginBtn = document.getElementById('loginBtn');
-    const btnText = loginBtn.querySelector('.btn-text');
-    const btnLoading = loginBtn.querySelector('.btn-loading');
-
-    errorMessage.style.display = 'none';
-    successMessage.style.display = 'none';
-
-    // validation
-    if (!username || !password) {
-        errorMessage.textContent = 'Please enter both username/email and password.';
-        errorMessage.style.display = 'block';
-        return;
-    }
-
-    // Show loading state
-    loginBtn.disabled = true;
-    btnText.style.display = 'none';
-    btnLoading.style.display = 'inline';
-
-    try {
-        console.log('Sending login request...');
-
-        // Use the login endpoint instead of fetching all accounts
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        console.log('Response status:', response.status);
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            successMessage.textContent = 'Logged in successfully! Redirecting...';
-            successMessage.style.display = 'block';
-
-            // Save user to localStorage
-            localStorage.setItem('user', JSON.stringify(data.user));
-            
-            // Update navigation immediately
-            if (typeof updateNavigationForLoggedInUser === 'function') {
-                updateNavigationForLoggedInUser(data.user);
-            }
-            
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
-        } else {
-            errorMessage.textContent = data.error || 'Login failed';
-            errorMessage.style.display = 'block';
-        }
-
-    } catch (error) {
-        console.error('Login error:', error);
-        errorMessage.textContent = 'Error: ' + error.message;
-        errorMessage.style.display = 'block';
-    } finally {
-        // Reset button state
-        loginBtn.disabled = false;
-        btnText.style.display = 'inline';
-        btnLoading.style.display = 'none';
-    }
-});
-
-// Optional: focus/blur UX for input fields
+//focus/blur UX for input fields
 document.querySelectorAll('.form-group input').forEach(input => {
     input.addEventListener('focus', function() {
         this.parentElement.classList.add('focused');
@@ -151,33 +77,6 @@ document.querySelectorAll('.form-group input').forEach(input => {
 
 console.log('Login page loaded successfully');
 
-// Update navigation based on login status
-function updateNavigationForLoggedInUser(user) {
-    const authButtons = document.querySelector('.auth-buttons');
-    
-    if (user) {
-        // User is logged in - replace buttons with settings button
-        authButtons.innerHTML = `
-            <div class="user-welcome">
-                <span class="welcome-text">Hi, ${user.username || user.handle}</span>
-                <button class="settings-btn" onclick="goToSettings()">
-                    ⚙️ Settings
-                </button>
-            </div>
-        `;
-    } else {
-        // User is not logged in - show login/signup buttons
-        authButtons.innerHTML = `
-            <button class="login-btn" onclick="location.href='/login'">Log In</button>
-            <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
-        `;
-    }
-}
-
-// Settings page navigation function
-function goToSettings() {
-    location.href='/settings';
-}
 
 // Check auth status when page loads
 function checkAuthStatus() {
