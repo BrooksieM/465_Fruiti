@@ -699,7 +699,7 @@ function hideDeleteConfirmation() {
     document.getElementById('deleteModal').style.display = 'none';
 }
 
-function deleteAccount() {
+async function deleteAccount() {
     const user = debugUserData();
     if (!user || !user.id) {
         showError('Please log in to delete your account');
@@ -710,12 +710,48 @@ function deleteAccount() {
     
     // In a real application, you would call your delete endpoint here
     // fetch(`/api/accounts/${user.id}`, { method: 'DELETE' })
-    
+    try {
+        const response = await fetch(`/api/accounts/${user.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to delete account');
+        }
+
+        console.log('✅ Account deleted successfully');
+        
+        // Clear local storage and redirect
+        localStorage.removeItem('user');
+        hideDeleteConfirmation();
+        
+        showSuccess('Account deleted successfully. Redirecting...');
+        
+        setTimeout(() => {
+            location.href = '/';
+        }, 2000);
+
+    } catch (error) {
+        console.error('❌ Account deletion error:', error);
+        showError('Error deleting account: ' + error.message);
+        
+        // Re-enable the button if there was an error
+        const deleteBtn = document.querySelector('.confirm-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Yes, Delete My Account';
+        }
+    }
     // For now, simulate deletion
     setTimeout(() => {
         localStorage.removeItem('user');
         hideDeleteConfirmation();
-        alert('Account deletion would be implemented here. Redirecting to home page...');
+        //alert('Account deletion would be implemented here. Redirecting to home page...');
         location.href = '/';
     }, 1000);
 }
