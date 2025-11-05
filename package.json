@@ -21,12 +21,17 @@
   "homepage": "https://github.com/BrooksieM/465_Fruiti#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.74.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
