@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us Page</title>
+<link rel="stylesheet" href="../css/standardLayout.css">
+<link rel="stylesheet" href="../css/AboutUsPage/aboutuspage.css">
+
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="../images/fruiti.png" alt="Placeholder for logo" />
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+
+<div class="auth-buttons" id="authButtons">
+    <!-- Default state - show login/signup -->
+    <button class="login-btn" onclick="location.href='/login'">Log In</button>
+    <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+</div>
+
+
+  </div>
+
+    <nav class="nav-links">
+      <a href="/" >Home</a>
+      <a href="become-seller.html">Become a Seller</a>
+      <a href="nutrition">Nutrition</a>
+      <a href="recipe.html">Recipes</a>
+      <a href="/aboutus " class="active">About Us</a>
+    </nav>
+
+  <div class="black-bar"></div>
+
+
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Welcome to Fruiti</h1>
+      <p>what should we put here?</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="content-container">
+    
+    <!-- Our Story -->
+    <section class="story-section">
+      <h2>Our Story</h2>
+      <p>
+        Founded in 2025, Fruiti was born from a simple idea: everyone deserves access to fresh, high-quality fruits without the hassle. We noticed that busy lifestyles often meant compromising on nutrition, and grocery shopping for fresh produce became a chore rather than a joy.
+      </p>
+      <p>
+        Our platform connects local fruit farmers and vendors directly with customers, ensuring that you get the freshest fruits while supporting local agriculture. We believe in transparency, quality, and building a community around healthy living.
+      </p>
+      <p>
+        Today, Fruiti serves thousands of happy customers across the region, delivering nature's goodness with a commitment to sustainability and excellence.
+      </p>
+    </section>
+
+    <!-- Mission & Vision -->
+    <div class="mission-vision">
+      <div class="card">
+        <span class="card-icon">🎯</span>
+        <h3>Our Mission</h3>
+        <p>
+          To make fresh, nutritious fruits accessible to everyone by creating a seamless connection between local farmers and customers, promoting healthy lifestyles and sustainable agriculture.
+        </p>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🌟</span>
+        <h3>Our Vision</h3>
+        <p>
+          To become the most trusted fruit marketplace, where quality meets convenience, and every purchase supports both personal health and local communities.
+        </p>
+      </div>
+    </div>
+
+    <!-- Team Section -->
+    <section class="team-section">
+      <h2>Meet Our Team</h2>
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="team-avatar">👨‍💼</div>
+          <h4>Michael</h4>
+          <p>Founder & CEO</p>
+          <span>Passionate about sustainable agriculture</span>
+        </div>
+        <div class="team-member">
+          <div class="team-avatar">👩‍💻</div>
+          <h4>Chen-Hsiu</h4>
+          <p>Head of Procrastinators</p>
+          <span>Lazy as fuck</span>
+        </div>
+        <div class="team-member">
+          <div class="team-avatar">👨‍🌾</div>
+          <h4>Muhammad</h4>
+          <p>Makes Good Coffee</p>
+          <span>Need Coffee? Contact Muhammad</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+      <h2>Get In Touch</h2>
+      <p>Have questions or feedback? We'd love to hear from you!</p>
+      
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" name="name" required placeholder="Enter your name">
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" required placeholder="What's this about?">
+        </div>
+        
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required placeholder="Tell us what's on your mind..."></textarea>
+        </div>
+        
+        <button type="submit" class="submit-btn">Send Message</button>
+      </form>
+    </section>
+
+  </div>
+
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
+  <script>
+    // Handle form submission
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        subject: document.getElementById('subject').value,
+        message: document.getElementById('message').value
+      };
+      
+      // Here you would typically send this to your server
+      console.log('Form submitted:', formData);
+      
+      // Show success message
+      alert('Thank you for contacting us! We\'ll get back to you soon.');
+      
+      // Reset form
+      this.reset();
+    });
+  </script>
+</body>
+</html>
