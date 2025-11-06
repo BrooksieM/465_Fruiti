@@ -123,12 +123,19 @@
         "rating": 4,
         "body": "",
         "createdAt": "2025-11-03T19:39:41.732Z"
+      },
+      {
+        "id": "127865c7-5e10-4134-bbfb-d072809504b3",
+        "userId": "18",
+        "rating": 5,
+        "body": "good",
+        "createdAt": "2025-11-06T16:18:25.039Z"
       }
     ],
     "likes": [],
     "authorId": null,
     "createdAt": "2025-11-03T19:36:58.714Z",
-    "updatedAt": "2025-11-03T19:39:41.733Z"
+    "updatedAt": "2025-11-06T16:18:25.039Z"
   },
   "17227f19-55b3-45ed-9783-44bf8d1e0a1d": {
     "id": "17227f19-55b3-45ed-9783-44bf8d1e0a1d",
