@@ -45,6 +45,32 @@ app.get('/aboutus', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/aboutus.html'));
 });
 
+app.get('/become-seller', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
+});
+
+// app.get('/seller-payment', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+// });
+
+app.get('/seller-payment', (req, res) => {
+  console.log('🎯 Seller payment route hit!');
+  console.log('📁 File path:', path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+  console.log('📦 Query params:', req.query);
+  
+  const filePath = path.join(__dirname, 'public/UI/payment/seller-payment.html');
+  
+  // Check if file exists
+  const fs = require('fs');
+  if (fs.existsSync(filePath)) {
+    console.log('✅ File exists!');
+    res.sendFile(filePath);
+  } else {
+    console.log('❌ File NOT found!');
+    res.status(404).send('File not found');
+  }
+});
+
 async function testConnection() {
   // Simple test - adjust based on your table structure
   const { data, error } = await supabase
