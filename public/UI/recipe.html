@@ -4,253 +4,238 @@
   <meta charset="utf-8" />
   <title>Recipes • Fruiti</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Keep your originals (if present) -->
   <link rel="stylesheet" href="../css/standardLayout.css" />
   <link rel="stylesheet" href="../css/RecipePage/recipe.css" />
-
-  <!-- Page-local styles to ensure pretty cards + matching nav/footer -->
-  <style>
-    :root{
-      --bg:#f6f7fb; --panel:#ffffff; --ink:#0f172a; --muted:#64748b;
-      --line:#e5e7ef; --line-strong:#d7d9e6;
-      --primary:#7c3aed; --primary-strong:#6b27df; --primary-ghost:#f3eaff;
-      --focus:#a78bfa;
-      --easy:#22c55e; --medium:#f59e0b; --hard:#ef4444;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    a{color:inherit;text-decoration:none}
-
-    /* Shell */
-    .container{max-width:1100px;margin:0 auto;padding:0 18px}
-
-    /* Topbar (matches rest pages: white panel, subtle shadow, rounded) */
-    .topbar{background:var(--panel); border-bottom:1px solid var(--line); box-shadow:0 2px 12px rgba(15,23,42,.05)}
-    .topbar .wrap{display:flex;align-items:center;gap:16px;height:64px}
-    .logo img{display:block;height:36px}
-    .search{flex:1;display:flex;justify-content:center}
-    .search input{
-      width:min(640px,100%); height:38px; border-radius:22px; border:1px solid var(--line);
-      padding:0 14px; outline:none; background:#fff;
-    }
-    .auth{display:flex;gap:10px}
-    .auth .login-btn{background:#eef2ff;border:1px solid #e0e7ff;color:#3730a3}
-    .auth .signup-btn{background:var(--primary);color:#fff;border:1px solid var(--primary)}
-    .auth button{
-      height:36px; padding:0 14px; border-radius:12px; cursor:pointer; outline:none;
-    }
-
-    /* Main nav under topbar */
-    .subnav{background:transparent;border-bottom:1px solid var(--line)}
-    .subnav .tabs{display:flex;gap:20px;height:44px;align-items:center}
-    .tabs a{color:var(--muted)}
-    .tabs a[aria-current="page"]{color:var(--ink); font-weight:600; position:relative}
-    .tabs a[aria-current="page"]::after{
-      content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--primary);
-    }
-
-    /* Headings */
-    .recipe-page h1{font-size:32px; line-height:1.2; margin:22px 0 14px}
-    .recipe-page h2{font-size:20px; margin:20px 0 12px}
-
-    /* Cards grid */
-    .cards{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap:16px;
-      align-items: stretch;
-      margin-bottom:22px;
-    }
-    .recipe-card{
-      position:relative;
-      display:flex; flex-direction:column;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:16px;
-      box-shadow:0 6px 14px rgba(15,23,42,.06);
-      overflow:hidden;
-      transition:transform .12s ease, box-shadow .12s ease;
-      cursor:pointer;
-      outline: none;
-    }
-    .recipe-card:focus{ box-shadow:0 0 0 3px rgba(124,58,237,.25) }
-    .recipe-card:hover{ transform: translateY(-2px); box-shadow:0 12px 20px rgba(15,23,42,.10); }
-
-    .recipe-img{ width:100%; height:160px; object-fit:cover; background:#eef1f7; display:block; }
-
-    .recipe-card h3{ font-size:18px; margin:12px 12px 4px; line-height:1.25; }
-    .recipe-summary{ color:var(--muted); margin:0 12px 10px; min-height:38px; }
-    .recipe-meta, .recipe-counts{ font-size:12px; color:var(--muted); margin:0 12px 8px; }
-
-    /* Difficulty bar + pill */
-    .diff-bar{
-      position:absolute; left:0; right:0; top:0; height:4px; background:#e5e7eb;
-    }
-    .diff-bar.easy{ background:linear-gradient(90deg,var(--easy),#86efac) }
-    .diff-bar.medium{ background:linear-gradient(90deg,var(--medium),#fde68a) }
-    .diff-bar.hard{ background:linear-gradient(90deg,var(--hard),#fecaca) }
-
-    .diff-pill{
-      position:absolute; top:8px; right:8px;
-      font-size:11px; letter-spacing:.2px;
-      padding:4px 8px; border-radius:999px; background:#fff;
-      border:1px solid var(--line-strong);
-      box-shadow:0 2px 6px rgba(15,23,42,.08);
-      font-weight:600;
-    }
-    .diff-pill.easy{ color:#065f46; border-color:#bbf7d0; background:#ecfdf5 }
-    .diff-pill.medium{ color:#7c2d12; border-color:#fde68a; background:#fffbeb }
-    .diff-pill.hard{ color:#7f1d1d; border-color:#fecaca; background:#fff1f2 }
-
-    /* Buttons */
-    .btn, .btn-primary, .btn-danger{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:8px 12px; border-radius:10px; border:1px solid var(--line);
-      background:#fff; color:var(--ink); cursor:pointer; user-select:none;
-    }
-    .btn-primary{ background:var(--primary); color:#fff; border-color:var(--primary) }
-    .btn-danger{ background:#fee2e2; color:#991b1b; border-color:#fecaca }
-
-    /* Create section */
-    .create-recipe{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:16px;
-      box-shadow:0 6px 14px rgba(15,23,42,.06);
-    }
-    .form-row{display:flex; gap:12px; margin-bottom:10px}
-    .form-row input, .form-row select, textarea, input{
-      width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
-      outline:none;
-    }
-    textarea{min-height:90px; resize:vertical}
-
-    /* Drawer */
-    .drawer{ position:fixed; inset:0; background:rgba(15,23,42,.35); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:40; }
-    .drawer[hidden]{ display:none }
-    .drawer-inner{
-      width:min(860px, 100%);
-      background:#fff; border-radius:18px; overflow:auto; max-height:85vh;
-      box-shadow:0 20px 30px rgba(15,23,42,.25);
-      padding:18px 18px 24px;
-    }
-    .drawer-close{ float:right; border:0; background:transparent; font-size:22px; cursor:pointer; }
-    .drawer-title{ font-size:22px; margin:0 0 8px }
-    .detail-img{ width:100%; height:260px; object-fit:cover; border-radius:12px }
-    .detail-summary{ color:var(--muted) }
-    .detail-meta, .detail-counts{ color:var(--muted); font-size:13px; margin:6px 0 10px }
-    .detail-list{ margin:10px 0 16px }
-    .actions{ display:flex; gap:10px; margin:8px 0 16px }
-    .reviews .rev{ font-size:13px; color:#111; background:#fafafa; border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin:6px 0 }
-
-    /* Footer (match top: white panel, border, subtle shadow) */
-    .footerbar{ background:var(--panel); border-top:1px solid var(--line); margin-top:28px; box-shadow:0 -2px 12px rgba(15,23,42,.04) }
-    .footerbar .row{ display:flex; align-items:center; justify-content:space-between; height:56px; gap:12px }
-    .foot-links{ display:flex; gap:18px; color:var(--muted) }
-    .foot-links a:hover{ color:var(--ink) }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Top -->
+  <!-- Top Navigation Bar -->
   <div class="topbar">
-    <div class="container wrap">
-      <div class="logo"><a href="/"><img src="../images/fruiti.png" alt="Fruiti" /></a></div>
-      <div class="search"><input type="text" placeholder="Search Fruit" /></div>
-      <div class="auth">
-        <button class="login-btn" onclick="location.href='/login'">Log In</button>
-        <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
-      </div>
+    <div class="logo"><a href="/"><img src="../images/fruiti.png" alt="Fruiti" /></a></div>
+    <div class="search-bar"><input type="text" placeholder="Search Recipes..." /></div>
+    <div class="auth-buttons">
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
     </div>
   </div>
-
-  <!-- Sub Navigation -->
-  <div class="subnav">
-    <div class="container">
-      <nav class="tabs">
-        <a href="/">Home</a>
-        <a href="/UI/nutrition.html">Nutrition</a>
-        <a aria-current="page" href="/UI/recipe.html">Recipes</a>
-        <a href="/UI/about-us.html">About Us</a>
-      </nav>
+  
+  <!-- Navigation Links -->
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/UI/nutrition.html">Nutrition</a>
+    <a class="active" href="/UI/recipe.html">Recipes</a>
+    <a href="/UI/about-us.html">About Us</a>
+  </nav>
+  
+  <div class="black-bar"></div>
+  
+  <!-- Main Content -->
+  <main class="recipe-page">
+    <div class="page-container">
+      
+      <!-- Left Sidebar - Filters -->
+      <aside class="filter-sidebar">
+        <div class="filter-header">
+          <h3>Filters</h3>
+          <button class="clear-filters" id="clearFilters">Clear All</button>
+        </div>
+        
+        <!-- Difficulty Filter -->
+        <div class="filter-section">
+          <h4>Difficulty</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="easy" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Easy</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="medium" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Medium</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="hard" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Hard</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Time Filter -->
+        <div class="filter-section">
+          <h4>Preparation Time</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="0-15" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Under 15 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="15-30" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">15-30 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="30-60" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">30-60 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="60+" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Over 60 min</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Season Filter -->
+        <div class="filter-section">
+          <h4>Season</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="spring" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Spring</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="summer" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Summer</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="fall" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Fall</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="winter" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Winter</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Main Content Area -->
+      <div class="content-area">
+        <!-- Header with Create Button -->
+        <div class="content-header">
+          <div>
+            <h1>Discover Delicious Recipes</h1>
+            <p class="subtitle">Explore our collection of fruit-based recipes for every occasion</p>
+          </div>
+          <button class="btn-create" id="openCreateModal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Recipe
+          </button>
+        </div>
+        
+        <!-- Recipe Grid -->
+        <div id="cards" class="recipe-grid"></div>
+      </div>
+      
     </div>
-  </div>
-
-  <!-- Page -->
-  <main class="container recipe-page">
-    <!-- Card grid -->
-    <section>
-      <h1>Recipes</h1>
-      <div id="cards" class="cards"></div>
-    </section>
-
-    <!-- Create Recipe -->
-    <section class="create-recipe">
-      <h2 id="createTitle">Create Recipe</h2>
-
-      <div class="form-row">
-        <input id="rTitle" placeholder="Title" />
-        <select id="rDiff">
-          <option>Easy</option>
-          <option>Medium</option>
-          <option>Hard</option>
-        </select>
-      </div>
-
-      <input id="rSummary" placeholder="Short summary" />
-
-      <div class="form-row">
-        <input id="rCover" placeholder="Cover image URL (/images/...)" />
-        <input id="rCoverFile" type="file" accept="image/*" />
-      </div>
-
-      <div class="form-row">
-        <input id="rServ" placeholder="Servings" />
-        <input id="rMin" placeholder="Minutes" />
-      </div>
-
-      <textarea id="rIngr" placeholder="Ingredients (one per line)"></textarea>
-      <textarea id="rSteps" placeholder="Steps (one per line)"></textarea>
-
-      <button id="createBtn" class="btn-primary">Create</button>
-    </section>
-
-    <!-- Detail Drawer -->
-    <section class="drawer" id="drawer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dTitle">
-      <div class="drawer-inner">
-        <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
-
-        <h2 id="dTitle" class="drawer-title"></h2>
-        <img id="dCover" alt="" class="detail-img" hidden />
-
-        <p id="dSummary" class="detail-summary"></p>
-        <div id="dMeta" class="detail-meta"></div>
-        <div id="dCounts" class="detail-counts"></div>
-
-        <h3>Ingredients</h3>
-        <ul id="dIngr" class="detail-list"></ul>
-
-        <h3>Steps</h3>
-        <ol id="dSteps" class="detail-list"></ol>
-
-        <div class="actions">
-          <button id="likeBtn" class="btn">Like</button>
-          <button id="unlikeBtn" class="btn">Unlike</button>
-          <!-- Delete is added by JS for the owner -->
-        </div>
-
-        <h3>Add a review</h3>
-        <div class="form-row">
-          <input id="revRating" placeholder="Rating 1-5" value="5" />
-          <input id="revBody" placeholder="Your review" />
-          <button id="revSend" class="btn-primary">Submit</button>
-        </div>
-
-        <div id="revList" class="reviews"></div>
-      </div>
-    </section>
   </main>
-
+  
+  <!-- Create Recipe Modal -->
+  <div class="modal-overlay" id="createModal" hidden>
+    <div class="modal-content create-modal">
+      <div class="modal-header">
+        <h2>Create New Recipe</h2>
+        <button class="modal-close" id="closeCreateModal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="createForm">
+          <div class="form-group">
+            <label for="rTitle">Recipe Title</label>
+            <input id="rTitle" type="text" placeholder="Enter recipe title" required />
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rDiff">Difficulty</label>
+              <select id="rDiff" required>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rServ">Servings</label>
+              <input id="rServ" type="number" placeholder="4" required />
+            </div>
+            <div class="form-group">
+              <label for="rMin">Time (minutes)</label>
+              <input id="rMin" type="number" placeholder="30" required />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rSummary">Short Summary</label>
+            <textarea id="rSummary" rows="2" placeholder="Brief description of your recipe" required></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rCover">Cover Image URL</label>
+              <input id="rCover" type="text" placeholder="/images/..." />
+            </div>
+            <div class="form-group">
+              <label for="rCoverFile">Or Upload Image</label>
+              <input id="rCoverFile" type="file" accept="image/*" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rIngr">Ingredients</label>
+            <textarea id="rIngr" rows="4" placeholder="Enter ingredients (one per line)" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="rSteps">Instructions</label>
+            <textarea id="rSteps" rows="5" placeholder="Enter steps (one per line)" required></textarea>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" id="cancelCreate">Cancel</button>
+            <button type="submit" class="btn-submit" id="createBtn">Create Recipe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recipe Detail Drawer -->
+  <section class="drawer" id="drawer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="drawer-inner">
+      <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
+      <h2 id="dTitle" class="drawer-title"></h2>
+      <img id="dCover" alt="" class="detail-img" hidden />
+      <p id="dSummary" class="detail-summary"></p>
+      <div id="dMeta" class="detail-meta"></div>
+      <div id="dCounts" class="detail-counts"></div>
+      <h3>Ingredients</h3>
+      <ul id="dIngr" class="detail-list"></ul>
+      <h3>Steps</h3>
+      <ol id="dSteps" class="detail-list"></ol>
+      <div class="actions">
+        <button id="likeBtn" class="btn">Like</button>
+        <button id="unlikeBtn" class="btn">Unlike</button>
+      </div>
+      <h3>Add a review</h3>
+      <div class="form-row">
+        <input id="revRating" placeholder="Rating 1-5" value="5" />
+        <input id="revBody" placeholder="Your review" />
+        <button id="revSend" class="btn-primary">Submit</button>
+      </div>
+      <div id="revList" class="reviews"></div>
+    </div>
+  </section>
+  
   <!-- Footer -->
   <footer class="footerbar">
     <div class="container row">
@@ -263,55 +248,91 @@
       <div style="color:var(--muted)">© Fruiti</div>
     </div>
   </footer>
-
-  <!-- Your app script, then the auth addon -->
+  
+  <!-- Scripts -->
   <script src="/js/recipe.js"></script>
   <script src="/js/recipe-auth-addon.js"></script>
-
-  <!-- Decorate cards with difficulty (uses existing data; no app logic changes) -->
+  
+  <!-- Modal Controls -->
   <script>
-    // After your recipe.js renders, fetch list and add difficulty bar + pill to each card by title match.
+    // Modal controls
+    const createModal = document.getElementById('createModal');
+    const openCreateBtn = document.getElementById('openCreateModal');
+    const closeCreateBtn = document.getElementById('closeCreateModal');
+    const cancelCreateBtn = document.getElementById('cancelCreate');
+    
+    openCreateBtn.addEventListener('click', () => {
+      createModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    });
+    
+    function closeModal() {
+      createModal.hidden = true;
+      document.body.style.overflow = '';
+    }
+    
+    closeCreateBtn.addEventListener('click', closeModal);
+    cancelCreateBtn.addEventListener('click', closeModal);
+    
+    createModal.addEventListener('click', (e) => {
+      if (e.target === createModal) closeModal();
+    });
+    
+    // Filter controls
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    clearFiltersBtn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      // Trigger filter update if you have filtering logic
+    });
+    
+    // Check login status for create button
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user && openCreateBtn) {
+          openCreateBtn.style.display = 'none';
+        }
+      } catch {}
+    });
+  </script>
+  
+  <!-- Difficulty decoration script -->
+  <script>
     (async function attachDifficulty(){
-      try{
+      try {
         const res = await fetch('/recipes');
         if(!res.ok) return;
         const items = await res.json();
         const byTitle = new Map(items.map(x => [String(x.title||'').trim().toLowerCase(), String(x.difficulty||'Easy')]));
-
         const toClass = (d) => {
           const s = (d||'').toLowerCase();
           if (s==='hard') return 'hard';
           if (s==='medium') return 'medium';
           return 'easy';
         };
-
-        // run once now, and again after brief delay in case render is async
+        
         function decorate() {
           document.querySelectorAll('.recipe-card').forEach(card=>{
             if (card.__diffDecorated) return;
             const titleEl = card.querySelector('h3');
             if (!titleEl) return;
             const key = titleEl.textContent.trim().toLowerCase();
-            const diff = toClass(byTitle.get(key));
-
-            // colored top bar
-            const bar = document.createElement('div');
-            bar.className = 'diff-bar ' + diff;
-            card.prepend(bar);
-
-            // pill
+            const diffClass = toClass(byTitle.get(key));
+            card.classList.add(diffClass);
             const pill = document.createElement('span');
-            pill.className = 'diff-pill ' + diff;
-            const label = diff.charAt(0).toUpperCase()+diff.slice(1);
+            pill.className = 'diff-pill ' + diffClass;
+            const label = diffClass.charAt(0).toUpperCase()+diffClass.slice(1);
             pill.textContent = label;
             card.appendChild(pill);
-
             card.__diffDecorated = true;
           });
         }
+        
         decorate();
         setTimeout(decorate, 250);
-        // Optional: decorate again after refresh() if your app exposes it
+        
         const _refresh = window.refresh;
         if (typeof _refresh === 'function') {
           window.refresh = async function(){
@@ -320,19 +341,8 @@
             return r;
           }
         }
-      }catch(e){}
+      } catch(e) {}
     })();
-  </script>
-
-  <!-- (optional) Hide create for guests; logic-only -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const sec = document.querySelector('.create-recipe');
-      try {
-        const u = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!u && sec) { sec.style.display = 'none'; }
-      } catch {}
-    });
   </script>
 </body>
 </html>
