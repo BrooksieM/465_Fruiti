@@ -45,6 +45,11 @@ app.get('/aboutus', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/aboutus.html'));
 });
 
+app.get('/become-seller', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
+});
+
+
 async function testConnection() {
   // Simple test - adjust based on your table structure
   const { data, error } = await supabase

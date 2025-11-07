@@ -1,0 +1,317 @@
+.seller-hero {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-hero::before {
+  content: '🍎🍊🍇🍓🍌';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  font-size: 60px;
+  opacity: 0.1;
+  letter-spacing: 40px;
+}
+
+.seller-hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.seller-hero p {
+  font-size: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  opacity: 0.95;
+}
+
+/* Benefits Section */
+.benefits-section {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.benefit-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.benefit-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(1, 125, 73, 0.2);
+  border-color: #019456;
+}
+
+.benefit-icon {
+  font-size: 56px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.benefit-card h3 {
+  color: #017d49;
+  font-size: 22px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.benefit-card p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Pricing Section */
+.pricing-section {
+  background: linear-gradient(135deg, #f7f6fc 0%, #e8f5f0 100%);
+  padding: 80px 20px;
+  position: relative;
+}
+
+.pricing-section h2 {
+  text-align: center;
+  font-size: 42px;
+  color: #017d49;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.pricing-subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 50px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.price-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  border: 3px solid transparent;
+}
+
+.price-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(1, 125, 73, 0.25);
+}
+
+.price-card.featured {
+  border-color: #017d49;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.price-card.featured::before {
+  content: 'BEST VALUE';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #017d49, #019456);
+  color: white;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(1, 125, 73, 0.3);
+}
+
+.plan-name {
+  font-size: 28px;
+  color: #017d49;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.plan-price {
+  font-size: 56px;
+  color: #333;
+  font-weight: 800;
+  margin: 20px 0;
+}
+
+.plan-price span {
+  font-size: 24px;
+  color: #666;
+  font-weight: 500;
+}
+
+.price-period {
+  color: #888;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.savings-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(146, 64, 14, 0.2);
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0;
+  text-align: left;
+}
+
+.plan-features li {
+  padding: 12px 0;
+  color: #555;
+  font-size: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plan-features li::before {
+  content: '✓';
+  color: #019456;
+  font-weight: bold;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.plan-features li:last-child {
+  border-bottom: none;
+}
+
+.select-plan-btn {
+  background: linear-gradient(135deg, #017d49, #019456);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(1, 125, 73, 0.3);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.select-plan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(1, 125, 73, 0.4);
+  background: linear-gradient(135deg, #019456, #01a662);
+}
+
+.select-plan-btn:active {
+  transform: translateY(0);
+}
+
+/* CTA Section */
+.cta-section {
+  max-width: 900px;
+  margin: 80px auto;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  border-radius: 24px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 10px 40px rgba(1, 125, 73, 0.3);
+}
+
+.cta-section h2 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.cta-section p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  opacity: 0.95;
+}
+
+.cta-button {
+  background: white;
+  color: #017d49;
+  border: none;
+  padding: 16px 50px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .seller-hero h1 {
+    font-size: 36px;
+  }
+
+  .seller-hero p {
+    font-size: 16px;
+  }
+
+  .pricing-section h2 {
+    font-size: 32px;
+  }
+
+  .plan-price {
+    font-size: 48px;
+  }
+
+  .pricing-cards {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+
+  .cta-section {
+    padding: 40px 20px;
+  }
+
+  .cta-section h2 {
+    font-size: 28px;
+  }
+}
