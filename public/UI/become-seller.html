@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="../css/standardLayout.css">
 <link rel="stylesheet" href="../css/footer/footer.css">
 <link rel="stylesheet" href="../css/become-a-seller/become-a-seller-page1.css">
+<link rel="stylesheet" href="../css/become-a-seller/payment.css">
 
 </head>
 
@@ -102,7 +103,7 @@
           <li>Basic analytics dashboard</li>
           <li>Email support</li>
         </ul>
-        <button class="select-plan-btn">Get Started</button>
+        <button class="select-plan-btn" onclick="location.href='seller-payment.html?plan=monthly'">Get Started</button>
       </div>
 
       <!-- 3-Month Plan (Featured) -->
@@ -119,7 +120,7 @@
           <li>Photo gallery (up to 10 photos)</li>
           <li>Social media integration</li>
         </ul>
-        <button class="select-plan-btn">Best Value!</button>
+        <button class="select-plan-btn" onclick="location.href='/seller-payment?plan=3month'">Best Value!</button>
       </div>
 
       <!-- 6-Month Plan -->
@@ -137,18 +138,21 @@
           <li>Dedicated account manager</li>
           <li>Promotional campaigns</li>
         </ul>
-        <button class="select-plan-btn">Maximum Savings</button>
+        <button class="select-plan-btn" onclick="location.href='seller-payment.html?plan=6month'">Maximum Savings</button>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="cta-section">
+  <!-- <section class="cta-section">
     <h2>Ready to Grow Your Business? 🚀</h2>
     <p>Join Fruiti today and start connecting with customers who love fresh, local produce!</p>
     <button class="cta-button" onclick="location.href='/signup'">Start Your Free Trial</button>
-  </section>
+  </section> -->
 
 <div id="footer-placeholder"></div>
 <script src="../scripts/footer.js"></script>
+
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
+</html>
