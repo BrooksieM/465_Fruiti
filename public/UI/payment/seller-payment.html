@@ -76,15 +76,82 @@
           <textarea id="standDescription" name="standDescription" rows="3" placeholder="Tell customers about your stand..."></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required>
+        </div>
+
+        <div class="form-group">
+          <label for="standAddress">Stand Address *</label>
+          <input type="text" id="standAddress" name="standAddress" placeholder="Street address" required>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label for="phone">Phone Number *</label>
-            <input type="tel" id="phone" name="phone" required>
+            <label for="city">City *</label>
+            <input type="text" id="city" name="city" required>
           </div>
           <div class="form-group">
-            <label for="standLocation">Stand Location *</label>
-            <input type="text" id="standLocation" name="standLocation" placeholder="City, State" required>
+            <label for="state">State *</label>
+            <select id="state" name="state" required>
+              <option value="">Select a state</option>
+              <option value="Alabama">Alabama</option>
+              <option value="Alaska">Alaska</option>
+              <option value="Arizona">Arizona</option>
+              <option value="Arkansas">Arkansas</option>
+              <option value="California">California</option>
+              <option value="Colorado">Colorado</option>
+              <option value="Connecticut">Connecticut</option>
+              <option value="Delaware">Delaware</option>
+              <option value="Florida">Florida</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Hawaii">Hawaii</option>
+              <option value="Idaho">Idaho</option>
+              <option value="Illinois">Illinois</option>
+              <option value="Indiana">Indiana</option>
+              <option value="Iowa">Iowa</option>
+              <option value="Kansas">Kansas</option>
+              <option value="Kentucky">Kentucky</option>
+              <option value="Louisiana">Louisiana</option>
+              <option value="Maine">Maine</option>
+              <option value="Maryland">Maryland</option>
+              <option value="Massachusetts">Massachusetts</option>
+              <option value="Michigan">Michigan</option>
+              <option value="Minnesota">Minnesota</option>
+              <option value="Mississippi">Mississippi</option>
+              <option value="Missouri">Missouri</option>
+              <option value="Montana">Montana</option>
+              <option value="Nebraska">Nebraska</option>
+              <option value="Nevada">Nevada</option>
+              <option value="New Hampshire">New Hampshire</option>
+              <option value="New Jersey">New Jersey</option>
+              <option value="New Mexico">New Mexico</option>
+              <option value="New York">New York</option>
+              <option value="North Carolina">North Carolina</option>
+              <option value="North Dakota">North Dakota</option>
+              <option value="Ohio">Ohio</option>
+              <option value="Oklahoma">Oklahoma</option>
+              <option value="Oregon">Oregon</option>
+              <option value="Pennsylvania">Pennsylvania</option>
+              <option value="Rhode Island">Rhode Island</option>
+              <option value="South Carolina">South Carolina</option>
+              <option value="South Dakota">South Dakota</option>
+              <option value="Tennessee">Tennessee</option>
+              <option value="Texas">Texas</option>
+              <option value="Utah">Utah</option>
+              <option value="Vermont">Vermont</option>
+              <option value="Virginia">Virginia</option>
+              <option value="Washington">Washington</option>
+              <option value="West Virginia">West Virginia</option>
+              <option value="Wisconsin">Wisconsin</option>
+              <option value="Wyoming">Wyoming</option>
+            </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="zipcode">ZIP Code *</label>
+          <input type="text" id="zipcode" name="zipcode" placeholder="12345" maxlength="5" required>
         </div>
 
         <!-- Payment Information -->
@@ -304,6 +371,11 @@
       e.target.value = value;
     });
 
+    // ZIP code formatting (numbers only)
+    document.getElementById('zipcode').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+
     // Form submission
     document.getElementById('paymentForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -317,6 +389,20 @@
           alert('Passwords do not match!');
           return;
         }
+      }
+
+      // Validate state is selected
+      const state = document.getElementById('state').value;
+      if (!state) {
+        alert('Please select a state');
+        return;
+      }
+
+      // Validate ZIP code
+      const zipcode = document.getElementById('zipcode').value;
+      if (zipcode.length !== 5) {
+        alert('Please enter a valid 5-digit ZIP code');
+        return;
       }
 
       // Here you would process the payment and create the seller account
