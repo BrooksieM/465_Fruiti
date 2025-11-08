@@ -12,6 +12,9 @@ app.use(express.static('public'));
 // Load environment variables from .env file
 require('dotenv').config();
 
+// Load Google Maps API key from gmaps_api/.env
+require('dotenv').config({ path: './gmaps_api/.env' });
+
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client using environment variables
@@ -47,6 +50,11 @@ app.get('/aboutus', (req, res) => {
 
 app.get('/become-seller', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
+});
+
+// API endpoint to serve Google Maps API key
+app.get('/api/gmaps-key', (req, res) => {
+  res.json({ apiKey: process.env.GMAPS_API_KEY });
 });
 
 // app.get('/seller-payment', (req, res) => {
