@@ -66,11 +66,20 @@
 
 <script src="/scripts/randomizer.js"></script>
 
-<script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbZkgPg-CPzz-Y1gK5i4RBjF5jh7bsL5o&loading=async&callback=initMap"
-      async defer
-  ></script>
- 
+<script>
+  // Fetch Google Maps API key from server and load the Maps script
+  fetch('/api/gmaps-key')
+    .then(response => response.json())
+    .then(data => {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&loading=async&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    })
+    .catch(error => console.error('Error loading Google Maps API key:', error));
+</script>
+
 <script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
 
