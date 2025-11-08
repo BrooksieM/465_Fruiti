@@ -7,6 +7,7 @@
 <title>Home Page</title>
 <link rel="stylesheet" href="../css/standardLayout.css">
 <link rel="stylesheet" href="../css/HomePage/homepage.css">
+<link rel="stylesheet" href="../css/footer/footer.css">
 
 </head>
 
@@ -32,10 +33,10 @@
 
     <nav class="nav-links">
       <a href="/" class="active">Home</a>
-      <a href="become-seller.html">Become a Seller</a>
+      <a href="/become-seller">Become a Seller</a>
       <a href="nutrition">Nutrition</a>
       <a href="recipe.html">Recipes</a>
-      <a href="about-us.html">About Us</a>
+      <a href="/aboutus">About Us</a>
     </nav>
 
   <div class="black-bar"></div>
@@ -58,15 +59,27 @@
 </div>
 <div class="spacing"></div>
 
+<div id="footer-placeholder"></div>
+<script src="../scripts/footer.js"></script>
+
 <script src="/scripts/gmaps/complete.js"></script>
 
 <script src="/scripts/randomizer.js"></script>
 
-<script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbZkgPg-CPzz-Y1gK5i4RBjF5jh7bsL5o&loading=async&callback=initMap"
-      async defer
-  ></script>
- 
+<script>
+  // Fetch Google Maps API key from server and load the Maps script
+  fetch('/api/gmaps-key')
+    .then(response => response.json())
+    .then(data => {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&loading=async&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    })
+    .catch(error => console.error('Error loading Google Maps API key:', error));
+</script>
+
 <script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
 

@@ -12,6 +12,9 @@ app.use(express.static('public'));
 // Load environment variables from .env file
 require('dotenv').config();
 
+// Load Google Maps API key from gmaps_api/.env
+require('dotenv').config({ path: './gmaps_api/.env' });
+
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client using environment variables
@@ -36,11 +39,45 @@ app.get('/login', (req, res) => {
 app.get('/settings', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/settingspage.html'));
 });
+
 app.get('/nutrition', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/nutrition.html'));
 });
 
+app.get('/aboutus', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/aboutus.html'));
+});
 
+app.get('/become-seller', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
+});
+
+// API endpoint to serve Google Maps API key
+app.get('/api/gmaps-key', (req, res) => {
+  res.json({ apiKey: process.env.GMAPS_API_KEY });
+});
+
+// app.get('/seller-payment', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+// });
+
+app.get('/seller-payment', (req, res) => {
+  console.log('🎯 Seller payment route hit!');
+  console.log('📁 File path:', path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+  console.log('📦 Query params:', req.query);
+  
+  const filePath = path.join(__dirname, 'public/UI/payment/seller-payment.html');
+  
+  // Check if file exists
+  const fs = require('fs');
+  if (fs.existsSync(filePath)) {
+    console.log('✅ File exists!');
+    res.sendFile(filePath);
+  } else {
+    console.log('❌ File NOT found!');
+    res.status(404).send('File not found');
+  }
+});
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
