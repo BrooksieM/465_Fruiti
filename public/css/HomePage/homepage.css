@@ -5,7 +5,7 @@
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   margin: 25px auto 0; /* Changed from margin-left to auto margins */
   width: fit-content;
   height: auto;
@@ -35,6 +35,7 @@
 .homepage-images img 
 {
   width: 250px;
+  max-width: 100%;
   height: 225px;
   object-fit: cover;
   border-radius: 8px;
@@ -54,6 +55,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .card-container p 
@@ -111,6 +113,7 @@
   box-shadow: 0 4px 12px rgba(1, 125, 73, 0.2);
   padding: 25px;
   text-align: center;
+  overflow: hidden
 }
 
 /* Reuse your section heading style */
