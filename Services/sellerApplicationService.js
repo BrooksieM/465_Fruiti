@@ -269,12 +269,44 @@ module.exports = function (app, supabase)
   });
 
   // GET /api/seller_application -> view seller application page (placeholder)
-  app.get('/api/seller_application', (req, res) => 
+  app.get('/api/seller_application', (req, res) =>
   {
-    res.json({ 
+    res.json({
       message: 'This is the seller application page',
       instructions: 'Use POST /api/seller_applications to submit an application'
     });
+  });
+
+  // GET /api/approved-sellers -> fetch all approved sellers with location data for map display
+  app.get('/api/approved-sellers', async (req, res) =>
+  {
+    try
+    {
+      const { data, error } = await supabase
+        .from('seller_applications')
+        .select('id, business_name, description, phone_number, address, city, state, zipcode, user_id')
+        .eq('status', 'approved')
+        .not('address', 'is', null)
+        .not('city', 'is', null)
+        .not('state', 'is', null)
+        .not('zipcode', 'is', null);
+
+      if (error)
+      {
+        console.error('Sellers query error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.json({
+        count: data.length,
+        sellers: data
+      });
+    }
+    catch (error)
+    {
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   // ========== PAYMENT INFORMATION ==========
