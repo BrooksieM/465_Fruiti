@@ -40,6 +40,19 @@
 
   <div class="black-bar"></div>
 
+      <!-- Success Modal -->
+  <div class="success-modal" id="successModal">
+    <div class="success-modal-content">
+      <div class="success-icon">
+        <svg viewBox="0 0 52 52">
+          <path class="checkmark" d="M14 27l8 8 16-16"/>
+        </svg>
+      </div>
+      <h3>Message Sent!</h3>
+      <p>Thank you for contacting us! We've received your message and will get back to you as soon as possible.</p>
+      <button class="modal-close-btn" onclick="closeSuccessModal()">Got it!</button>
+    </div>
+  </div>
 
   <script src="/scripts/navigationForLoggedInUser.js"></script>
 
@@ -146,6 +159,26 @@
 
   <script src="/scripts/navigationForLoggedInUser.js"></script>
   <script>
+    function showSuccessModal() {
+      const modal = document.getElementById('successModal');
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    function closeSuccessModal() {
+      const modal = document.getElementById('successModal');
+      modal.classList.remove('show');
+      document.body.style.overflow = ''; // Restore scrolling
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('successModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSuccessModal();
+      }
+    });
+
     // Handle form submission with Web3Forms
     document.getElementById('contactForm').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -168,19 +201,11 @@
         const data = await response.json();
         
         if (data.success) {
-          // Show success message
-          alert('Thank you for contacting us! We\'ll get back to you soon.');
+          // Show beautiful success modal instead of alert
+          showSuccessModal();
           
           // Reset form
           this.reset();
-          
-          // Optional: Redirect after 2 seconds
-          // setTimeout(() => {
-          //   window.location.href = '/aboutus'; // or '/' for homepage
-          // }, 2000);
-          
-          // Optional: Scroll to top of page
-          window.scrollTo({ top: 0, behavior: 'smooth' });
           
         } else {
           alert('Error: ' + (data.message || 'Failed to send message'));
