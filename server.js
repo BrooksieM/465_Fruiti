@@ -5,7 +5,7 @@ const app = express();
 const bcrypt = require('bcrypt');
 app.use(express.json());
 const PORT = 3000;
-const path = require('path'); // Add this line
+const path = require('path');
 app.use(express.static('public'));
 
 
@@ -23,61 +23,55 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+const pageRoutes = require('./routes/pages');
+const apiRoutes = require('./routes/api');
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/homepage.html'));
-});
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/signup.html'));
-});
+app.use('/', pageRoutes);
+app.use('/api', apiRoutes);
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/homepage.html'));
+// });
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/login.html'));
-});
+// app.get('/signup', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/signup.html'));
+// });
 
-app.get('/settings', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/settingspage.html'));
-});
+// app.get('/login', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/login.html'));
+// });
 
-app.get('/nutrition', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/nutrition.html'));
-});
+// app.get('/settings', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/settingspage.html'));
+// });
 
-app.get('/aboutus', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/aboutus.html'));
-});
+// app.get('/nutrition', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/nutrition.html'));
+// });
 
-app.get('/become-seller', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
-});
+// app.get('/aboutus', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/aboutus.html'));
+// });
 
-// API endpoint to serve Google Maps API key
-app.get('/api/gmaps-key', (req, res) => {
-  res.json({ apiKey: process.env.GMAPS_API_KEY });
-});
+// app.get('/become-seller', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/UI/become-seller.html'));
+// });
+
+// // API endpoint to serve Google Maps API key
+// app.get('/api/gmaps-key', (req, res) => {
+//   res.json({ apiKey: process.env.GMAPS_API_KEY });
+// });
+
+// // app.get('/seller-payment', (req, res) => {
+// //   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+// // });
 
 // app.get('/seller-payment', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+  
 // });
-
-app.get('/seller-payment', (req, res) => {
-  console.log('🎯 Seller payment route hit!');
-  console.log('📁 File path:', path.join(__dirname, 'public/UI/payment/seller-payment.html'));
-  console.log('📦 Query params:', req.query);
-  
-  const filePath = path.join(__dirname, 'public/UI/payment/seller-payment.html');
-  
-  // Check if file exists
-  const fs = require('fs');
-  if (fs.existsSync(filePath)) {
-    console.log('✅ File exists!');
-    res.sendFile(filePath);
-  } else {
-    console.log('❌ File NOT found!');
-    res.status(404).send('File not found');
-  }
-});
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
