@@ -412,14 +412,18 @@ document.getElementById('profileForm').addEventListener('submit', async function
     hideMessages();
 
     try {
-        // Check if there's a new avatar file to upload
         const avatarFile = document.getElementById('avatarUpload').files[0];
-        let avatarUrl = document.getElementById('avatarPreview').src;
+        const avatarUrl = document.getElementById('avatarPreview').src;
 
-        // If there's a new file, upload it first
+        // If there's a new file, upload it first to get the new URL
         if (avatarFile) {
             console.log('📤 Uploading new avatar...');
-            avatarUrl = await uploadAvatar(avatarFile);
+            const newAvatarUrl = await uploadAvatar(avatarFile);
+            // Use the new URL from the upload
+            var finalAvatarUrl = newAvatarUrl;
+        } else {
+            // Use the current preview URL (could be default or existing)
+            var finalAvatarUrl = avatarUrl;
         }
 
         const formData = {
@@ -427,7 +431,7 @@ document.getElementById('profileForm').addEventListener('submit', async function
             email: document.getElementById('email').value.trim(),
             displayName: document.getElementById('displayName').value.trim(),
             bio: document.getElementById('bio').value.trim(),
-            avatar: avatarUrl // Include the avatar URL (could be new or existing)
+            avatar: finalAvatarUrl // This will be either the new uploaded URL or the default URL
         };
 
         // Basic validation
@@ -445,7 +449,6 @@ document.getElementById('profileForm').addEventListener('submit', async function
         const mergedUser = { 
             ...currentUser, 
             ...updatedUser,
-            // Include fields that might not be returned by the API
             handle: formData.handle,
             email: formData.email,
             displayName: formData.displayName,
@@ -475,7 +478,6 @@ document.getElementById('profileForm').addEventListener('submit', async function
         btnLoading.style.display = 'none';
     }
 });
-
 // Security form submission with password update
 document.getElementById('securityForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -725,44 +727,6 @@ async function uploadAvatar(file) {
         console.error('Avatar upload error:', error);
         showError('Error uploading avatar: ' + error.message);
         throw error;
-    }
-}
-
-async function removeAvatar() {
-    const user = debugUserData();
-    if (!user || !user.id) {
-        showError('Please log in to remove avatar');
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/upload/avatar?userId=${user.id}`, {
-            method: 'DELETE'
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || 'Failed to remove avatar');
-        }
-
-        // Update localStorage
-        const currentUser = JSON.parse(localStorage.getItem('user'));
-        currentUser.avatar = result.avatarUrl;
-        localStorage.setItem('user', JSON.stringify(currentUser));
-        
-        // Update navigation if needed
-        if (typeof updateNavigationForLoggedInUser === 'function') {
-            updateNavigationForLoggedInUser(currentUser);
-        }
-
-        // Update preview
-        document.getElementById('avatarPreview').src = result.avatarUrl;
-        showSuccess('Avatar removed successfully!');
-
-    } catch (error) {
-        console.error('Avatar removal error:', error);
-        showError('Error removing avatar: ' + error.message);
     }
 }
 

@@ -98,85 +98,6 @@ module.exports = function (app, supabase)
     }
   });
 
- // Delete avatar endpoint
-app.delete('/api/upload/avatar', async (req, res) => {
-    console.log('🗑️ DELETE /api/upload/avatar called');
-    console.log('📝 Query params:', req.query);
-    console.log('📝 Body:', req.body);
-    
-    try {
-        const userId = req.body.userId || req.query.userId;
-        
-        console.log('👤 User ID:', userId);
-        
-        if (!userId) {
-            console.log('❌ No user ID provided');
-            return res.status(400).json({ error: 'User ID is required' });
-        }
-
-        // Get user's current avatar
-        console.log('🔍 Getting user data from database...');
-        const { data: user, error: userError } = await supabase
-            .from('accounts')
-            .select('avatar')
-            .eq('id', userId)
-            .single();
-
-        if (userError) {
-            console.log('❌ User not found error:', userError);
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        console.log('📸 Current avatar:', user.avatar);
-
-        // Delete the avatar file from filesystem if it's not the default
-        if (user.avatar && user.avatar !== '/images/default-avatar.png') {
-            const filename = path.basename(user.avatar);
-            const filePath = path.join('public/uploads/avatars', filename);
-            
-            console.log('🗑️ Attempting to delete file:', filePath);
-            
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-                console.log('✅ File deleted successfully');
-            } else {
-                console.log('⚠️ File not found, skipping deletion');
-            }
-        } else {
-            console.log('ℹ️ Using default avatar, no file to delete');
-        }
-
-        // Update user in database to set default avatar
-        console.log('💾 Updating database...');
-        const { data, error } = await supabase
-            .from('accounts')
-            .update({ 
-                avatar: '/images/default-avatar.png',
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', userId)
-            .select('id, handle, email, avatar, displayName, bio');
-
-        if (error) {
-            console.log('❌ Database update error:', error);
-            return res.status(500).json({ error: 'Failed to remove avatar from database' });
-        }
-
-        console.log('✅ Database updated successfully');
-
-        res.json({
-            success: true,
-            avatarUrl: '/images/default-avatar.png',
-            user: data[0]
-        });
-
-    } catch (error) {
-        console.error('❌ Avatar deletion error:', error);
-        console.error('❌ Error stack:', error.stack);
-        res.status(500).json({ error: 'Failed to delete avatar: ' + error.message });
-    }
-});
-
   app.get('/api/accounts/__ping', (_req, res) => res.json({ ok: true }));
 
   // POST /api/accounts -> create new account
@@ -368,6 +289,22 @@ app.put('/api/accounts/:id', async (req, res) => {
 
       if (checkError) {
         return res.status(404).json({ error: 'Account not found' });
+      }
+      // If avatar is being changed to default, delete the old file
+      if (avatar && avatar.includes('default-avatar.png') && 
+          existingAccount.avatar && !existingAccount.avatar.includes('default-avatar.png')) {
+        console.log('🗑️ Deleting old avatar file:', existingAccount.avatar);
+        
+        // Delete the old avatar file from filesystem
+        const filename = path.basename(existingAccount.avatar);
+        const filePath = path.join('public/uploads/avatars', filename);
+        console.log('🔍 Looking for file at:', filePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log('✅ Old avatar file deleted successfully');
+        } else {
+          console.log('⚠️ Old avatar file not found, skipping deletion');
+        }
       }
 
       // If handle or email is being updated, check for conflicts
