@@ -297,9 +297,34 @@ module.exports = function (app, supabase)
         return res.status(500).json({ error: error.message });
       }
 
+      // Fetch handles for all sellers
+      const userIds = data.map(seller => seller.user_id);
+      const { data: accounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('id, handle')
+        .in('id', userIds);
+
+      if (accountsError)
+      {
+        console.error('Accounts query error:', accountsError);
+        return res.status(500).json({ error: accountsError.message });
+      }
+
+      // Create a map of user_id -> handle for quick lookup
+      const handleMap = {};
+      accounts.forEach(account => {
+        handleMap[account.id] = account.handle;
+      });
+
+      // Add handle to each seller
+      const enrichedSellers = data.map(seller => ({
+        ...seller,
+        handle: handleMap[seller.user_id] || null
+      }));
+
       res.json({
-        count: data.length,
-        sellers: data
+        count: enrichedSellers.length,
+        sellers: enrichedSellers
       });
     }
     catch (error)
@@ -526,7 +551,7 @@ module.exports = function (app, supabase)
           {
             user_id: userId,
             business_name: standName,
-            description: standDescription || `Fruit stand: ${standName}`,
+            description: standDescription || '',
             subscription_plan_id: subscriptionId,
             status: 'approved', // Auto-approve upon payment
             phone_number: phone_number,

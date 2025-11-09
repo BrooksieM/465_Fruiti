@@ -142,10 +142,12 @@ function displaySellerMarker(seller, location, fullAddress) {
   console.log('Marker created for:', seller.business_name);
 
   // info window for sellers
+  const sellerHandle = seller.handle || 'N/A';
   const infoContent = `
     <div style="padding: 10px; font-family: Arial, sans-serif; max-width: 250px;">
       <h3 style="margin: 0 0 8px 0; color: #333;">${escapeHtml(seller.business_name)}</h3>
       ${seller.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${escapeHtml(seller.description)}</p>` : ''}
+      <p style="margin: 0 0 8px 0; color: #666;"><strong>Handle:</strong> ${escapeHtml(sellerHandle)}</p>
       <p style="margin: 0 0 8px 0; color: #666;"><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
       ${seller.phone_number ? `<p style="margin: 0 0 8px 0; color: #666;"><strong>Phone:</strong> ${escapeHtml(seller.phone_number)}</p>` : ''}
       <a href="#" style="color: #1f73d1; text-decoration: none; font-size: 14px;" onclick="event.preventDefault(); alert('Contact this seller at ' + '${escapeHtml(seller.phone_number || 'N/A')}');">Contact Seller</a>
@@ -201,45 +203,45 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Place a custom marker
-function placeMarker(location) {
-  const marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    draggable: true, // Can drag to reposition
-    animation: google.maps.Animation.DROP,
-    icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-  });
+// // Place a custom marker
+// function placeMarker(location) {
+//   const marker = new google.maps.Marker({
+//     position: location,
+//     map: map,
+//     draggable: true, // Can drag to reposition
+//     animation: google.maps.Animation.DROP,
+//     icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+//   });
 
-  // Right-click to delete
-  marker.addListener('rightclick', function() {
-    marker.setMap(null);
-    const index = customMarkers.indexOf(marker);
-    if (index > -1) {
-      customMarkers.splice(index, 1);
-    }
-  });
+//   // Right-click to delete
+//   marker.addListener('rightclick', function() {
+//     marker.setMap(null);
+//     const index = customMarkers.indexOf(marker);
+//     if (index > -1) {
+//       customMarkers.splice(index, 1);
+//     }
+//   });
 
-  // Click to show info
-  marker.addListener('click', function() {
-    const infoWindow = new google.maps.InfoWindow({
-      content: `
-        <div style="padding: 10px;">
-          <h3>Custom Marker</h3>
-          <p><strong>Lat:</strong> ${location.lat().toFixed(6)}</p>
-          <p><strong>Lng:</strong> ${location.lng().toFixed(6)}</p>
-          <button onclick="deleteThisMarker(${customMarkers.length})" 
-                  style="padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
-            Delete
-          </button>
-        </div>
-      `
-    });
-    infoWindow.open(map, marker);
-  });
+//   // Click to show info
+//   marker.addListener('click', function() {
+//     const infoWindow = new google.maps.InfoWindow({
+//       content: `
+//         <div style="padding: 10px;">
+//           <h3>Custom Marker</h3>
+//           <p><strong>Lat:</strong> ${location.lat().toFixed(6)}</p>
+//           <p><strong>Lng:</strong> ${location.lng().toFixed(6)}</p>
+//           <button onclick="deleteThisMarker(${customMarkers.length})" 
+//                   style="padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
+//             Delete
+//           </button>
+//         </div>
+//       `
+//     });
+//     infoWindow.open(map, marker);
+//   });
 
-  customMarkers.push(marker);
-}
+//   customMarkers.push(marker);
+// }
 
 // Place marker by address search
 function placeMarkerByAddress(address) {
