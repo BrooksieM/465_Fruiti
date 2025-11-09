@@ -330,7 +330,7 @@ function initializeFormWithUserData(user) {
         'displayName': user.displayName || user.name || user.handle || '',
         'username': user.handle || user.username || '',
         'email': user.email || '',
-        'bio': user.bio || 'I love fresh fruits and healthy recipes!'
+        'bio': user.bio || 'Write anything here'
     };
 
     Object.entries(fieldMappings).forEach(([fieldId, value]) => {
@@ -348,11 +348,15 @@ function initializeFormWithUserData(user) {
             avatarPreview.src = user.avatar;
         }
     }
+    // Clear any file input
+    document.getElementById('avatarUpload').value = '';
 }
 
 function resetForm() {
     if (originalUserData) {
         initializeFormWithUserData(originalUserData);
+        // Clear any selected file
+        document.getElementById('avatarUpload').value = '';
         showSuccess('Changes discarded');
     }
 }
@@ -385,7 +389,7 @@ async function updateUserProfile(userId, formData) {
     }
 }
 
-// Profile form submission with PUT endpoint
+// Profile form submission with PUT endpoint (including avatar)
 document.getElementById('profileForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -408,12 +412,22 @@ document.getElementById('profileForm').addEventListener('submit', async function
     hideMessages();
 
     try {
+        // Check if there's a new avatar file to upload
+        const avatarFile = document.getElementById('avatarUpload').files[0];
+        let avatarUrl = document.getElementById('avatarPreview').src;
+
+        // If there's a new file, upload it first
+        if (avatarFile) {
+            console.log('📤 Uploading new avatar...');
+            avatarUrl = await uploadAvatar(avatarFile);
+        }
+
         const formData = {
             handle: document.getElementById('username').value.trim(),
             email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value.trim(),
-            // Note: Add avatar support when you implement file upload
-            // avatar: document.getElementById('avatarPreview').src
+            displayName: document.getElementById('displayName').value.trim(),
+            bio: document.getElementById('bio').value.trim(),
+            avatar: avatarUrl // Include the avatar URL (could be new or existing)
         };
 
         // Basic validation
@@ -433,7 +447,10 @@ document.getElementById('profileForm').addEventListener('submit', async function
             ...updatedUser,
             // Include fields that might not be returned by the API
             handle: formData.handle,
-            email: formData.email
+            email: formData.email,
+            displayName: formData.displayName,
+            bio: formData.bio,
+            avatar: formData.avatar
         };
         localStorage.setItem('user', JSON.stringify(mergedUser));
         
@@ -442,6 +459,9 @@ document.getElementById('profileForm').addEventListener('submit', async function
         
         // Update original data for cancel functionality
         originalUserData = { ...mergedUser };
+        
+        // Clear the file input after successful save
+        document.getElementById('avatarUpload').value = '';
         
         showSuccess('Profile updated successfully!');
 
@@ -664,36 +684,123 @@ document.querySelectorAll('.settings-form').forEach(form => {
     }
 });
 
-// Avatar upload preview
+// Avatar upload functions
+async function uploadAvatar(file) {
+    const user = debugUserData();
+    if (!user || !user.id) {
+        showError('Please log in to upload avatar');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('userId', user.id);
+
+    try {
+        const response = await fetch('/api/upload/avatar', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to upload avatar');
+        }
+
+        // Update localStorage with new avatar
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        currentUser.avatar = result.avatarUrl;
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        
+        // Update navigation if needed
+        if (typeof updateNavigationForLoggedInUser === 'function') {
+            updateNavigationForLoggedInUser(currentUser);
+        }
+
+        showSuccess('Avatar uploaded successfully!');
+        return result.avatarUrl;
+
+    } catch (error) {
+        console.error('Avatar upload error:', error);
+        showError('Error uploading avatar: ' + error.message);
+        throw error;
+    }
+}
+
+async function removeAvatar() {
+    const user = debugUserData();
+    if (!user || !user.id) {
+        showError('Please log in to remove avatar');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/upload/avatar?userId=${user.id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to remove avatar');
+        }
+
+        // Update localStorage
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        currentUser.avatar = result.avatarUrl;
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        
+        // Update navigation if needed
+        if (typeof updateNavigationForLoggedInUser === 'function') {
+            updateNavigationForLoggedInUser(currentUser);
+        }
+
+        // Update preview
+        document.getElementById('avatarPreview').src = result.avatarUrl;
+        showSuccess('Avatar removed successfully!');
+
+    } catch (error) {
+        console.error('Avatar removal error:', error);
+        showError('Error removing avatar: ' + error.message);
+    }
+}
+
+// Avatar upload preview (without automatic upload)
 document.getElementById('avatarUpload')?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         // Check file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             showError('Image size must be less than 5MB');
+            this.value = ''; // Clear the file input
             return;
         }
         
         // Check file type
         if (!file.type.startsWith('image/')) {
             showError('Please select an image file');
+            this.value = ''; // Clear the file input
             return;
         }
-        
+
+        // Show temporary preview only
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('avatarPreview').src = e.target.result;
-            showSuccess('Avatar updated! Click "Save Changes" to make it permanent.');
+            showSuccess('Avatar preview updated! Click "Save Changes" to save it permanently.');
         };
         reader.readAsDataURL(file);
     }
 });
 
-// Remove avatar
+// Remove avatar (without automatic server call)
 document.querySelector('.remove-btn')?.addEventListener('click', function() {
     document.getElementById('avatarPreview').src = '/images/default-avatar.png';
-    showSuccess('Avatar removed! Click "Save Changes" to make it permanent.');
+    document.getElementById('avatarUpload').value = ''; // Clear the file input
+    showSuccess('Avatar preview removed! Click "Save Changes" to make it permanent.');
 });
+
 
 // Delete account functions
 function showDeleteConfirmation() {

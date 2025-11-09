@@ -1,9 +1,182 @@
 // Services/accountService.js
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
 
 module.exports = function (app, supabase) 
 {
   const bcrypt = require('bcrypt');
   // Dev ping
+  // Configure multer for file storage
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      const uploadDir = 'public/uploads/avatars';
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+      // Generate unique filename: userid-timestamp.extension
+      const userId = req.user?.id || 'unknown';
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      cb(null, `avatar-${userId}-${uniqueSuffix}${ext}`);
+    }
+  });
+
+  // File filter for images only
+  const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  };
+
+  const upload = multer({
+    storage: storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: fileFilter
+  });
+
+  // Upload avatar endpoint
+  app.post('/api/upload/avatar', upload.single('avatar'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      // For now, we'll assume user ID comes from request body or query
+      // In a real app, you'd get this from authentication middleware
+      const userId = req.body.userId || req.query.userId;
+      
+      if (!userId) {
+        // Delete the uploaded file since we don't have a user ID
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const avatarPath = `/uploads/avatars/${req.file.filename}`;
+
+      // Update user in database
+      const { data, error } = await supabase
+        .from('accounts')
+        .update({ 
+          avatar: avatarPath,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select('id, handle, email, avatar');
+
+      if (error) {
+        // Delete the uploaded file if database update fails
+        fs.unlinkSync(req.file.path);
+        console.error('Database update error:', error);
+        return res.status(500).json({ error: 'Failed to update avatar in database' });
+      }
+
+      res.json({
+        success: true,
+        avatarUrl: avatarPath,
+        user: data[0]
+      });
+
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      
+      // Clean up uploaded file if it exists
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      res.status(500).json({ error: 'Failed to upload avatar' });
+    }
+  });
+
+ // Delete avatar endpoint
+app.delete('/api/upload/avatar', async (req, res) => {
+    console.log('🗑️ DELETE /api/upload/avatar called');
+    console.log('📝 Query params:', req.query);
+    console.log('📝 Body:', req.body);
+    
+    try {
+        const userId = req.body.userId || req.query.userId;
+        
+        console.log('👤 User ID:', userId);
+        
+        if (!userId) {
+            console.log('❌ No user ID provided');
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        // Get user's current avatar
+        console.log('🔍 Getting user data from database...');
+        const { data: user, error: userError } = await supabase
+            .from('accounts')
+            .select('avatar')
+            .eq('id', userId)
+            .single();
+
+        if (userError) {
+            console.log('❌ User not found error:', userError);
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('📸 Current avatar:', user.avatar);
+
+        // Delete the avatar file from filesystem if it's not the default
+        if (user.avatar && user.avatar !== '/images/default-avatar.png') {
+            const filename = path.basename(user.avatar);
+            const filePath = path.join('public/uploads/avatars', filename);
+            
+            console.log('🗑️ Attempting to delete file:', filePath);
+            
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                console.log('✅ File deleted successfully');
+            } else {
+                console.log('⚠️ File not found, skipping deletion');
+            }
+        } else {
+            console.log('ℹ️ Using default avatar, no file to delete');
+        }
+
+        // Update user in database to set default avatar
+        console.log('💾 Updating database...');
+        const { data, error } = await supabase
+            .from('accounts')
+            .update({ 
+                avatar: '/images/default-avatar.png',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select('id, handle, email, avatar, displayName, bio');
+
+        if (error) {
+            console.log('❌ Database update error:', error);
+            return res.status(500).json({ error: 'Failed to remove avatar from database' });
+        }
+
+        console.log('✅ Database updated successfully');
+
+        res.json({
+            success: true,
+            avatarUrl: '/images/default-avatar.png',
+            user: data[0]
+        });
+
+    } catch (error) {
+        console.error('❌ Avatar deletion error:', error);
+        console.error('❌ Error stack:', error.stack);
+        res.status(500).json({ error: 'Failed to delete avatar: ' + error.message });
+    }
+});
+
   app.get('/api/accounts/__ping', (_req, res) => res.json({ ok: true }));
 
   // POST /api/accounts -> create new account
@@ -62,8 +235,10 @@ app.post('/api/accounts', async (req, res) => {
           avatar: avatar || null,
           payment_method: null,
           password: hashedPassword, // Store the hashed password
+          displayName: handle,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+
         }
       ])
       .select();
@@ -178,7 +353,7 @@ app.post('/api/accounts', async (req, res) => {
 app.put('/api/accounts/:id', async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { handle, email, avatar, password } = req.body || {};
+      const { handle, email, avatar, password, displayName, bio } = req.body || {};
 
       if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({ error: 'Invalid account ID' });
@@ -228,6 +403,8 @@ app.put('/api/accounts/:id', async (req, res) => {
       if (handle !== undefined) updateData.handle = handle;
       if (email !== undefined) updateData.email = email;
       if (avatar !== undefined) updateData.avatar = avatar;
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (bio !== undefined) updateData.bio = bio;
       
       // Hash password if provided
       if (password !== undefined) {
