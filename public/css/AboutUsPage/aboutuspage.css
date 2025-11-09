@@ -1,332 +1,456 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.1)"/></svg>');
+  opacity: 0.3;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-section h1 {
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  animation: fadeInDown 1s ease;
+}
+
+.hero-section p {
+  font-size: 1.3em;
+  opacity: 0.95;
+  animation: fadeInUp 1s ease;
+}
+
+/* Main Content Container */
+.content-container {
+  max-width: 1200px;
+  margin: -50px auto 50px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Story Section */
+.story-section {
+  background: white;
+  border-radius: 20px;
+  padding: 60px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  animation: fadeIn 1.2s ease;
+}
+
+.story-section h2 {
+  color: #019456;
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.story-section p {
+  font-size: 1.1em;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 20px;
+  text-align: justify;
+}
+
+/* Mission & Vision */
+.mission-vision {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 1.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+  font-size: 3em;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.card h3 {
+  color: #019456;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.card p {
+  font-size: 1.05em;
+  line-height: 1.7;
+  color: #666;
+}
+
+/* Team Section */
+.team-section {
+  background: white;
+  border-radius: 20px;
+  padding: 60px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  animation: fadeIn 1.6s ease;
+}
+
+.team-section h2 {
+  color: #019456;
+  font-size: 2.5em;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+}
+
+.team-member {
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  transition: background 0.3s ease;
+}
+
+.team-member:hover {
+  background: #f8f9ff;
+}
+
+.team-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3em;
+  color: white;
+  box-shadow: 0 5px 20px rgba(1, 148, 86, 0.3);
+}
+
+.team-member h4 {
+  color: #333;
+  font-size: 1.3em;
+  margin-bottom: 10px;
+}
+
+.team-member p {
+  color: #019456;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.team-member span {
+  color: #888;
+  font-size: 0.95em;
+}
+
+/* Contact Section */
+.contact-section {
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  border-radius: 20px;
+  padding: 60px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  animation: fadeIn 1.8s ease;
+}
+
+.contact-section h2 {
+  color: white;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.contact-section > p {
+  color: white;
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 1.1em;
+  opacity: 0.95;
+}
+
+.contact-form {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 1em;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #019456;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(1, 148, 86, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Success Modal */
+.success-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.success-modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 50px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+  position: relative;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+  animation: scaleIn 0.5s ease;
+}
+
+.success-icon svg {
+  width: 45px;
+  height: 45px;
+  stroke: white;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.checkmark {
+  animation: drawCheck 0.5s ease 0.3s forwards;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.success-modal h3 {
+  color: #333;
+  font-size: 2em;
+  margin-bottom: 15px;
+}
+
+.success-modal p {
+  color: #666;
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.modal-close-btn {
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(1, 148, 86, 0.4);
+}
+
+.modal-close-btn:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+  to {
+    opacity: 1;
   }
-  
-  /* Hero Section */
-  .hero-section {
-    background: linear-gradient(135deg, #017d49 0%, #019456 100%);
-    color: white;
-    padding: 80px 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
   }
-  
-  .hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.1)"/></svg>');
-    opacity: 0.3;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    margin: 0 auto;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .hero-section h1 {
-    font-size: 3.5em;
-    margin-bottom: 20px;
-    animation: fadeInDown 1s ease;
-  }
-  
-  .hero-section p {
-    font-size: 1.3em;
-    opacity: 0.95;
-    animation: fadeInUp 1s ease;
-  }
-  
-  /* Main Content Container */
-  .content-container {
-    max-width: 1200px;
-    margin: -50px auto 50px;
-    padding: 0 20px;
-    position: relative;
-    z-index: 2;
-  }
-  
-  /* Story Section */
-  .story-section {
-    background: white;
-    border-radius: 20px;
-    padding: 60px;
-    margin-bottom: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    animation: fadeIn 1.2s ease;
-  }
-  
-  .story-section h2 {
-    color: #019456;
     font-size: 2.5em;
-    margin-bottom: 30px;
-    text-align: center;
   }
   
-  .story-section p {
-    font-size: 1.1em;
-    line-height: 1.8;
-    color: #555;
-    margin-bottom: 20px;
-    text-align: justify;
-  }
-  
-  /* Mission & Vision */
-  .mission-vision {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
+  .story-section,
+  .team-section,
+  .contact-section {
+    padding: 40px 30px;
   }
   
   .card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: fadeInUp 1.4s ease;
-  }
-  
-  .card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-  }
-  
-  .card-icon {
-    font-size: 3em;
-    margin-bottom: 20px;
-    display: block;
-  }
-  
-  .card h3 {
-    color: #019456;
-    font-size: 2em;
-    margin-bottom: 20px;
-  }
-  
-  .card p {
-    font-size: 1.05em;
-    line-height: 1.7;
-    color: #666;
-  }
-  
-  /* Team Section */
-  .team-section {
-    background: white;
-    border-radius: 20px;
-    padding: 60px;
-    margin-bottom: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    animation: fadeIn 1.6s ease;
-  }
-  
-  .team-section h2 {
-    color: #019456;
-    font-size: 2.5em;
-    margin-bottom: 50px;
-    text-align: center;
-  }
-  
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
-  }
-  
-  .team-member {
-    text-align: center;
-    padding: 20px;
-    border-radius: 15px;
-    transition: background 0.3s ease;
-  }
-  
-  .team-member:hover {
-    background: #f8f9ff;
-  }
-  
-  .team-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #019456 0%, #017d49 100%);
-    margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3em;
-    color: white;
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-  }
-  
-  .team-member h4 {
-    color: #333;
-    font-size: 1.3em;
-    margin-bottom: 10px;
-  }
-  
-  .team-member p {
-    color: #667eea;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  
-  .team-member span {
-    color: #888;
-    font-size: 0.95em;
-  }
-  
-  /* Contact Section */
-  .contact-section {
-    background: linear-gradient(135deg, #019456 0%, #017d49 100%);
-    border-radius: 20px;
-    padding: 60px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    animation: fadeIn 1.8s ease;
-  }
-  
-  .contact-section h2 {
-    color: white;
-    font-size: 2.5em;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .contact-section > p {
-    color: white;
-    text-align: center;
-    margin-bottom: 40px;
-    font-size: 1.1em;
-    opacity: 0.95;
+    padding: 30px;
   }
   
   .contact-form {
-    max-width: 700px;
-    margin: 0 auto;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+    padding: 30px 20px;
   }
   
-  .form-group {
-    margin-bottom: 25px;
+  .success-modal-content {
+    padding: 40px 30px;
   }
-  
-  .form-group label {
-    display: block;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 8px;
-    font-size: 1em;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 1em;
-    font-family: inherit;
-    transition: border-color 0.3s ease;
-  }
-  
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #019456;
-  }
-  
-  .form-group textarea {
-    resize: vertical;
-    min-height: 150px;
-  }
-  
-  .submit-btn {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, #019456 0%, #017d49 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-  }
-  
-  .submit-btn:active {
-    transform: translateY(0);
-  }
-  
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .hero-section h1 {
-      font-size: 2.5em;
-    }
-    
-    .story-section,
-    .team-section,
-    .contact-section {
-      padding: 40px 30px;
-    }
-    
-    .card {
-      padding: 30px;
-    }
-    
-    .contact-form {
-      padding: 30px 20px;
-    }
 }
