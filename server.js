@@ -68,10 +68,10 @@ app.use('/api', apiRoutes);
 // //   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
 // // });
 
-// app.get('/seller-payment', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
+app.get('/seller-payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
   
-// });
+});
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
