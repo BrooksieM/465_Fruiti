@@ -44,11 +44,17 @@
       </div>
 
       <form id="paymentForm">
+        <!-- Email (always visible) -->
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
         <!-- Account Information (only for non-logged in users) -->
         <div id="accountSection">
           <div class="form-group">
-            <label for="email">Email Address *</label>
-            <input type="email" id="email" name="email" required>
+            <label for="handle">Username (Handle) *</label>
+            <input type="text" id="handle" name="handle" placeholder="e.g., john_fruits" required>
           </div>
 
           <div class="form-row">
@@ -77,8 +83,8 @@
         </div>
 
         <div class="form-group">
-          <label for="phone">Phone Number *</label>
-          <input type="tel" id="phone" name="phone" required>
+          <label for="phone_number">Phone Number *</label>
+          <input type="tel" id="phone_number" name="phone_number" required>
         </div>
 
         <div class="form-group">
@@ -332,12 +338,35 @@
     document.getElementById('total').textContent = `$${total.toFixed(2)}`;
 
     // Check if user is logged in
-    // This should be replaced with actual authentication check
-    const isLoggedIn = false; // Set this based on your auth system
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const userId = localStorage.getItem('userId');
 
-    if (isLoggedIn) {
+    if (isLoggedIn && userId) {
+      // User is logged in - hide account creation fields
       document.getElementById('accountSection').style.display = 'none';
       document.getElementById('accountNotice').innerHTML = '<p><strong>Upgrade to Seller Account</strong> Complete your payment to start selling!</p>';
+
+      // Remove required attribute from hidden fields
+      document.getElementById('handle').required = false;
+      document.getElementById('password').required = false;
+      document.getElementById('confirmPassword').required = false;
+
+      // Fetch user email to pre-fill
+      fetch(`/api/accounts/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+          if (user && user.email) {
+            document.getElementById('email').value = user.email;
+            document.getElementById('email').readOnly = true;
+          }
+        })
+        .catch(err => console.error('Error fetching user:', err));
+    } else {
+      // Make sure all account fields are required
+      document.getElementById('email').required = true;
+      document.getElementById('handle').required = true;
+      document.getElementById('password').required = true;
+      document.getElementById('confirmPassword').required = true;
     }
 
     // Payment method toggle
@@ -377,14 +406,15 @@
     });
 
     // Form submission
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
       // Validate passwords match if account section is visible
-      if (document.getElementById('accountSection').style.display !== 'none') {
+      const accountSectionVisible = document.getElementById('accountSection').style.display !== 'none';
+      if (accountSectionVisible) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        
+
         if (password !== confirmPassword) {
           alert('Passwords do not match!');
           return;
@@ -405,12 +435,63 @@
         return;
       }
 
-      // Here you would process the payment and create the seller account
-      // For now, just show a success message
-      alert('Processing your payment...\n\nIn production, this would:\n1. Process payment\n2. Create/upgrade account to seller\n3. Set up your fruit stand\n4. Redirect to seller dashboard');
-      
-      // Redirect to seller dashboard
-      // window.location.href = '/seller/dashboard';
+      // Get form data
+      const formData = {
+        email: document.getElementById('email').value,
+        subscriptionType: plan,
+        standName: document.getElementById('standName').value,
+        standDescription: document.getElementById('standDescription').value,
+        phone_number: document.getElementById('phone_number').value,
+        standAddress: document.getElementById('standAddress').value,
+        city: document.getElementById('city').value,
+        state: state,
+        zipcode: zipcode,
+        paymentMethod: document.querySelector('.payment-method.active').dataset.method
+      };
+
+      // Add account fields for new users
+      if (accountSectionVisible) {
+        formData.password = document.getElementById('password').value;
+        formData.handle = document.getElementById('handle').value;
+      }
+
+      // Disable submit button
+      const submitBtn = document.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      try {
+        // Send data to backend
+        const response = await fetch('/api/purchase-seller-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`Success! ${result.message}\n\nYour subscription is active until ${new Date(result.subscriptionEnd).toLocaleDateString()}`);
+
+          // Store user info in localStorage (temporary until proper auth is implemented)
+          localStorage.setItem('userId', result.userId);
+          localStorage.setItem('isLoggedIn', 'true');
+
+          // Redirect to homepage or seller dashboard
+          window.location.href = '/';
+        } else {
+          alert(`Error: ${result.error}`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Complete Purchase & Become a Seller';
+        }
+      } catch (error) {
+        console.error('Purchase error:', error);
+        alert('An error occurred while processing your purchase. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Purchase & Become a Seller';
+      }
     });
   </script>
 </body>

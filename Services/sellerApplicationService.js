@@ -325,11 +325,207 @@ module.exports = function (app, supabase)
   });
 
   // GET /api/seller_payment -> view payment page (placeholder)
-  app.get('/api/seller_payment', (req, res) => 
+  app.get('/api/seller_payment', (req, res) =>
   {
-    res.json({ 
+    res.json({
       message: 'This is the payment information page',
       instructions: 'Use POST /api/seller_payments to submit payment information'
     });
+  });
+
+  // ========== SELLER SUBSCRIPTION PURCHASE ==========
+
+  // POST /api/purchase-seller-subscription -> complete seller subscription purchase
+  app.post('/api/purchase-seller-subscription', async (req, res) =>
+  {
+    try
+    {
+      const {
+        // User account info (for new users)
+        email,
+        password,
+        handle,
+        // Subscription info
+        subscriptionType,
+        // Payment info (placeholder until Stripe integration)
+        paymentMethod,
+        // Stand info
+        standName,
+        standDescription,
+        phone_number,
+        standAddress,
+        city,
+        state,
+        zipcode
+      } = req.body;
+
+      // Validate required fields
+      if (!email || !subscriptionType || !standName || !phone_number || !standAddress || !city || !state || !zipcode)
+      {
+        return res.status(400).json({
+          error: 'Missing required fields'
+        });
+      }
+
+      const bcrypt = require('bcrypt');
+      let userId;
+      let isNewUser = false;
+
+      // Check if user exists by email
+      const { data: existingAccounts, error: checkError } = await supabase
+        .from('accounts')
+        .select('id, handle, email')
+        .eq('email', email)
+        .limit(1);
+
+      if (checkError)
+      {
+        console.error('Account check error:', checkError);
+        return res.status(500).json({ error: 'Error checking existing account' });
+      }
+
+      if (existingAccounts && existingAccounts.length > 0)
+      {
+        // User exists - use their account
+        userId = existingAccounts[0].id;
+      }
+      else
+      {
+        // New user - create account
+        if (!password || !handle)
+        {
+          return res.status(400).json({
+            error: 'Password and handle are required for new accounts'
+          });
+        }
+
+        if (password.length < 6)
+        {
+          return res.status(400).json({
+            error: 'Password must be at least 6 characters long'
+          });
+        }
+
+        // Check if handle already exists
+        const { data: handleCheck } = await supabase
+          .from('accounts')
+          .select('handle')
+          .eq('handle', handle)
+          .limit(1);
+
+        if (handleCheck && handleCheck.length > 0)
+        {
+          return res.status(409).json({ error: 'Handle already exists' });
+        }
+
+        // Hash password and create account
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const { data: newAccount, error: createError } = await supabase
+          .from('accounts')
+          .insert([
+            {
+              handle,
+              email,
+              password: hashedPassword,
+              avatar: null,
+              payment_method: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          ])
+          .select('id');
+
+        if (createError)
+        {
+          console.error('Account creation error:', createError);
+          return res.status(500).json({ error: 'Failed to create account' });
+        }
+
+        userId = newAccount[0].id;
+        isNewUser = true;
+      }
+
+      // Map subscription type to ID from seller_subscriptions table
+      const subscriptionMap = {
+        'monthly': 1,
+        '3month': 2,
+        '6month': 3
+      };
+
+      const subscriptionId = subscriptionMap[subscriptionType];
+      if (!subscriptionId)
+      {
+        return res.status(400).json({ error: 'Invalid subscription type' });
+      }
+
+      // Get subscription details
+      const { data: subscription } = await supabase
+        .from('seller_subscriptions')
+        .select('*')
+        .eq('id', subscriptionId)
+        .single();
+
+      // Update account payment method (once Stripe is integrated, this will be the actual card info)
+      await supabase
+        .from('accounts')
+        .update({
+          payment_method: { type: paymentMethod || 'card', status: 'active' },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      // Calculate subscription end date
+      const now = new Date();
+      const durationMap = {
+        '1 month': 1,
+        '3 months': 3,
+        '6 months': 6
+      };
+      const months = durationMap[subscription.duration] || 1;
+      const endDate = new Date(now);
+      endDate.setMonth(endDate.getMonth() + months);
+
+      // Create seller application with subscription
+      const { data: application, error: appError } = await supabase
+        .from('seller_applications')
+        .insert([
+          {
+            user_id: userId,
+            business_name: standName,
+            description: standDescription || `Fruit stand: ${standName}`,
+            subscription_plan_id: subscriptionId,
+            status: 'approved', // Auto-approve upon payment
+            phone_number: phone_number,
+            address: standAddress,
+            city: city,
+            state: state,
+            zipcode: zipcode,
+            created_at: now.toISOString()
+          }
+        ])
+        .select();
+
+      if (appError)
+      {
+        console.error('Application creation error:', appError);
+        return res.status(500).json({ error: 'Failed to create seller application' });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: 'Seller subscription purchased successfully!',
+        userId: userId,
+        applicationId: application[0].id,
+        isNewUser: isNewUser,
+        subscriptionEnd: endDate.toISOString()
+      });
+    }
+    catch (error)
+    {
+      console.error('Purchase error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 };

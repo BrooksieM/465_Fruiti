@@ -59,7 +59,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
             // Save user to localStorage
             localStorage.setItem('user', JSON.stringify(data.user));
-            
+            localStorage.setItem('userId', data.user.id);
+            localStorage.setItem('isLoggedIn', 'true');
+
             // Update navigation immediately
             if (typeof updateNavigationForLoggedInUser === 'function') {
                 updateNavigationForLoggedInUser(data.user);
