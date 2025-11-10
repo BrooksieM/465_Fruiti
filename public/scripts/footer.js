@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
       <h3>Quick Links</h3>
       <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="#">Become a Seller</a></li>
+        <li><a href="/become-seller">Become a Seller</a></li>
         <li><a href="nutrition">Nutrition</a></li>
         <li><a href="#">Recipes</a></li>
-        <li><a href="#">About Us</a></li>
+        <li><a href="/aboutus">About Us</a></li>
       </ul>
     </div>
     
