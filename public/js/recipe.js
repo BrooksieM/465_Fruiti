@@ -1,7 +1,7 @@
 // public/js/recipe.js
 // Card grid + drawer + create/like/review/delete + optional image upload. Uses /recipes API.
 
-const API = '/recipes';
+const API = '/api/recipes';
 
 // ---- auth helpers (from localStorage user) ----
 function currentUser() {

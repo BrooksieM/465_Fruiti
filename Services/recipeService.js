@@ -1,26 +1,36 @@
 module.exports = function (app, supabase) 
 {
     // Create a recipe
-    app.post('/api/recipes', async (req, res) => 
+    app.post('/api/recipes', async (req, res) =>
     {
-      try 
+      try
       {
-        const { name, ingredients, instructions } = req.body;
+        const { title, ingredients, steps, summary, servings, minutes, difficulty, coverUrl } = req.body;
 
-        if (!name || !ingredients || !instructions) 
-          return res.status(400).json({ error: 'Missing required fields' });
+        if (!title || !ingredients || !steps)
+          return res.status(400).json({ error: 'Missing required fields: title, ingredients, steps' });
 
         const { data, error } = await supabase
           .from('recipes')
-          .insert([{ name, ingredients, instructions, created_at: new Date().toISOString() }])
+          .insert([{
+            name: title,
+            ingredients: Array.isArray(ingredients) ? ingredients : [],
+            instructions: Array.isArray(steps) ? steps : [],
+            summary: summary || '',
+            servings: servings || null,
+            minutes: minutes || null,
+            difficulty: difficulty || 'Easy',
+            coverUrl: coverUrl || '',
+            created_at: new Date().toISOString()
+          }])
           .select();
 
-        if (error) 
+        if (error)
           return res.status(500).json({ error: error.message });
 
         res.status(201).json(data[0]);
-      } 
-      catch (error) 
+      }
+      catch (error)
       {
         res.status(500).json({ error: 'Internal server error' });
       }
