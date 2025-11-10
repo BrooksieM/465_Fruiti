@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Recipes • Fruiti</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../css/standardLayout.css" />
+  <link rel="stylesheet" href="../css/RecipePage/recipe.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <div class="navbar">
+    <div class="logo"><a href="/"><img src="../images/fruiti.png" alt="Fruiti" /></a></div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search Recipes..." />
+      <span class="icon">🔍</span>
+    </div>
+    <div class="auth-buttons">
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+  
+  <!-- Navigation Links -->
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/UI/nutrition.html">Nutrition</a>
+    <a class="active" href="/UI/recipe.html">Recipes</a>
+    <a href="/UI/about-us.html">About Us</a>
+    <a href="/UI/contact.html">Contact</a>
+  </nav>
+  
+  <div class="black-bar"></div>
+  
+  <!-- Main Content -->
+  <main class="recipe-page">
+    <div class="page-container">
+      
+      <!-- Left Sidebar - Filters -->
+      <aside class="filter-sidebar">
+        <div class="filter-header">
+          <h3>Filters</h3>
+          <button class="clear-filters" id="clearFilters">Clear All</button>
+        </div>
+        
+        <!-- Difficulty Filter -->
+        <div class="filter-section">
+          <h4>Difficulty</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="easy" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Easy</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="medium" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Medium</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="difficulty" value="hard" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Hard</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Time Filter -->
+        <div class="filter-section">
+          <h4>Preparation Time</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="0-15" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Under 15 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="15-30" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">15-30 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="30-60" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">30-60 min</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="time" value="60+" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Over 60 min</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Season Filter -->
+        <div class="filter-section">
+          <h4>Season</h4>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="spring" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Spring</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="summer" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Summer</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="fall" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Fall</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="season" value="winter" class="filter-input" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Winter</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Main Content Area -->
+      <div class="content-area">
+        <!-- Header with Create Button -->
+        <div class="content-header">
+          <div>
+            <h1>Discover Delicious Recipes</h1>
+            <p class="subtitle">Explore our collection of fruit-based recipes for every occasion</p>
+          </div>
+          <button class="btn-create" id="openCreateModal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Recipe
+          </button>
+        </div>
+        
+        <!-- Recipe Grid -->
+        <div id="cards" class="recipe-grid"></div>
+      </div>
+      
+    </div>
+  </main>
+  
+  <!-- Create Recipe Modal -->
+  <div class="modal-overlay" id="createModal" hidden>
+    <div class="modal-content create-modal">
+      <div class="modal-header">
+        <h2>Create New Recipe</h2>
+        <button class="modal-close" id="closeCreateModal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="createForm">
+          <div class="form-group">
+            <label for="rTitle">Recipe Title</label>
+            <input id="rTitle" type="text" placeholder="Enter recipe title" required />
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rDiff">Difficulty</label>
+              <select id="rDiff" required>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rServ">Servings</label>
+              <input id="rServ" type="number" placeholder="4" required />
+            </div>
+            <div class="form-group">
+              <label for="rMin">Time (minutes)</label>
+              <input id="rMin" type="number" placeholder="30" required />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rSummary">Short Summary</label>
+            <textarea id="rSummary" rows="2" placeholder="Brief description of your recipe" required></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rCover">Cover Image URL</label>
+              <input id="rCover" type="text" placeholder="/images/..." />
+            </div>
+            <div class="form-group">
+              <label for="rCoverFile">Or Upload Image</label>
+              <input id="rCoverFile" type="file" accept="image/*" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="rIngr">Ingredients</label>
+            <textarea id="rIngr" rows="4" placeholder="Enter ingredients (one per line)" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="rSteps">Instructions</label>
+            <textarea id="rSteps" rows="5" placeholder="Enter steps (one per line)" required></textarea>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" id="cancelCreate">Cancel</button>
+            <button type="submit" class="btn-submit" id="createBtn">Create Recipe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recipe Detail Drawer -->
+  <section class="drawer" id="drawer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="drawer-inner">
+      <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
+      <h2 id="dTitle" class="drawer-title"></h2>
+      <img id="dCover" alt="" class="detail-img" hidden />
+      <p id="dSummary" class="detail-summary"></p>
+      <div id="dMeta" class="detail-meta"></div>
+      <div id="dCounts" class="detail-counts"></div>
+      <h3>Ingredients</h3>
+      <ul id="dIngr" class="detail-list"></ul>
+      <h3>Steps</h3>
+      <ol id="dSteps" class="detail-list"></ol>
+      <div class="actions">
+        <button id="likeBtn" class="btn">Like</button>
+        <button id="unlikeBtn" class="btn">Unlike</button>
+      </div>
+      <h3>Add a review</h3>
+      <div class="form-row">
+        <input id="revRating" placeholder="Rating 1-5" value="5" />
+        <input id="revBody" placeholder="Your review" />
+        <button id="revSend" class="btn-primary">Submit</button>
+      </div>
+      <div id="revList" class="reviews"></div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footerbar">
+    <div class="container row">
+      <div class="foot-links">
+        <a href="/">Home</a>
+        <a href="/UI/nutrition.html">Nutrition</a>
+        <a href="/UI/recipe.html">Recipes</a>
+        <a href="/UI/about-us.html">About Us</a>
+      </div>
+      <div style="color:var(--muted)">© Fruiti</div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="/js/recipe.js"></script>
+  <script src="/js/recipe-auth-addon.js"></script>
+  
+  <!-- Filter Functionality Script -->
+  <script>
+    // Track if we have valid time data
+    let hasTimeData = false;
+    
+    // Function to apply filters using existing DOM cards
+    function applyFilters() {
+      // Get selected difficulty filters
+      const selectedDifficulties = Array.from(
+        document.querySelectorAll('input[name="difficulty"]:checked')
+      ).map(cb => cb.value.toLowerCase());
+      
+      // Get selected time filters
+      const selectedTimes = Array.from(
+        document.querySelectorAll('input[name="time"]:checked')
+      ).map(cb => cb.value);
+      
+      // Get all recipe cards
+      const allCards = document.querySelectorAll('.recipe-card');
+      
+      console.log('=== APPLYING FILTERS ===');
+      console.log('Difficulties selected:', selectedDifficulties);
+      console.log('Times selected:', selectedTimes);
+      console.log('Total cards:', allCards.length);
+      console.log('Has time data:', hasTimeData);
+      
+      // If no filters selected, show all
+      if (selectedDifficulties.length === 0 && selectedTimes.length === 0) {
+        allCards.forEach(card => card.style.display = '');
+        
+        // Remove any existing "no results" message
+        const grid = document.getElementById('cards');
+        const existingMsg = grid?.querySelector('.no-results-message');
+        if (existingMsg) existingMsg.remove();
+        
+        return;
+      }
+      
+      let visibleCount = 0;
+      
+      // Filter each card
+      allCards.forEach(card => {
+        let shouldShow = true;
+        
+        // Get card's difficulty class
+        const cardDifficulty = 
+          card.classList.contains('easy') ? 'easy' :
+          card.classList.contains('medium') ? 'medium' :
+          card.classList.contains('hard') ? 'hard' : '';
+        
+        // Check difficulty filter
+        if (selectedDifficulties.length > 0 && cardDifficulty) {
+          if (!selectedDifficulties.includes(cardDifficulty)) {
+            shouldShow = false;
+          }
+        }
+        
+        // Check time filter ONLY if we have time data
+        if (shouldShow && selectedTimes.length > 0 && hasTimeData) {
+          const recipeTime = parseInt(card.getAttribute('data-time') || '0');
+          
+          let matchesTime = false;
+          
+          for (const timeRange of selectedTimes) {
+            if (timeRange === '0-15' && recipeTime > 0 && recipeTime < 15) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '15-30' && recipeTime >= 15 && recipeTime <= 30) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '30-60' && recipeTime > 30 && recipeTime <= 60) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '60+' && recipeTime > 60) {
+              matchesTime = true;
+              break;
+            }
+          }
+          
+          if (!matchesTime) {
+            shouldShow = false;
+          }
+        }
+        
+        // Show or hide card
+        if (shouldShow) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      console.log('Visible cards after filter:', visibleCount);
+      
+      // Handle "no results" message
+      const grid = document.getElementById('cards');
+      const existingMsg = grid?.querySelector('.no-results-message');
+      if (existingMsg) existingMsg.remove();
+      
+      if (visibleCount === 0 && grid) {
+        const msg = document.createElement('p');
+        msg.className = 'no-results-message';
+        msg.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 16px;';
+        msg.textContent = 'No recipes match your filters. Try adjusting your selection.';
+        grid.appendChild(msg);
+      }
+      
+      // Show warning if time filter is selected but we have no time data
+      if (selectedTimes.length > 0 && !hasTimeData) {
+        console.warn('⚠️ Time filters selected but no time data available in recipes!');
+        console.warn('Time filtering is disabled. Only difficulty filtering will work.');
+      }
+    }
+    
+    // Attach filter listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Listen to all filter checkboxes
+      document.querySelectorAll('.filter-input').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          console.log('Filter changed:', checkbox.name, '=', checkbox.value, 'checked:', checkbox.checked);
+          setTimeout(applyFilters, 100);
+        });
+      });
+      
+      // Clear filters button
+      const clearFiltersBtn = document.getElementById('clearFilters');
+      clearFiltersBtn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+        applyFilters();
+      });
+      
+      // Wait for recipe cards to be loaded and decorated
+      let checkCount = 0;
+      const checkForCards = setInterval(() => {
+        const cards = document.querySelectorAll('.recipe-card[data-time]');
+        checkCount++;
+        
+        if (cards.length > 0) {
+          clearInterval(checkForCards);
+          
+          // Check if any cards have non-zero time data
+          let cardsWithTime = 0;
+          cards.forEach(card => {
+            const time = parseInt(card.getAttribute('data-time') || '0');
+            if (time > 0) cardsWithTime++;
+          });
+          
+          hasTimeData = cardsWithTime > 0;
+          
+          console.log('✓ Filters ready! Found', cards.length, 'decorated recipe cards');
+          console.log('✓ Cards with time data:', cardsWithTime);
+          
+          if (!hasTimeData) {
+            console.warn('⚠️ WARNING: No recipe has time data!');
+            console.warn('⚠️ Time filters will not work. Check your /recipes API response.');
+            console.warn('⚠️ Expected fields: prepTime, prep_time, time, cookTime, cook_time, totalTime, minutes, or duration');
+          }
+          
+          // Log sample card data
+          if (cards[0]) {
+            console.log('Sample card - Title:', cards[0].querySelector('h3')?.textContent);
+            console.log('Sample card - Time:', cards[0].getAttribute('data-time'));
+            console.log('Sample card - Difficulty:', 
+              cards[0].classList.contains('easy') ? 'easy' :
+              cards[0].classList.contains('medium') ? 'medium' :
+              cards[0].classList.contains('hard') ? 'hard' : 'unknown'
+            );
+          }
+        } else if (checkCount > 20) {
+          clearInterval(checkForCards);
+          console.error('❌ Could not find decorated cards after 10 seconds');
+        }
+      }, 500);
+    });
+  </script>
+  
+  <!-- Modal Controls -->
+  <script>
+    // Modal controls
+    const createModal = document.getElementById('createModal');
+    const openCreateBtn = document.getElementById('openCreateModal');
+    const closeCreateBtn = document.getElementById('closeCreateModal');
+    const cancelCreateBtn = document.getElementById('cancelCreate');
+    
+    openCreateBtn.addEventListener('click', () => {
+      createModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    });
+    
+    function closeModal() {
+      createModal.hidden = true;
+      document.body.style.overflow = '';
+    }
+    
+    closeCreateBtn.addEventListener('click', closeModal);
+    cancelCreateBtn.addEventListener('click', closeModal);
+    
+    createModal.addEventListener('click', (e) => {
+      if (e.target === createModal) closeModal();
+    });
+    
+    // Check login status for create button
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user && openCreateBtn) {
+          openCreateBtn.style.display = 'none';
+        }
+      } catch {}
+    });
+  </script>
+  
+  <!-- Difficulty decoration script -->
+  <script>
+    (async function attachDifficulty(){
+      try {
+        const res = await fetch('/recipes');
+        if(!res.ok) return;
+        const items = await res.json();
+        
+        // Log the first recipe to see what fields are available
+        if (items.length > 0) {
+          console.log('Sample recipe data:', items[0]);
+          console.log('Available fields:', Object.keys(items[0]));
+        }
+        
+        // Store recipes by title for both difficulty and time
+        const byTitle = new Map(items.map(x => {
+          // Try multiple possible field names for time
+          const time = parseInt(
+            x.prepTime || 
+            x.prep_time || 
+            x.time || 
+            x.cookTime || 
+            x.cook_time || 
+            x.totalTime || 
+            x.total_time ||
+            x.minutes ||
+            x.duration ||
+            0
+          );
+          
+          return [
+            String(x.title||'').trim().toLowerCase(), 
+            {
+              difficulty: String(x.difficulty||'Easy'),
+              time: time
+            }
+          ];
+        }));
+        
+        const toClass = (d) => {
+          const s = (d||'').toLowerCase();
+          if (s==='hard') return 'hard';
+          if (s==='medium') return 'medium';
+          return 'easy';
+        };
+        
+        function decorate() {
+          document.querySelectorAll('.recipe-card').forEach(card=>{
+            if (card.__diffDecorated) return;
+            const titleEl = card.querySelector('h3');
+            if (!titleEl) return;
+            const key = titleEl.textContent.trim().toLowerCase();
+            const recipeData = byTitle.get(key);
+            
+            if (recipeData) {
+              // Add difficulty class
+              const diffClass = toClass(recipeData.difficulty);
+              card.classList.add(diffClass);
+              
+              // Store time as data attribute for filtering
+              card.setAttribute('data-time', recipeData.time);
+              
+              console.log('Decorated card:', key, 'Difficulty:', diffClass, 'Time:', recipeData.time);
+              
+              // Add difficulty pill
+              const pill = document.createElement('span');
+              pill.className = 'diff-pill ' + diffClass;
+              const label = diffClass.charAt(0).toUpperCase()+diffClass.slice(1);
+              pill.textContent = label;
+              card.appendChild(pill);
+              
+              card.__diffDecorated = true;
+            }
+          });
+        }
+        
+        // Make decorate function global so filters can use it
+        window.decorateDifficulty = decorate;
+        
+        decorate();
+        setTimeout(decorate, 250);
+        setTimeout(decorate, 500);
+        setTimeout(decorate, 1000);
+        setTimeout(decorate, 2000);
+        
+        const _refresh = window.refresh;
+        if (typeof _refresh === 'function') {
+          window.refresh = async function(){
+            const r = await _refresh.apply(this, arguments);
+            setTimeout(decorate, 50);
+            setTimeout(decorate, 250);
+            return r;
+          }
+        }
+      } catch(e) {
+        console.error('Error loading recipe data:', e);
+      }
+    })();
+  </script>
+</body>
+</html>
