@@ -27,7 +27,7 @@ function initMap() {
     styles: mapStyles
   });
 
-  // Try to get user's location
+  // getting users location
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -37,7 +37,7 @@ function initMap() {
         };
         map.setCenter(userLocation);
 
-        // Add blue marker for user's location
+        // blue marker for users location
         new google.maps.Marker({
           position: userLocation,
           map: map,
