@@ -44,11 +44,17 @@
       </div>
 
       <form id="paymentForm">
+        <!-- Email (always visible) -->
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
         <!-- Account Information (only for non-logged in users) -->
         <div id="accountSection">
           <div class="form-group">
-            <label for="email">Email Address *</label>
-            <input type="email" id="email" name="email" required>
+            <label for="handle">Username (Handle) *</label>
+            <input type="text" id="handle" name="handle" placeholder="e.g., john_fruits" required>
           </div>
 
           <div class="form-row">
@@ -76,15 +82,82 @@
           <textarea id="standDescription" name="standDescription" rows="3" placeholder="Tell customers about your stand..."></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="phone_number">Phone Number *</label>
+          <input type="tel" id="phone_number" name="phone_number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="standAddress">Stand Address *</label>
+          <input type="text" id="standAddress" name="standAddress" placeholder="Street address" required>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label for="phone">Phone Number *</label>
-            <input type="tel" id="phone" name="phone" required>
+            <label for="city">City *</label>
+            <input type="text" id="city" name="city" required>
           </div>
           <div class="form-group">
-            <label for="standLocation">Stand Location *</label>
-            <input type="text" id="standLocation" name="standLocation" placeholder="City, State" required>
+            <label for="state">State *</label>
+            <select id="state" name="state" required>
+              <option value="">Select a state</option>
+              <option value="Alabama">Alabama</option>
+              <option value="Alaska">Alaska</option>
+              <option value="Arizona">Arizona</option>
+              <option value="Arkansas">Arkansas</option>
+              <option value="California">California</option>
+              <option value="Colorado">Colorado</option>
+              <option value="Connecticut">Connecticut</option>
+              <option value="Delaware">Delaware</option>
+              <option value="Florida">Florida</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Hawaii">Hawaii</option>
+              <option value="Idaho">Idaho</option>
+              <option value="Illinois">Illinois</option>
+              <option value="Indiana">Indiana</option>
+              <option value="Iowa">Iowa</option>
+              <option value="Kansas">Kansas</option>
+              <option value="Kentucky">Kentucky</option>
+              <option value="Louisiana">Louisiana</option>
+              <option value="Maine">Maine</option>
+              <option value="Maryland">Maryland</option>
+              <option value="Massachusetts">Massachusetts</option>
+              <option value="Michigan">Michigan</option>
+              <option value="Minnesota">Minnesota</option>
+              <option value="Mississippi">Mississippi</option>
+              <option value="Missouri">Missouri</option>
+              <option value="Montana">Montana</option>
+              <option value="Nebraska">Nebraska</option>
+              <option value="Nevada">Nevada</option>
+              <option value="New Hampshire">New Hampshire</option>
+              <option value="New Jersey">New Jersey</option>
+              <option value="New Mexico">New Mexico</option>
+              <option value="New York">New York</option>
+              <option value="North Carolina">North Carolina</option>
+              <option value="North Dakota">North Dakota</option>
+              <option value="Ohio">Ohio</option>
+              <option value="Oklahoma">Oklahoma</option>
+              <option value="Oregon">Oregon</option>
+              <option value="Pennsylvania">Pennsylvania</option>
+              <option value="Rhode Island">Rhode Island</option>
+              <option value="South Carolina">South Carolina</option>
+              <option value="South Dakota">South Dakota</option>
+              <option value="Tennessee">Tennessee</option>
+              <option value="Texas">Texas</option>
+              <option value="Utah">Utah</option>
+              <option value="Vermont">Vermont</option>
+              <option value="Virginia">Virginia</option>
+              <option value="Washington">Washington</option>
+              <option value="West Virginia">West Virginia</option>
+              <option value="Wisconsin">Wisconsin</option>
+              <option value="Wyoming">Wyoming</option>
+            </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="zipcode">ZIP Code *</label>
+          <input type="text" id="zipcode" name="zipcode" placeholder="12345" maxlength="5" required>
         </div>
 
         <!-- Payment Information -->
@@ -200,7 +273,7 @@
           'List your fruit stand location',
           'Update inventory daily',
           'Customer reviews & ratings',
-          'Basic analytics dashboard',
+          // 'Basic analytics dashboard',
           'Email support'
         ],
         amount: 4.99
@@ -213,8 +286,8 @@
         features: [
           'Everything in Monthly',
           'Priority customer support',
-          'Featured stand placement',
-          'Advanced analytics',
+          // 'Featured stand placement',
+          // 'Advanced analytics',
           'Photo gallery (up to 10 photos)',
           'Social media integration'
         ],
@@ -229,9 +302,9 @@
           'Everything in 3 Months',
           'Premium stand badge',
           'Unlimited photos',
-          'Custom stand URL',
-          'Priority listing in searches',
-          'Dedicated account manager',
+          // 'Custom stand URL',
+          // 'Priority listing in searches',
+          // 'Dedicated account manager',
           'Promotional campaigns'
         ],
         amount: 15.00
@@ -265,12 +338,35 @@
     document.getElementById('total').textContent = `$${total.toFixed(2)}`;
 
     // Check if user is logged in
-    // This should be replaced with actual authentication check
-    const isLoggedIn = false; // Set this based on your auth system
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const userId = localStorage.getItem('userId');
 
-    if (isLoggedIn) {
+    if (isLoggedIn && userId) {
+      // User is logged in - hide account creation fields
       document.getElementById('accountSection').style.display = 'none';
       document.getElementById('accountNotice').innerHTML = '<p><strong>Upgrade to Seller Account</strong> Complete your payment to start selling!</p>';
+
+      // Remove required attribute from hidden fields
+      document.getElementById('handle').required = false;
+      document.getElementById('password').required = false;
+      document.getElementById('confirmPassword').required = false;
+
+      // Fetch user email to pre-fill
+      fetch(`/api/accounts/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+          if (user && user.email) {
+            document.getElementById('email').value = user.email;
+            document.getElementById('email').readOnly = true;
+          }
+        })
+        .catch(err => console.error('Error fetching user:', err));
+    } else {
+      // Make sure all account fields are required
+      document.getElementById('email').required = true;
+      document.getElementById('handle').required = true;
+      document.getElementById('password').required = true;
+      document.getElementById('confirmPassword').required = true;
     }
 
     // Payment method toggle
@@ -304,27 +400,98 @@
       e.target.value = value;
     });
 
+    // ZIP code formatting (numbers only)
+    document.getElementById('zipcode').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+
     // Form submission
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
       // Validate passwords match if account section is visible
-      if (document.getElementById('accountSection').style.display !== 'none') {
+      const accountSectionVisible = document.getElementById('accountSection').style.display !== 'none';
+      if (accountSectionVisible) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        
+
         if (password !== confirmPassword) {
           alert('Passwords do not match!');
           return;
         }
       }
 
-      // Here you would process the payment and create the seller account
-      // For now, just show a success message
-      alert('Processing your payment...\n\nIn production, this would:\n1. Process payment\n2. Create/upgrade account to seller\n3. Set up your fruit stand\n4. Redirect to seller dashboard');
-      
-      // Redirect to seller dashboard
-      // window.location.href = '/seller/dashboard';
+      // Validate state is selected
+      const state = document.getElementById('state').value;
+      if (!state) {
+        alert('Please select a state');
+        return;
+      }
+
+      // Validate ZIP code
+      const zipcode = document.getElementById('zipcode').value;
+      if (zipcode.length !== 5) {
+        alert('Please enter a valid 5-digit ZIP code');
+        return;
+      }
+
+      // Get form data
+      const formData = {
+        email: document.getElementById('email').value,
+        subscriptionType: plan,
+        standName: document.getElementById('standName').value,
+        standDescription: document.getElementById('standDescription').value,
+        phone_number: document.getElementById('phone_number').value,
+        standAddress: document.getElementById('standAddress').value,
+        city: document.getElementById('city').value,
+        state: state,
+        zipcode: zipcode,
+        paymentMethod: document.querySelector('.payment-method.active').dataset.method
+      };
+
+      // Add account fields for new users
+      if (accountSectionVisible) {
+        formData.password = document.getElementById('password').value;
+        formData.handle = document.getElementById('handle').value;
+      }
+
+      // Disable submit button
+      const submitBtn = document.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      try {
+        // Send data to backend
+        const response = await fetch('/api/purchase-seller-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`Success! ${result.message}\n\nYour subscription is active until ${new Date(result.subscriptionEnd).toLocaleDateString()}`);
+
+          // Store user info in localStorage (temporary until proper auth is implemented)
+          localStorage.setItem('userId', result.userId);
+          localStorage.setItem('isLoggedIn', 'true');
+
+          // Redirect to homepage or seller dashboard
+          window.location.href = '/';
+        } else {
+          alert(`Error: ${result.error}`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Complete Purchase & Become a Seller';
+        }
+      } catch (error) {
+        console.error('Purchase error:', error);
+        alert('An error occurred while processing your purchase. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Purchase & Become a Seller';
+      }
     });
   </script>
 </body>
