@@ -10,9 +10,12 @@
 </head>
 <body>
   <!-- Top Navigation Bar -->
-  <div class="topbar">
+  <div class="navbar">
     <div class="logo"><a href="/"><img src="../images/fruiti.png" alt="Fruiti" /></a></div>
-    <div class="search-bar"><input type="text" placeholder="Search Recipes..." /></div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search Recipes..." />
+      <span class="icon">🔍</span>
+    </div>
     <div class="auth-buttons">
       <button class="login-btn" onclick="location.href='/login'">Log In</button>
       <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
@@ -25,6 +28,7 @@
     <a href="/UI/nutrition.html">Nutrition</a>
     <a class="active" href="/UI/recipe.html">Recipes</a>
     <a href="/UI/about-us.html">About Us</a>
+    <a href="/UI/contact.html">Contact</a>
   </nav>
   
   <div class="black-bar"></div>
@@ -45,17 +49,17 @@
           <h4>Difficulty</h4>
           <div class="filter-options">
             <label class="filter-checkbox">
-              <input type="checkbox" name="difficulty" value="easy" />
+              <input type="checkbox" name="difficulty" value="easy" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Easy</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="difficulty" value="medium" />
+              <input type="checkbox" name="difficulty" value="medium" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Medium</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="difficulty" value="hard" />
+              <input type="checkbox" name="difficulty" value="hard" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Hard</span>
             </label>
@@ -67,22 +71,22 @@
           <h4>Preparation Time</h4>
           <div class="filter-options">
             <label class="filter-checkbox">
-              <input type="checkbox" name="time" value="0-15" />
+              <input type="checkbox" name="time" value="0-15" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Under 15 min</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="time" value="15-30" />
+              <input type="checkbox" name="time" value="15-30" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">15-30 min</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="time" value="30-60" />
+              <input type="checkbox" name="time" value="30-60" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">30-60 min</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="time" value="60+" />
+              <input type="checkbox" name="time" value="60+" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Over 60 min</span>
             </label>
@@ -94,22 +98,22 @@
           <h4>Season</h4>
           <div class="filter-options">
             <label class="filter-checkbox">
-              <input type="checkbox" name="season" value="spring" />
+              <input type="checkbox" name="season" value="spring" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Spring</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="season" value="summer" />
+              <input type="checkbox" name="season" value="summer" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Summer</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="season" value="fall" />
+              <input type="checkbox" name="season" value="fall" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Fall</span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" name="season" value="winter" />
+              <input type="checkbox" name="season" value="winter" class="filter-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Winter</span>
             </label>
@@ -253,6 +257,185 @@
   <script src="/js/recipe.js"></script>
   <script src="/js/recipe-auth-addon.js"></script>
   
+  <!-- Filter Functionality Script -->
+  <script>
+    // Track if we have valid time data
+    let hasTimeData = false;
+    
+    // Function to apply filters using existing DOM cards
+    function applyFilters() {
+      // Get selected difficulty filters
+      const selectedDifficulties = Array.from(
+        document.querySelectorAll('input[name="difficulty"]:checked')
+      ).map(cb => cb.value.toLowerCase());
+      
+      // Get selected time filters
+      const selectedTimes = Array.from(
+        document.querySelectorAll('input[name="time"]:checked')
+      ).map(cb => cb.value);
+      
+      // Get all recipe cards
+      const allCards = document.querySelectorAll('.recipe-card');
+      
+      console.log('=== APPLYING FILTERS ===');
+      console.log('Difficulties selected:', selectedDifficulties);
+      console.log('Times selected:', selectedTimes);
+      console.log('Total cards:', allCards.length);
+      console.log('Has time data:', hasTimeData);
+      
+      // If no filters selected, show all
+      if (selectedDifficulties.length === 0 && selectedTimes.length === 0) {
+        allCards.forEach(card => card.style.display = '');
+        
+        // Remove any existing "no results" message
+        const grid = document.getElementById('cards');
+        const existingMsg = grid?.querySelector('.no-results-message');
+        if (existingMsg) existingMsg.remove();
+        
+        return;
+      }
+      
+      let visibleCount = 0;
+      
+      // Filter each card
+      allCards.forEach(card => {
+        let shouldShow = true;
+        
+        // Get card's difficulty class
+        const cardDifficulty = 
+          card.classList.contains('easy') ? 'easy' :
+          card.classList.contains('medium') ? 'medium' :
+          card.classList.contains('hard') ? 'hard' : '';
+        
+        // Check difficulty filter
+        if (selectedDifficulties.length > 0 && cardDifficulty) {
+          if (!selectedDifficulties.includes(cardDifficulty)) {
+            shouldShow = false;
+          }
+        }
+        
+        // Check time filter ONLY if we have time data
+        if (shouldShow && selectedTimes.length > 0 && hasTimeData) {
+          const recipeTime = parseInt(card.getAttribute('data-time') || '0');
+          
+          let matchesTime = false;
+          
+          for (const timeRange of selectedTimes) {
+            if (timeRange === '0-15' && recipeTime > 0 && recipeTime < 15) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '15-30' && recipeTime >= 15 && recipeTime <= 30) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '30-60' && recipeTime > 30 && recipeTime <= 60) {
+              matchesTime = true;
+              break;
+            } else if (timeRange === '60+' && recipeTime > 60) {
+              matchesTime = true;
+              break;
+            }
+          }
+          
+          if (!matchesTime) {
+            shouldShow = false;
+          }
+        }
+        
+        // Show or hide card
+        if (shouldShow) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      console.log('Visible cards after filter:', visibleCount);
+      
+      // Handle "no results" message
+      const grid = document.getElementById('cards');
+      const existingMsg = grid?.querySelector('.no-results-message');
+      if (existingMsg) existingMsg.remove();
+      
+      if (visibleCount === 0 && grid) {
+        const msg = document.createElement('p');
+        msg.className = 'no-results-message';
+        msg.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 16px;';
+        msg.textContent = 'No recipes match your filters. Try adjusting your selection.';
+        grid.appendChild(msg);
+      }
+      
+      // Show warning if time filter is selected but we have no time data
+      if (selectedTimes.length > 0 && !hasTimeData) {
+        console.warn('⚠️ Time filters selected but no time data available in recipes!');
+        console.warn('Time filtering is disabled. Only difficulty filtering will work.');
+      }
+    }
+    
+    // Attach filter listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Listen to all filter checkboxes
+      document.querySelectorAll('.filter-input').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          console.log('Filter changed:', checkbox.name, '=', checkbox.value, 'checked:', checkbox.checked);
+          setTimeout(applyFilters, 100);
+        });
+      });
+      
+      // Clear filters button
+      const clearFiltersBtn = document.getElementById('clearFilters');
+      clearFiltersBtn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+        applyFilters();
+      });
+      
+      // Wait for recipe cards to be loaded and decorated
+      let checkCount = 0;
+      const checkForCards = setInterval(() => {
+        const cards = document.querySelectorAll('.recipe-card[data-time]');
+        checkCount++;
+        
+        if (cards.length > 0) {
+          clearInterval(checkForCards);
+          
+          // Check if any cards have non-zero time data
+          let cardsWithTime = 0;
+          cards.forEach(card => {
+            const time = parseInt(card.getAttribute('data-time') || '0');
+            if (time > 0) cardsWithTime++;
+          });
+          
+          hasTimeData = cardsWithTime > 0;
+          
+          console.log('✓ Filters ready! Found', cards.length, 'decorated recipe cards');
+          console.log('✓ Cards with time data:', cardsWithTime);
+          
+          if (!hasTimeData) {
+            console.warn('⚠️ WARNING: No recipe has time data!');
+            console.warn('⚠️ Time filters will not work. Check your /recipes API response.');
+            console.warn('⚠️ Expected fields: prepTime, prep_time, time, cookTime, cook_time, totalTime, minutes, or duration');
+          }
+          
+          // Log sample card data
+          if (cards[0]) {
+            console.log('Sample card - Title:', cards[0].querySelector('h3')?.textContent);
+            console.log('Sample card - Time:', cards[0].getAttribute('data-time'));
+            console.log('Sample card - Difficulty:', 
+              cards[0].classList.contains('easy') ? 'easy' :
+              cards[0].classList.contains('medium') ? 'medium' :
+              cards[0].classList.contains('hard') ? 'hard' : 'unknown'
+            );
+          }
+        } else if (checkCount > 20) {
+          clearInterval(checkForCards);
+          console.error('❌ Could not find decorated cards after 10 seconds');
+        }
+      }, 500);
+    });
+  </script>
+  
   <!-- Modal Controls -->
   <script>
     // Modal controls
@@ -278,15 +461,6 @@
       if (e.target === createModal) closeModal();
     });
     
-    // Filter controls
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    clearFiltersBtn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
-        cb.checked = false;
-      });
-      // Trigger filter update if you have filtering logic
-    });
-    
     // Check login status for create button
     document.addEventListener('DOMContentLoaded', () => {
       try {
@@ -305,7 +479,38 @@
         const res = await fetch('/recipes');
         if(!res.ok) return;
         const items = await res.json();
-        const byTitle = new Map(items.map(x => [String(x.title||'').trim().toLowerCase(), String(x.difficulty||'Easy')]));
+        
+        // Log the first recipe to see what fields are available
+        if (items.length > 0) {
+          console.log('Sample recipe data:', items[0]);
+          console.log('Available fields:', Object.keys(items[0]));
+        }
+        
+        // Store recipes by title for both difficulty and time
+        const byTitle = new Map(items.map(x => {
+          // Try multiple possible field names for time
+          const time = parseInt(
+            x.prepTime || 
+            x.prep_time || 
+            x.time || 
+            x.cookTime || 
+            x.cook_time || 
+            x.totalTime || 
+            x.total_time ||
+            x.minutes ||
+            x.duration ||
+            0
+          );
+          
+          return [
+            String(x.title||'').trim().toLowerCase(), 
+            {
+              difficulty: String(x.difficulty||'Easy'),
+              time: time
+            }
+          ];
+        }));
+        
         const toClass = (d) => {
           const s = (d||'').toLowerCase();
           if (s==='hard') return 'hard';
@@ -319,29 +524,51 @@
             const titleEl = card.querySelector('h3');
             if (!titleEl) return;
             const key = titleEl.textContent.trim().toLowerCase();
-            const diffClass = toClass(byTitle.get(key));
-            card.classList.add(diffClass);
-            const pill = document.createElement('span');
-            pill.className = 'diff-pill ' + diffClass;
-            const label = diffClass.charAt(0).toUpperCase()+diffClass.slice(1);
-            pill.textContent = label;
-            card.appendChild(pill);
-            card.__diffDecorated = true;
+            const recipeData = byTitle.get(key);
+            
+            if (recipeData) {
+              // Add difficulty class
+              const diffClass = toClass(recipeData.difficulty);
+              card.classList.add(diffClass);
+              
+              // Store time as data attribute for filtering
+              card.setAttribute('data-time', recipeData.time);
+              
+              console.log('Decorated card:', key, 'Difficulty:', diffClass, 'Time:', recipeData.time);
+              
+              // Add difficulty pill
+              const pill = document.createElement('span');
+              pill.className = 'diff-pill ' + diffClass;
+              const label = diffClass.charAt(0).toUpperCase()+diffClass.slice(1);
+              pill.textContent = label;
+              card.appendChild(pill);
+              
+              card.__diffDecorated = true;
+            }
           });
         }
         
+        // Make decorate function global so filters can use it
+        window.decorateDifficulty = decorate;
+        
         decorate();
         setTimeout(decorate, 250);
+        setTimeout(decorate, 500);
+        setTimeout(decorate, 1000);
+        setTimeout(decorate, 2000);
         
         const _refresh = window.refresh;
         if (typeof _refresh === 'function') {
           window.refresh = async function(){
             const r = await _refresh.apply(this, arguments);
             setTimeout(decorate, 50);
+            setTimeout(decorate, 250);
             return r;
           }
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error('Error loading recipe data:', e);
+      }
     })();
   </script>
 </body>
