@@ -8,6 +8,7 @@ const routes = {
   '/login': 'login.html',
   '/settings': 'settingspage.html',
   '/nutrition': 'nutrition.html',
+  '/recipe': 'recipe.html',
   '/aboutus': 'aboutus.html',
   '/become-seller': 'become-seller.html'
 };

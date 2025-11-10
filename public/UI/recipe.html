@@ -16,10 +16,12 @@
       <input type="text" placeholder="Search Recipes..." />
       <span class="icon">🔍</span>
     </div>
-    <div class="auth-buttons">
-      <button class="login-btn" onclick="location.href='/login'">Log In</button>
-      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
-    </div>
+<div class="auth-buttons" id="authButtons">
+    <!-- Default state - show login/signup -->
+    <button class="login-btn" onclick="location.href='/login'">Log In</button>
+    <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+</div>
+
   </div>
   
   <!-- Navigation Links -->
@@ -571,5 +573,6 @@
       }
     })();
   </script>
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
 </html>
