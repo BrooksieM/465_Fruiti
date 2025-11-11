@@ -9,6 +9,7 @@ const routes = {
   '/settings': 'settingspage.html',
   '/nutrition': 'nutrition.html',
   '/aboutus': 'aboutus.html',
+  '/recipe': 'recipe.html',
   '/become-seller': 'become-seller.html'
 };
 
