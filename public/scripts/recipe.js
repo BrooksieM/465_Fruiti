@@ -129,6 +129,15 @@ async function handleCreateRecipe(e) {
     return;
   }
 
+  // Check if user already has 3 recipes (only for new recipes, not edits)
+  if (!isEditingRecipe) {
+    const userRecipes = allRecipes.filter(recipe => recipe.userId === (currentUser.id || localStorage.getItem('userId')));
+    if (userRecipes.length >= 3) {
+      showError('You can only create a maximum of 3 recipes');
+      return;
+    }
+  }
+
   const name = document.getElementById('recipeName').value.trim();
   const ingredientsInput = document.getElementById('ingredients').value.trim();
   const instructions = document.getElementById('instructions').value.trim();
@@ -248,13 +257,31 @@ function displayRecipes() {
 
   if (allRecipes.length === 0) {
     recipesList.innerHTML = '<div class="no-recipes">No recipes yet. Be the first to create one!</div>';
-    return;
+  } else {
+    allRecipes.forEach(recipe => {
+      const card = createRecipeCard(recipe);
+      recipesList.appendChild(card);
+    });
   }
 
-  allRecipes.forEach(recipe => {
-    const card = createRecipeCard(recipe);
-    recipesList.appendChild(card);
-  });
+  // Check if current user has reached recipe limit
+  if (currentUser) {
+    const createButton = document.getElementById('createRecipeButton');
+    const userRecipes = allRecipes.filter(recipe => recipe.userId === (currentUser.id || localStorage.getItem('userId')));
+    const btn = createButton.querySelector('.btn-create');
+
+    if (userRecipes.length >= 3) {
+      btn.disabled = true;
+      btn.title = 'You have reached the maximum of 3 recipes';
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+    } else {
+      btn.disabled = false;
+      btn.title = '';
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+  }
 }
 
 // Create a recipe card element

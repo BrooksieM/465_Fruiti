@@ -5,11 +5,14 @@ module.exports = function (app, supabase)
     {
       try
       {
-        const { name, ingredients, instructions, userId } = req.body;
+        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId } = req.body;
 
         // Validate required fields
         if (!name || !ingredients || !instructions || !userId)
           return res.status(400).json({ error: 'Missing required fields (name, ingredients, instructions, userId)' });
+
+        if (!difficulty || !estimatedTime)
+          return res.status(400).json({ error: 'Missing required fields (difficulty, estimatedTime)' });
 
         // Validate input lengths
         if (typeof name !== 'string' || name.trim().length === 0 || name.length > 255)
@@ -17,6 +20,14 @@ module.exports = function (app, supabase)
 
         if (typeof instructions !== 'string' || instructions.trim().length === 0 || instructions.length > 5000)
           return res.status(400).json({ error: 'Instructions must be between 1 and 5000 characters' });
+
+        // Validate difficulty
+        if (!['Easy', 'Medium', 'Hard'].includes(difficulty))
+          return res.status(400).json({ error: 'Difficulty must be Easy, Medium, or Hard' });
+
+        // Validate estimated time
+        if (!Number.isInteger(estimatedTime) || estimatedTime <= 0)
+          return res.status(400).json({ error: 'Estimated time must be a positive integer' });
 
         // Validate ingredients format
         let parsedIngredients = ingredients;
@@ -37,6 +48,9 @@ module.exports = function (app, supabase)
             name: name.trim(),
             ingredients: JSON.stringify(parsedIngredients),
             instructions: instructions.trim(),
+            difficulty: difficulty,
+            estimated_time: estimatedTime,
+            image: image || null,
             user_id: userId,
             created_at: new Date().toISOString()
           }])
@@ -160,7 +174,7 @@ module.exports = function (app, supabase)
       try
       {
         const id = Number(req.params.id);
-        const { name, ingredients, instructions, userId } = req.body;
+        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId } = req.body;
 
         // Validate ID
         if (!Number.isInteger(id) || id <= 0)
@@ -171,8 +185,8 @@ module.exports = function (app, supabase)
           return res.status(401).json({ error: 'User ID required for updates' });
 
         // Validate that at least one field is being updated
-        if (!name && !ingredients && !instructions)
-          return res.status(400).json({ error: 'At least one field (name, ingredients, instructions) must be provided' });
+        if (!name && !ingredients && !instructions && !difficulty && !estimatedTime && !image)
+          return res.status(400).json({ error: 'At least one field must be provided' });
 
         // Validate inputs if provided
         if (name && (typeof name !== 'string' || name.trim().length === 0 || name.length > 255))
@@ -180,6 +194,14 @@ module.exports = function (app, supabase)
 
         if (instructions && (typeof instructions !== 'string' || instructions.trim().length === 0 || instructions.length > 5000))
           return res.status(400).json({ error: 'Instructions must be between 1 and 5000 characters' });
+
+        // Validate difficulty if provided
+        if (difficulty && !['Easy', 'Medium', 'Hard'].includes(difficulty))
+          return res.status(400).json({ error: 'Difficulty must be Easy, Medium, or Hard' });
+
+        // Validate estimated time if provided
+        if (estimatedTime && (!Number.isInteger(estimatedTime) || estimatedTime <= 0))
+          return res.status(400).json({ error: 'Estimated time must be a positive integer' });
 
         // Validate ingredients format if provided
         let parsedIngredients = ingredients;
@@ -215,6 +237,9 @@ module.exports = function (app, supabase)
         if (name) updateData.name = name.trim();
         if (instructions) updateData.instructions = instructions.trim();
         if (ingredients) updateData.ingredients = JSON.stringify(parsedIngredients);
+        if (difficulty) updateData.difficulty = difficulty;
+        if (estimatedTime) updateData.estimated_time = estimatedTime;
+        if (image) updateData.image = image;
 
         const { data, error } = await supabase
           .from('recipes')
