@@ -100,6 +100,7 @@ require('./Services/fruitstandService')(app, supabase);
 require('./Services/nutritionService')(app, supabase);
 require('./Services/recipeService')(app, supabase);
 require('./Services/sellerApplicationService')(app, supabase);
+require('./Services/uploadService')(app, supabase);
 
 //swagger 
 const swaggerSetup = require('./swagger/swagger');

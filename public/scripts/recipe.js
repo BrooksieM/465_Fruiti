@@ -406,7 +406,7 @@ function editRecipe(recipe) {
   document.getElementById('recipeName').value = recipe.name;
   document.getElementById('ingredients').value = ingredientsList.join(', ');
   document.getElementById('instructions').value = recipe.instructions;
-  document.getElementById('estimatedTime').value = recipe.estimatedTime || '';
+  document.getElementById('estimatedTime').value = recipe.estimated_time || '';
 
   // Set difficulty level
   if (recipe.difficulty) {
