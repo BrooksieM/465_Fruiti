@@ -18,8 +18,18 @@ module.exports = function (app, supabase)
         if (typeof name !== 'string' || name.trim().length === 0 || name.length > 255)
           return res.status(400).json({ error: 'Recipe name must be between 1 and 255 characters' });
 
-        if (typeof instructions !== 'string' || instructions.trim().length === 0 || instructions.length > 5000)
-          return res.status(400).json({ error: 'Instructions must be between 1 and 5000 characters' });
+        // Validate instructions format
+        let parsedInstructions = instructions;
+        if (typeof instructions === 'string') {
+          try {
+            parsedInstructions = JSON.parse(instructions);
+            if (!Array.isArray(parsedInstructions) || parsedInstructions.length === 0) {
+              return res.status(400).json({ error: 'Instructions must be a non-empty array' });
+            }
+          } catch {
+            return res.status(400).json({ error: 'Instructions must be a valid JSON array' });
+          }
+        }
 
         // Validate difficulty
         if (!['Easy', 'Medium', 'Hard'].includes(difficulty))
@@ -46,8 +56,8 @@ module.exports = function (app, supabase)
           .from('recipes')
           .insert([{
             name: name.trim(),
-            ingredients: JSON.stringify(parsedIngredients),
-            instructions: instructions.trim(),
+            ingredients: parsedIngredients,
+            instructions: parsedInstructions,
             difficulty: difficulty,
             estimated_time: estimatedTime,
             image: image || null,
@@ -192,8 +202,20 @@ module.exports = function (app, supabase)
         if (name && (typeof name !== 'string' || name.trim().length === 0 || name.length > 255))
           return res.status(400).json({ error: 'Recipe name must be between 1 and 255 characters' });
 
-        if (instructions && (typeof instructions !== 'string' || instructions.trim().length === 0 || instructions.length > 5000))
-          return res.status(400).json({ error: 'Instructions must be between 1 and 5000 characters' });
+        // Validate instructions format if provided
+        let parsedInstructions = instructions;
+        if (instructions) {
+          if (typeof instructions === 'string') {
+            try {
+              parsedInstructions = JSON.parse(instructions);
+              if (!Array.isArray(parsedInstructions) || parsedInstructions.length === 0) {
+                return res.status(400).json({ error: 'Instructions must be a non-empty array' });
+              }
+            } catch {
+              return res.status(400).json({ error: 'Instructions must be a valid JSON array' });
+            }
+          }
+        }
 
         // Validate difficulty if provided
         if (difficulty && !['Easy', 'Medium', 'Hard'].includes(difficulty))
@@ -235,8 +257,8 @@ module.exports = function (app, supabase)
         // Build update object with only provided fields
         const updateData = { updated_at: new Date().toISOString() };
         if (name) updateData.name = name.trim();
-        if (instructions) updateData.instructions = instructions.trim();
-        if (ingredients) updateData.ingredients = JSON.stringify(parsedIngredients);
+        if (instructions) updateData.instructions = parsedInstructions;
+        if (ingredients) updateData.ingredients = parsedIngredients;
         if (difficulty) updateData.difficulty = difficulty;
         if (estimatedTime) updateData.estimated_time = estimatedTime;
         if (image) updateData.image = image;

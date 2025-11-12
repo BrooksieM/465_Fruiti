@@ -172,6 +172,17 @@ async function handleCreateRecipe(e) {
     return;
   }
 
+  // Parse instructions - split by newline (each line is a step)
+  const instructionSteps = instructions
+    .split(/\n/)
+    .map(step => step.trim())
+    .filter(step => step.length > 0);
+
+  if (instructionSteps.length === 0) {
+    showError('Please enter at least one instruction step');
+    return;
+  }
+
   try {
     // Handle image upload if present
     let imageUrl = null;
@@ -203,8 +214,8 @@ async function handleCreateRecipe(e) {
       },
       body: JSON.stringify({
         name: name,
-        ingredients: JSON.stringify(ingredients),
-        instructions: instructions,
+        ingredients: ingredients,
+        instructions: instructionSteps,
         difficulty: difficulty,
         estimatedTime: parseInt(estimatedTime),
         image: imageUrl,
@@ -299,13 +310,26 @@ function createRecipeCard(recipe) {
     ingredientsList = [recipe.ingredients];
   }
 
+  // Parse instructions if it's a JSON string
+  let instructionsList = [];
+  try {
+    instructionsList = typeof recipe.instructions === 'string'
+      ? JSON.parse(recipe.instructions)
+      : recipe.instructions;
+  } catch {
+    instructionsList = [recipe.instructions];
+  }
+
   const ingredientPreview = ingredientsList.slice(0, 2).join(', ');
   const ingredientSuffix = ingredientsList.length > 2 ? ` +${ingredientsList.length - 2} more` : '';
+  const instructionPreview = Array.isArray(instructionsList)
+    ? instructionsList[0]
+    : instructionsList;
 
   card.innerHTML = `
     <h3>${escapeHtml(recipe.name)}</h3>
     <p><strong>Ingredients:</strong> ${escapeHtml(ingredientPreview)}${ingredientSuffix}</p>
-    <p><strong>Instructions:</strong> ${escapeHtml(recipe.instructions.substring(0, 100))}...</p>
+    <p><strong>Instructions:</strong> ${escapeHtml(instructionPreview.substring(0, 100))}...</p>
   `;
 
   card.addEventListener('click', () => viewRecipeDetail(recipe));
@@ -356,8 +380,22 @@ function viewRecipeDetail(recipe) {
     ingredientsList = [recipe.ingredients];
   }
 
+  // Parse instructions
+  let instructionsList = [];
+  try {
+    instructionsList = typeof recipe.instructions === 'string'
+      ? JSON.parse(recipe.instructions)
+      : recipe.instructions;
+  } catch {
+    instructionsList = [recipe.instructions];
+  }
+
   const ingredientHTML = ingredientsList
     .map(ing => `<li>${escapeHtml(ing)}</li>`)
+    .join('');
+
+  const instructionHTML = instructionsList
+    .map(step => `<li>${escapeHtml(step)}</li>`)
     .join('');
 
   let detailHTML = `
@@ -367,7 +405,9 @@ function viewRecipeDetail(recipe) {
       ${ingredientHTML}
     </ul>
     <h3>Instructions:</h3>
-    <p>${escapeHtml(recipe.instructions)}</p>
+    <ol>
+      ${instructionHTML}
+    </ol>
   `;
 
   // Add edit/delete buttons if user is logged in
@@ -402,10 +442,20 @@ function editRecipe(recipe) {
     ingredientsList = [recipe.ingredients];
   }
 
+  // Parse instructions
+  let instructionsList = [];
+  try {
+    instructionsList = typeof recipe.instructions === 'string'
+      ? JSON.parse(recipe.instructions)
+      : recipe.instructions;
+  } catch {
+    instructionsList = [recipe.instructions];
+  }
+
   // Populate form with recipe data
   document.getElementById('recipeName').value = recipe.name;
   document.getElementById('ingredients').value = ingredientsList.join(', ');
-  document.getElementById('instructions').value = recipe.instructions;
+  document.getElementById('instructions').value = instructionsList.join('\n');
   document.getElementById('estimatedTime').value = recipe.estimated_time || '';
 
   // Set difficulty level
