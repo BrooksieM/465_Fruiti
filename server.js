@@ -3,10 +3,11 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 const PORT = 3000;
 const path = require('path');
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 // Load environment variables from .env file
