@@ -130,7 +130,9 @@ async function handleCreateRecipe(e) {
   }
 
   // Check if user already has 3 recipes (only for new recipes, not edits)
-  if (!isEditingRecipe) {
+  //  unlimited recipes for 'brstk' (development testing)
+  const username = currentUser.user_metadata?.username || currentUser.username || '';
+  if (!isEditingRecipe && username !== 'brstk') {
     const userRecipes = allRecipes.filter(recipe => recipe.userId === (currentUser.id || localStorage.getItem('userId')));
     if (userRecipes.length >= 3) {
       showError('You can only create a maximum of 3 recipes');
@@ -298,38 +300,21 @@ function displayRecipes() {
 // Create a recipe card element
 function createRecipeCard(recipe) {
   const card = document.createElement('div');
-  card.className = 'recipe-card';
 
-  // Parse ingredients if it's a JSON string
-  let ingredientsList = [];
-  try {
-    ingredientsList = typeof recipe.ingredients === 'string'
-      ? JSON.parse(recipe.ingredients)
-      : recipe.ingredients;
-  } catch {
-    ingredientsList = [recipe.ingredients];
-  }
+  // Add difficulty-based class
+  const difficultyClass = recipe.difficulty ? `difficulty-${recipe.difficulty.toLowerCase()}` : '';
+  card.className = `recipe-card ${difficultyClass}`;
 
-  // Parse instructions if it's a JSON string
-  let instructionsList = [];
-  try {
-    instructionsList = typeof recipe.instructions === 'string'
-      ? JSON.parse(recipe.instructions)
-      : recipe.instructions;
-  } catch {
-    instructionsList = [recipe.instructions];
-  }
-
-  const ingredientPreview = ingredientsList.slice(0, 2).join(', ');
-  const ingredientSuffix = ingredientsList.length > 2 ? ` +${ingredientsList.length - 2} more` : '';
-  const instructionPreview = Array.isArray(instructionsList)
-    ? instructionsList[0]
-    : instructionsList;
+  // Create image element or placeholder
+  const imageHTML = recipe.image
+    ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-card-image">`
+    : `<div class="recipe-card-image-placeholder">No image</div>`;
 
   card.innerHTML = `
+    ${imageHTML}
     <h3>${escapeHtml(recipe.name)}</h3>
-    <p><strong>Ingredients:</strong> ${escapeHtml(ingredientPreview)}${ingredientSuffix}</p>
-    <p><strong>Instructions:</strong> ${escapeHtml(instructionPreview.substring(0, 100))}...</p>
+    <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
+    <p><strong>Time:</strong> ${recipe.estimated_time} min</p>
   `;
 
   card.addEventListener('click', () => viewRecipeDetail(recipe));
@@ -398,8 +383,12 @@ function viewRecipeDetail(recipe) {
     .map(step => `<li>${escapeHtml(step)}</li>`)
     .join('');
 
+  const estimatedTime = recipe.estimated_time !== undefined ? recipe.estimated_time : (recipe.estimatedTime !== undefined ? recipe.estimatedTime : 'N/A');
+
   let detailHTML = `
     <h2>${escapeHtml(recipe.name)}</h2>
+    <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
+    <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
     <h3>Ingredients:</h3>
     <ul>
       ${ingredientHTML}
