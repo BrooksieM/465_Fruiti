@@ -78,7 +78,7 @@ app.get(['/recipes', '/recipes.html'], (req, res) => {
 });
 
 // Redirect old singular path to the unified one
-app.get('/recipe.html', (req, res) => res.redirect(301, '/recipes'));
+app.get('/recipes.html', (req, res) => res.redirect(301, '/recipes'));
 
 async function testConnection() {
   // Simple test - adjust based on your table structure
