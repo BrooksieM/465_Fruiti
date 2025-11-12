@@ -9,7 +9,8 @@ const routes = {
   '/settings': 'settingspage.html',
   '/nutrition': 'nutrition.html',
   '/aboutus': 'aboutus.html',
-  '/become-seller': 'become-seller.html'
+  '/become-seller': 'become-seller.html',
+  '/recipes': 'recipes.html'
 };
 
 Object.entries(routes).forEach(([route, file]) => {

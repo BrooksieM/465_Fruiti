@@ -478,7 +478,7 @@
   <script>
     (async function attachDifficulty(){
       try {
-        const res = await fetch('/recipes');
+        const res = await fetch('/api/recipes');
         if(!res.ok) return;
         const items = await res.json();
         
