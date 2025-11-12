@@ -319,32 +319,38 @@ function createRecipeCard(recipe) {
 
   card.addEventListener('click', () => viewRecipeDetail(recipe));
 
-  // Show edit/delete buttons only for the recipe creator (if user is logged in)
+  // Show edit/delete buttons only for the recipe creator (if user is logged in AND owns the recipe)
   if (currentUser) {
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'recipe-card-actions';
+    const currentUserId = currentUser.id || localStorage.getItem('userId');
+    const recipeOwnerId = recipe.user_id || recipe.userId;
 
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn-edit';
-    editBtn.textContent = 'Edit';
-    editBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      editRecipe(recipe);
-    });
+    // Only show buttons if the current user owns this recipe
+    if (currentUserId === recipeOwnerId) {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'recipe-card-actions';
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn-delete';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (confirm('Are you sure you want to delete this recipe?')) {
-        deleteRecipe(recipe.id);
-      }
-    });
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-edit';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        editRecipe(recipe);
+      });
 
-    actionsDiv.appendChild(editBtn);
-    actionsDiv.appendChild(deleteBtn);
-    card.appendChild(actionsDiv);
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn-delete';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this recipe?')) {
+          deleteRecipe(recipe.id);
+        }
+      });
+
+      actionsDiv.appendChild(editBtn);
+      actionsDiv.appendChild(deleteBtn);
+      card.appendChild(actionsDiv);
+    }
   }
 
   return card;
@@ -399,14 +405,19 @@ function viewRecipeDetail(recipe) {
     </ol>
   `;
 
-  // Add edit/delete buttons if user is logged in
+  // Add edit/delete buttons only if user is the recipe owner
   if (currentUser) {
-    detailHTML += `
-      <div class="modal-actions">
-        <button class="btn-edit" onclick="editRecipeFromModal(${recipe.id})">Edit</button>
-        <button class="btn-delete" onclick="deleteRecipeFromModal(${recipe.id})">Delete</button>
-      </div>
-    `;
+    const currentUserId = currentUser.id || localStorage.getItem('userId');
+    const recipeOwnerId = recipe.user_id || recipe.userId;
+
+    if (currentUserId === recipeOwnerId) {
+      detailHTML += `
+        <div class="modal-actions">
+          <button class="btn-edit" onclick="editRecipeFromModal(${recipe.id})">Edit</button>
+          <button class="btn-delete" onclick="deleteRecipeFromModal(${recipe.id})">Delete</button>
+        </div>
+      `;
+    }
   }
 
   recipeDetail.innerHTML = detailHTML;
