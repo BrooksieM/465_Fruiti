@@ -13,6 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (recipeForm) {
     recipeForm.addEventListener('submit', handleCreateRecipe);
   }
+
+  // Handle image preview
+  const recipeImage = document.getElementById('recipeImage');
+  if (recipeImage) {
+    recipeImage.addEventListener('change', handleImagePreview);
+  }
+
+  // Handle difficulty circle selection
+  const difficultyCircles = document.querySelectorAll('.difficulty-circle');
+  difficultyCircles.forEach(circle => {
+    circle.addEventListener('click', handleDifficultySelect);
+  });
 });
 
 // Check if user is logged in and setup the page accordingly
@@ -41,20 +53,69 @@ function checkAuthStatusAndSetup() {
   }
 }
 
-// Toggle recipe form visibility
-function toggleRecipeForm() {
-  const recipeForm = document.getElementById('recipeForm');
-  const createButton = document.getElementById('createRecipeButton');
+// Open create recipe modal
+function openCreateRecipeModal() {
+  const modal = document.getElementById('createRecipeModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const submitBtn = document.querySelector('#createRecipeForm .btn-submit');
 
-  if (recipeForm.classList.contains('hidden')) {
-    recipeForm.classList.remove('hidden');
-    createButton.classList.add('hidden');
-    // Reset form
-    document.getElementById('createRecipeForm').reset();
-    isEditingRecipe = null;
+  // Reset form
+  document.getElementById('createRecipeForm').reset();
+  isEditingRecipe = null;
+  modalTitle.textContent = 'Create a Recipe';
+  submitBtn.textContent = 'Create Recipe';
+
+  modal.classList.remove('hidden');
+}
+
+// Close create recipe modal
+function closeCreateRecipeModal() {
+  const modal = document.getElementById('createRecipeModal');
+  modal.classList.add('hidden');
+  // Reset form
+  document.getElementById('createRecipeForm').reset();
+  isEditingRecipe = null;
+  const modalTitle = document.getElementById('modalTitle');
+  const submitBtn = document.querySelector('#createRecipeForm .btn-submit');
+  modalTitle.textContent = 'Create a Recipe';
+  submitBtn.textContent = 'Create Recipe';
+  // Clear image preview
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  preview.classList.remove('show');
+}
+
+// Handle difficulty circle selection
+function handleDifficultySelect(e) {
+  const selectedCircle = e.target.closest('.difficulty-circle');
+  const allCircles = document.querySelectorAll('.difficulty-circle');
+  const difficultyInput = document.getElementById('difficultyInput');
+
+  // Remove selected class from all circles
+  allCircles.forEach(circle => circle.classList.remove('selected'));
+
+  // Add selected class to clicked circle
+  selectedCircle.classList.add('selected');
+
+  // Update hidden input
+  difficultyInput.value = selectedCircle.getAttribute('data-difficulty');
+}
+
+// Handle image preview
+function handleImagePreview(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('imagePreview');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      preview.innerHTML = `<img src="${event.target.result}" alt="Recipe preview">`;
+      preview.classList.add('show');
+    };
+    reader.readAsDataURL(file);
   } else {
-    recipeForm.classList.add('hidden');
-    createButton.classList.remove('hidden');
+    preview.innerHTML = '';
+    preview.classList.remove('show');
   }
 }
 
@@ -71,10 +132,23 @@ async function handleCreateRecipe(e) {
   const name = document.getElementById('recipeName').value.trim();
   const ingredientsInput = document.getElementById('ingredients').value.trim();
   const instructions = document.getElementById('instructions').value.trim();
+  const difficulty = document.getElementById('difficultyInput').value.trim();
+  const estimatedTime = document.getElementById('estimatedTime').value.trim();
+  const imageFile = document.getElementById('recipeImage').files[0];
 
   // Validate inputs
   if (!name || !ingredientsInput || !instructions) {
     showError('Please fill in all fields');
+    return;
+  }
+
+  if (!difficulty) {
+    showError('Please select a difficulty level');
+    return;
+  }
+
+  if (!estimatedTime) {
+    showError('Please enter an estimated time');
     return;
   }
 
@@ -90,6 +164,26 @@ async function handleCreateRecipe(e) {
   }
 
   try {
+    // Handle image upload if present
+    let imageUrl = null;
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        showError('Failed to upload image');
+        return;
+      }
+
+      const uploadData = await uploadResponse.json();
+      imageUrl = uploadData.url;
+    }
+
     const url = isEditingRecipe ? `/api/recipes/${isEditingRecipe}` : '/api/recipes';
     const method = isEditingRecipe ? 'PUT' : 'POST';
 
@@ -102,6 +196,9 @@ async function handleCreateRecipe(e) {
         name: name,
         ingredients: JSON.stringify(ingredients),
         instructions: instructions,
+        difficulty: difficulty,
+        estimatedTime: parseInt(estimatedTime),
+        image: imageUrl,
         userId: currentUser.id || localStorage.getItem('userId'),
       }),
     });
@@ -112,13 +209,13 @@ async function handleCreateRecipe(e) {
       return;
     }
 
-    const data = await response.json();
+    await response.json();
     showSuccess(isEditingRecipe ? 'Recipe updated successfully!' : 'Recipe created successfully!');
 
     // Reset form and reload recipes
     document.getElementById('createRecipeForm').reset();
     isEditingRecipe = null;
-    toggleRecipeForm();
+    closeCreateRecipeModal();
     await loadRecipes();
   } catch (error) {
     console.error('Error saving recipe:', error);
@@ -282,20 +379,42 @@ function editRecipe(recipe) {
   document.getElementById('recipeName').value = recipe.name;
   document.getElementById('ingredients').value = ingredientsList.join(', ');
   document.getElementById('instructions').value = recipe.instructions;
+  document.getElementById('estimatedTime').value = recipe.estimatedTime || '';
+
+  // Set difficulty level
+  if (recipe.difficulty) {
+    const difficultyInput = document.getElementById('difficultyInput');
+    difficultyInput.value = recipe.difficulty;
+
+    // Update circle visual
+    const allCircles = document.querySelectorAll('.difficulty-circle');
+    allCircles.forEach(circle => {
+      circle.classList.remove('selected');
+      if (circle.getAttribute('data-difficulty') === recipe.difficulty) {
+        circle.classList.add('selected');
+      }
+    });
+  }
 
   isEditingRecipe = recipe.id;
 
-  // Show form and hide button
-  const recipeForm = document.getElementById('recipeForm');
-  const createButton = document.getElementById('createRecipeButton');
-  recipeForm.classList.remove('hidden');
-  createButton.classList.add('hidden');
-
-  // Update button text
-  const submitBtn = document.querySelector('.btn-submit');
+  // Update modal title and button text
+  const modalTitle = document.getElementById('modalTitle');
+  const submitBtn = document.querySelector('#createRecipeForm .btn-submit');
+  modalTitle.textContent = 'Edit Recipe';
   submitBtn.textContent = 'Update Recipe';
 
-  // Close modal
+  // Clear image preview for editing
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  preview.classList.remove('show');
+  document.getElementById('recipeImage').value = '';
+
+  // Open modal
+  const modal = document.getElementById('createRecipeModal');
+  modal.classList.remove('hidden');
+
+  // Close recipe detail modal
   closeRecipeModal();
 }
 
@@ -381,10 +500,16 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Close modal when clicking outside of it
+// Close modals when clicking outside of them
 window.addEventListener('click', (event) => {
-  const modal = document.getElementById('recipeModal');
-  if (event.target === modal) {
+  const recipeModal = document.getElementById('recipeModal');
+  const createRecipeModal = document.getElementById('createRecipeModal');
+
+  if (event.target === recipeModal) {
     closeRecipeModal();
+  }
+
+  if (event.target === createRecipeModal) {
+    closeCreateRecipeModal();
   }
 });

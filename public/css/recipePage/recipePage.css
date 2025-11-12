@@ -12,20 +12,16 @@
   font-size: 28px;
 }
 
-/* Recipe Form */
-.recipe-form {
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+/* Recipe Form Styles for Modal */
+#createRecipeModal h2 {
+  margin-top: 0;
+  color: #017d49;
 }
 
-.recipe-form h2 {
-  margin-top: 0;
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .form-group {
@@ -68,6 +64,97 @@
   min-height: 100px;
 }
 
+.form-group input[type="number"] {
+  min-height: auto;
+  height: 40px;
+}
+
+.form-group input[type="file"] {
+  min-height: auto;
+  height: 40px;
+  padding: 8px 12px;
+}
+
+/* Image Preview */
+.image-preview {
+  margin-top: 10px;
+  max-width: 200px;
+  display: none;
+}
+
+.image-preview.show {
+  display: block;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Difficulty Options */
+.difficulty-options {
+  display: flex;
+  gap: 30px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.difficulty-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 12px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Easy - Green */
+.difficulty-circle[data-difficulty="Easy"] {
+  border-color: #017d49;
+  color: #017d49;
+}
+
+.difficulty-circle[data-difficulty="Easy"].selected {
+  background-color: #017d49;
+  color: white;
+}
+
+/* Medium - Orange */
+.difficulty-circle[data-difficulty="Medium"] {
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+.difficulty-circle[data-difficulty="Medium"].selected {
+  background-color: #ff9800;
+  color: white;
+}
+
+/* Hard - Red */
+.difficulty-circle[data-difficulty="Hard"] {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.difficulty-circle[data-difficulty="Hard"].selected {
+  background-color: #dc3545;
+  color: white;
+}
+
+.difficulty-circle:hover {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
 /* Buttons */
 .btn-submit,
 .btn-cancel,
@@ -86,8 +173,7 @@
 .btn-submit {
   background-color: #017d49;
   color: white;
-  width: 100%;
-  margin-bottom: 10px;
+  flex: 1;
 }
 
 .btn-submit:hover {
@@ -97,7 +183,7 @@
 .btn-cancel {
   background-color: #e6e6e6;
   color: #333;
-  width: 100%;
+  flex: 1;
 }
 
 .btn-cancel:hover {
@@ -233,7 +319,7 @@
   border-radius: 12px;
   max-width: 600px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
