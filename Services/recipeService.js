@@ -1,151 +1,129 @@
-module.exports = function (app, supabase) 
-{
-    // Create a recipe
-    app.post('/api/recipes', async (req, res) => 
-    {
-      try 
-      {
-        const { name, ingredients, instructions } = req.body;
+module.exports = function (app, supabase) {
+  const base = '/api/recipes';
 
-        if (!name || !ingredients || !instructions) 
-          return res.status(400).json({ error: 'Missing required fields' });
+  app.get(base, async (req, res) => {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-        const { data, error } = await supabase
-          .from('recipes')
-          .insert([{ name, ingredients, instructions, created_at: new Date().toISOString() }])
-          .select();
+    if (error) return res.status(500).json({ error: error.message });
 
-        if (error) 
-          return res.status(500).json({ error: error.message });
+    const items = (data || []).map(r => ({
+      id: r.id,
+      title: r.name || r.title || 'Untitled',
+      summary: r.summary || '',
+      ingredients: r.ingredients || '',
+      steps: r.steps || '',
+      servings: r.servings || 0,
+      minutes: r.minutes || 0,
+      difficulty: r.difficulty || 'easy',
+      coverUrl: r.cover_url || r.coverUrl || '',
+      createdAt: r.created_at || null,
+      likes: r.likes ?? 0,
+      dislikes: r.dislikes ?? 0,
+      rating: r.rating ?? 0
+    }));
 
-        res.status(201).json(data[0]);
-      } 
-      catch (error) 
-      {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+    res.json(items);
+  });
+
+  app.post(base, async (req, res) => {
+    const { title, ingredients, steps, summary, servings, minutes, difficulty, coverUrl } = req.body;
+
+    if (!title || !ingredients || !steps) {
+      return res.status(400).json({ error: 'Missing required fields: title, ingredients, steps' });
+    }
+
+    const insert = {
+      name: title,
+      ingredients,
+      steps,
+      summary: summary || '',
+      servings: servings ? Number(servings) : null,
+      minutes: minutes ? Number(minutes) : null,
+      difficulty: difficulty || 'easy',
+      cover_url: coverUrl || '',
+      likes: 0,
+      dislikes: 0,
+      rating: 0
+    };
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .insert([insert])
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.status(201).json({
+      id: data.id,
+      title: data.name,
+      summary: data.summary || '',
+      ingredients: data.ingredients || '',
+      steps: data.steps || '',
+      servings: data.servings || 0,
+      minutes: data.minutes || 0,
+      difficulty: data.difficulty || 'easy',
+      coverUrl: data.cover_url || '',
+      createdAt: data.created_at || null,
+      likes: data.likes ?? 0,
+      dislikes: data.dislikes ?? 0,
+      rating: data.rating ?? 0
     });
-  
-    // List all recipes
-    app.get('/api/recipes', async (_req, res) => 
-    {
-      try 
-      {
-        const { data, error } = await supabase
-          .from('recipes')
-          .select('*')
-          .order('created_at', { ascending: false });
+  });
 
-        if (error) 
-          return res.status(500).json({ error: error.message });
+  app.put(`${base}/:id`, async (req, res) => {
+    const id = req.params.id;
+    const map = {
+      title: 'name',
+      summary: 'summary',
+      ingredients: 'ingredients',
+      steps: 'steps',
+      servings: 'servings',
+      minutes: 'minutes',
+      difficulty: 'difficulty',
+      coverUrl: 'cover_url',
+      likes: 'likes',
+      dislikes: 'dislikes',
+      rating: 'rating'
+    };
 
-        res.json(data);
-      } 
-      catch (error) 
-      {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+    const patch = {};
+    for (const [k, v] of Object.entries(req.body || {})) {
+      if (map[k]) patch[map[k]] = v;
+    }
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({
+      id: data.id,
+      title: data.name,
+      summary: data.summary || '',
+      ingredients: data.ingredients || '',
+      steps: data.steps || '',
+      servings: data.servings || 0,
+      minutes: data.minutes || 0,
+      difficulty: data.difficulty || 'easy',
+      coverUrl: data.cover_url || '',
+      createdAt: data.created_at || null,
+      likes: data.likes ?? 0,
+      dislikes: data.dislikes ?? 0,
+      rating: data.rating ?? 0
     });
-  
-    // Delete a recipe by :id
-    app.delete('/api/recipes/:id', async (req, res) => 
-    {
-      try 
-      {
-        const id = Number(req.params.id);
+  });
 
-        if (!Number.isInteger(id) || id <= 0) 
-          return res.status(400).json({ error: 'Invalid recipe ID' });
-
-        const { error: checkError } = await supabase
-          .from('recipes')
-          .select('id')
-          .eq('id', id).single();
-
-        if (checkError) 
-          return res.status(404).json({ error: 'Recipe not found' });
-
-        const { error } = await supabase
-          .from('recipes')
-          .delete()
-          .eq('id', id);
-
-        if (error) 
-          return res.status(500).json({ error: error.message });
-
-        res.status(200).json({ message: 'Recipe deleted successfully', deletedId: id });
-
-      } 
-      catch (error) 
-      {
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
-  
-    // Get a single recipe
-    app.get('/api/recipes/:id', async (req, res) => 
-    {
-      try 
-      {
-        const id = Number(req.params.id);
-
-        if (!Number.isInteger(id) || id <= 0) 
-          return res.status(400).json({ error: 'Invalid recipe ID' });
-
-        const { data, error } = await supabase
-          .from('recipes')
-          .select('*')
-          .eq('id', id).single();
-
-        if (error) 
-        {
-          if (error.code === 'PGRST116') 
-            return res.status(404).json({ error: 'Recipe not found' });
-
-          return res.status(500).json({ error: error.message });
-        }
-        res.json(data);
-      } 
-      catch (error) 
-      {
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
-  
-    // Update a recipe (partial)
-    app.put('/api/recipes/:id', async (req, res) => 
-    {
-      try 
-      {
-        const id = Number(req.params.id);
-        const { name, ingredients, instructions } = req.body;
-
-        if (!Number.isInteger(id) || id <= 0) 
-          return res.status(400).json({ error: 'Invalid recipe ID' });
-
-        const { error: checkError } = await supabase
-          .from('recipes')
-          .select('id')
-          .eq('id', id).single();
-
-        if (checkError) 
-          return res.status(404).json({ error: 'Recipe not found' });
-
-        const { data, error } = await supabase
-          .from('recipes')
-          .update({ name, ingredients, instructions, updated_at: new Date().toISOString() })
-          .eq('id', id)
-          .select();
-
-        if (error) 
-          return res.status(500).json({ error: error.message });
-
-        res.json({ message: 'Recipe updated successfully', recipe: data[0] });
-      } 
-      catch (error) 
-      {
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
-  };
-  
+  app.delete(`${base}/:id`, async (req, res) => {
+    const { error } = await supabase.from('recipes').delete().eq('id', req.params.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+  });
+};

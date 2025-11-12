@@ -26,8 +26,7 @@ const supabase = createClient(
 const pageRoutes = require('./routes/pages');
 const apiRoutes = require('./routes/api');
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.use('/', pageRoutes);
 app.use('/api', apiRoutes);
@@ -73,6 +72,14 @@ app.get('/seller-payment', (req, res) => {
   
 });
 
+// Serve the recipes page consistently at /recipes (plural)
+app.get(['/recipes', '/recipes.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'UI', 'recipes.html'));
+});
+
+// Redirect old singular path to the unified one
+app.get('/recipe.html', (req, res) => res.redirect(301, '/recipes'));
+
 async function testConnection() {
   // Simple test - adjust based on your table structure
   const { data, error } = await supabase
@@ -106,7 +113,7 @@ const swaggerSetup = require('./swagger/swagger');
 swaggerSetup(app, PORT);
 
 
-//defauklt route
+//default route
 app.get('/', (req, res) => 
 {
   res.send('Welcome to the Fruiti API!');
