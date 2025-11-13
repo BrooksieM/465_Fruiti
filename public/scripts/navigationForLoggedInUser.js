@@ -130,6 +130,8 @@ function logout() {
     localStorage.removeItem('user');
     localStorage.removeItem('userStatus');
     window.location.href = '/';
+
+    localStorage.setItem('isLoggedIn', 'false');
 }
 
 // Check authentication status when page loads
