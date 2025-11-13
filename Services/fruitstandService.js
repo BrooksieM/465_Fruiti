@@ -178,7 +178,7 @@ app.put('/api/fruitstands/:id', async (req, res) => {
                 zipcode: zipcode,
                 phone_number: phone_number,
                 description: description,
-                working_hours,
+                working_hours: working_hours,
                 produce: produce,
                 updated_at: new Date().toISOString()
             })

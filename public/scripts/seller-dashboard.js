@@ -94,10 +94,74 @@ async function loadSellerData(userId) {
 
 // Load working hours
 function loadWorkingHours(hours) {
-    // This would populate the hours based on saved data
     console.log('Loading working hours:', hours);
+    
+    const dayRows = document.querySelectorAll('.day-row');
+    
+    dayRows.forEach((row, index) => {
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const dayName = days[index];
+        const dayData = hours[dayName];
+        
+        if (!dayData) return;
+        
+        const toggle = row.querySelector('.day-toggle');
+        const timeInputs = row.querySelectorAll('.time-input');
+        const statusText = row.querySelector('.status-text');
+        
+        // Set toggle state
+        toggle.checked = dayData.open;
+        
+        // Set time values and enable/disable inputs
+        if (dayData.open && dayData.start && dayData.end) {
+            timeInputs[0].value = dayData.start;
+            timeInputs[1].value = dayData.end;
+            timeInputs[0].disabled = false;
+            timeInputs[1].disabled = false;
+            statusText.textContent = 'Open';
+            statusText.classList.remove('closed');
+        } else {
+            timeInputs[0].value = '';
+            timeInputs[1].value = '';
+            timeInputs[0].disabled = true;
+            timeInputs[1].disabled = true;
+            statusText.textContent = 'Closed';
+            statusText.classList.add('closed');
+        }
+    });
+    initializeWorkingHoursToggles();
 }
-
+function initializeWorkingHoursToggles() {
+    const dayRows = document.querySelectorAll('.day-row');
+    
+    dayRows.forEach(row => {
+        const toggle = row.querySelector('.day-toggle');
+        const timeInputs = row.querySelectorAll('.time-input');
+        const statusText = row.querySelector('.status-text');
+        
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                // Enable time inputs
+                timeInputs[0].disabled = false;
+                timeInputs[1].disabled = false;
+                
+                // Set default times if empty
+                if (!timeInputs[0].value) timeInputs[0].value = '09:00';
+                if (!timeInputs[1].value) timeInputs[1].value = '17:00';
+                
+                statusText.textContent = 'Open';
+                statusText.classList.remove('closed');
+            } else {
+                // Disable time inputs
+                timeInputs[0].disabled = true;
+                timeInputs[1].disabled = true;
+                
+                statusText.textContent = 'Closed';
+                statusText.classList.add('closed');
+            }
+        });
+    });
+}
 // Load produce
 function loadProduce(produce) {
     if (!Array.isArray(produce)) return;
