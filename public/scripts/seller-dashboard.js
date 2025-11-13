@@ -302,7 +302,7 @@ async function saveChanges() {
         console.log('Form data:', formData);
 
 
-        const response = await fetch(`/api/seller-applications/${user.id}`, {
+        const response = await fetch(`/api/fruitstands/${user.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)

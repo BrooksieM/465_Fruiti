@@ -159,7 +159,7 @@ app.put('/api/fruitstands/:id', async (req, res) => {
         const { data: existingFruitStand, error: checkError } = await supabase
             .from('seller_applications')
             .select('id')
-            .eq('id', id)
+            .eq('user_id', id)
             .single();
 
         if (checkError) 
@@ -182,7 +182,7 @@ app.put('/api/fruitstands/:id', async (req, res) => {
                 produce: produce,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', id)
+            .eq('user_id', id)
             .select();
 
         if (error) 
