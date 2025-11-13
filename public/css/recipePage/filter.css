@@ -17,6 +17,7 @@
   border: 1px solid #e0e0e0;
   height: fit-content;
   position: sticky;
+  margin-top: 124px;
   top: 20px;
 }
 
@@ -68,6 +69,7 @@
 
 #recipeCount {
   margin: 0;
+  margin-bottom: 8px;
   color: #666;
   font-size: 14px;
   font-weight: 500;
