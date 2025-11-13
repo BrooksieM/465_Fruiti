@@ -40,7 +40,9 @@ async function loadSellerData(userId) {
         console.log('Loading seller data for user:', userId);
 
         // Fetch seller application data
-        const response = await fetch(`/api/seller-applications/${userId}`);
+        const response = await fetch(`/api/fruitstands/${userId}`, {
+            method: 'GET'
+        });
 
         if (!response.ok) {
             console.log('No existing seller data found');
@@ -270,7 +272,6 @@ async function saveChanges() {
         const standName = document.getElementById('standName').value.trim();
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const addressLn1 = document.getElementById('addressLn1').value.trim();
-        const addressLn2 = document.getElementById('addressLn2').value.trim();
         const city = document.getElementById('city').value.trim();
         const state = document.getElementById('state').value.trim();
         const zipCode = document.getElementById('zipCode').value.trim();
@@ -290,7 +291,6 @@ async function saveChanges() {
             business_name: standName,
             phone_number: phoneNumber,
             address: addressLn1,
-            address_line_2: addressLn2,
             city: city,
             state: state,
             zipcode: zipCode,
@@ -301,15 +301,13 @@ async function saveChanges() {
 
         console.log('Form data:', formData);
 
-        // TODO: Send data to backend
-        // const response = await fetch(`/api/seller-applications/${user.id}`, {
-        //     method: 'PUT',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(formData)
-        // });
 
-        // Simulate API call for now
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const response = await fetch(`/api/seller-applications/${user.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
 
         showSuccess('Changes saved successfully!');
 
