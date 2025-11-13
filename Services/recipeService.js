@@ -53,7 +53,7 @@ module.exports = function (app, supabase)
         }
 
         const { data, error } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .insert([{
             name: name.trim(),
             ingredients: parsedIngredients,
@@ -84,7 +84,7 @@ module.exports = function (app, supabase)
       try 
       {
         const { data, error } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .select('*')
           .order('created_at', { ascending: false });
 
@@ -117,7 +117,7 @@ module.exports = function (app, supabase)
 
         // Get the recipe and check ownership
         const { data: recipe, error: checkError } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .select('id, user_id')
           .eq('id', id)
           .single();
@@ -131,7 +131,7 @@ module.exports = function (app, supabase)
 
         // Delete the recipe
         const { error } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .delete()
           .eq('id', id);
 
@@ -159,7 +159,7 @@ module.exports = function (app, supabase)
           return res.status(400).json({ error: 'Invalid recipe ID' });
 
         const { data, error } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .select('*')
           .eq('id', id).single();
 
@@ -242,7 +242,7 @@ module.exports = function (app, supabase)
 
         // Get the recipe and check ownership
         const { data: recipe, error: checkError } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .select('id, user_id')
           .eq('id', id)
           .single();
@@ -264,7 +264,7 @@ module.exports = function (app, supabase)
         if (image) updateData.image = image;
 
         const { data, error } = await supabase
-          .from('recipes')
+          .from('recipe_new')
           .update(updateData)
           .eq('id', id)
           .select();
