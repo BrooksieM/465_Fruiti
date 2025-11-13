@@ -11,14 +11,14 @@
 </head>
 
 <body>
-  <!-- Top Navigation Bar -->
+  <!-- Top Navigation Bar (same structure as Become Seller / About Us) -->
   <div class="navbar">
     <div class="logo">
       <img src="../images/fruiti.png" alt="Fruiti Logo" />
     </div>
 
     <div class="search-bar">
-      <input type="text" placeholder="Search Recipes" />
+      <input type="text" placeholder="Search Fruit" />
     </div>
 
     <div class="auth-buttons" id="authButtons">
@@ -28,21 +28,25 @@
     </div>
   </div>
 
-  <!-- Navigation Links -->
+  <!-- Main nav links bar -->
   <nav class="nav-links">
     <a href="/">Home</a>
     <a href="/become-seller">Become a Seller</a>
-    <a href="/nutrition">Nutrition</a>
-    <a href="/recipes" class="active">Recipes</a>
+    <a href="nutrition">Nutrition</a>
+    <a href="recipes.html" class="active">Recipes</a>
     <a href="/aboutus">About Us</a>
   </nav>
 
+  <!-- Black bar under nav (for consistent layout) -->
   <div class="black-bar"></div>
 
   <!-- Hero Section -->
   <section class="recipe-hero">
     <h1>Discover Delicious Recipes 🍎</h1>
-    <p>Explore our collection of healthy, fruit-based recipes. From quick snacks to gourmet desserts, find your next favorite dish!</p>
+    <p>
+      Explore our collection of healthy, fruit-based recipes. From quick snacks to gourmet desserts,
+      find your next favorite dish!
+    </p>
   </section>
 
   <!-- Main Content -->
@@ -80,7 +84,7 @@
         
         <!-- Time Filter -->
         <div class="filter-section">
-          <h4>Prep Time</h4>
+          <h4>Time</h4>
           <div class="filter-options">
             <label class="filter-checkbox">
               <input type="checkbox" name="time" value="0-15" class="filter-input" />
@@ -133,9 +137,8 @@
         </div>
       </aside>
       
-      <!-- Main Content Area -->
-      <div class="content-area">
-        <!-- Header with Create Button -->
+      <!-- Right Content Area -->
+      <section class="content-area">
         <div class="content-header">
           <div>
             <h1>Featured Recipes</h1>
@@ -152,43 +155,44 @@
         
         <!-- Recipe Grid -->
         <div id="cards" class="recipe-grid"></div>
-      </div>
-      
+      </section>
     </div>
   </main>
 
   <!-- Create Recipe Modal -->
   <div class="modal" id="createModal" hidden>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Create New Recipe</h2>
-        <button class="modal-close" id="closeCreateModal" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Create a New Recipe</h2>
+          <button class="modal-close" id="closeCreateModal" aria-label="Close">×</button>
+        </div>
+        
         <form id="createRecipeForm">
-          <div class="form-group">
-            <label for="rTitle">Recipe Title</label>
-            <input id="rTitle" type="text" placeholder="Enter recipe title" required />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rTitle">Recipe Title</label>
+              <input id="rTitle" type="text" placeholder="e.g., Summer Berry Salad" required />
+            </div>
+            <div class="form-group">
+              <label for="rDiff">Difficulty</label>
+              <select id="rDiff" required>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
-              <label for="rDiff">Difficulty</label>
-              <select id="rDiff" required>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
+              <label for="rServ">Servings</label>
+              <input id="rServ" type="number" min="1" placeholder="4" />
             </div>
             <div class="form-group">
-              <label for="rServ">Servings</label>
-              <input id="rServ" type="number" placeholder="4" required />
+              <label for="rMin">Time (minutes)</label>
+              <input id="rMin" type="number" placeholder="30" required />
             </div>
-          </div>
-
-          <div class="form-group">
-            <label for="rMin">Time (minutes)</label>
-            <input id="rMin" type="number" placeholder="30" required />
           </div>
           
           <div class="form-group">
@@ -230,242 +234,318 @@
   <div id="footer-placeholder"></div>
   <script src="../scripts/footer.js"></script>
 
-  <!-- Form submission script -->
+  <!-- Recipe page logic: load recipes, render cards, handle create form, filters, and modal -->
   <script>
-    document.getElementById('createRecipeForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const formData = {
-        title: document.getElementById('rTitle').value,
-        difficulty: document.getElementById('rDiff').value,
-        servings: parseInt(document.getElementById('rServ').value),
-        prepTime: parseInt(document.getElementById('rMin').value),
-        summary: document.getElementById('rSummary').value,
-        coverImage: document.getElementById('rCover').value,
-        ingredients: document.getElementById('rIngr').value.split('\n').filter(x => x.trim()),
-        instructions: document.getElementById('rSteps').value.split('\n').filter(x => x.trim())
+    (function () {
+      const API = '/api/recipes';
+
+      const els = {
+        grid: document.getElementById('cards'),
+        form: document.getElementById('createRecipeForm'),
+        title: document.getElementById('rTitle'),
+        difficulty: document.getElementById('rDiff'),
+        servings: document.getElementById('rServ'),
+        minutes: document.getElementById('rMin'),
+        summary: document.getElementById('rSummary'),
+        coverText: document.getElementById('rCover'),
+        coverFile: document.getElementById('rCoverFile'),
+        ingredients: document.getElementById('rIngr'),
+        steps: document.getElementById('rSteps'),
+        openCreate: document.getElementById('openCreateModal'),
+        closeCreate: document.getElementById('closeCreateModal'),
+        cancelCreate: document.getElementById('cancelCreate'),
+        clearFilters: document.getElementById('clearFilters')
       };
 
-      try {
-        const response = await fetch('/api/recipes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
+      if (!els.grid) return;
 
-        if (response.ok) {
-          alert('Recipe created successfully!');
-          document.getElementById('createRecipeForm').reset();
-          document.getElementById('createModal').hidden = true;
-          document.body.style.overflow = '';
-          if (typeof refresh === 'function') refresh();
-        } else {
-          alert('Failed to create recipe. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error creating recipe:', error);
-        alert('An error occurred. Please try again.');
+      let hasTimeData = false;
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
-    });
-  </script>
 
-  <!-- Filter Logic -->
-  <script>
-    let hasTimeData = false;
+      function buildStars(rating) {
+        const r = Number(rating || 0);
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+          const filled = r >= i;
+          html += '<span class="star">' + (filled ? '★' : '☆') + '</span>';
+        }
+        return html;
+      }
 
-    function applyFilters() {
-      const diffChecks = Array.from(document.querySelectorAll('input[name="difficulty"]:checked')).map(x => x.value);
-      const timeChecks = Array.from(document.querySelectorAll('input[name="time"]:checked')).map(x => x.value);
-      const seasonChecks = Array.from(document.querySelectorAll('input[name="season"]:checked')).map(x => x.value);
-      
-      const allCards = document.querySelectorAll('.recipe-card');
-      
-      allCards.forEach(card => {
-        let show = true;
-        
-        // Difficulty filter
-        if (diffChecks.length > 0) {
-          const hasDiff = diffChecks.some(d => card.classList.contains(d));
-          if (!hasDiff) show = false;
+      function difficultyClass(diff) {
+        const s = String(diff || 'easy').toLowerCase();
+        if (s === 'hard') return 'hard';
+        if (s === 'medium') return 'medium';
+        return 'easy';
+      }
+
+      function createRecipeCard(recipe) {
+        const diffClass = difficultyClass(recipe.difficulty);
+        const minutes = Number(recipe.minutes || 0);
+        const servings = Number(recipe.servings || 0);
+
+        let coverUrl = (recipe.coverUrl || '').trim();
+        if (!coverUrl) {
+          coverUrl = '/images/recipes/1762442126478-butter-chicken-recipe.jpg';
         }
-        
-        // Time filter
-        if (timeChecks.length > 0 && hasTimeData) {
-          const cardTime = parseInt(card.getAttribute('data-time') || '0');
-          const matchTime = timeChecks.some(range => {
-            if (range === '0-15') return cardTime > 0 && cardTime <= 15;
-            if (range === '15-30') return cardTime > 15 && cardTime <= 30;
-            if (range === '30-60') return cardTime > 30 && cardTime <= 60;
-            if (range === '60+') return cardTime > 60;
-            return false;
-          });
-          if (!matchTime) show = false;
-        }
-        
-        card.style.display = show ? '' : 'none';
-      });
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.filter-input').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-          setTimeout(applyFilters, 100);
+
+        const card = document.createElement('article');
+        card.className = 'recipe-card ' + diffClass;
+        card.dataset.id = recipe.id || '';
+        card.dataset.time = minutes || 0;
+
+        card.innerHTML = `
+          <div class="recipe-card-image">
+            <img src="${escapeHtml(coverUrl)}"
+                 alt="${escapeHtml(recipe.title || 'Recipe image')}"
+                 onerror="this.style.display='none'">
+          </div>
+          <div class="recipe-card-content">
+            <h3 class="recipe-card-title">${escapeHtml(recipe.title || 'Untitled recipe')}</h3>
+            <p class="recipe-card-description">${escapeHtml(recipe.summary || '')}</p>
+            <div class="recipe-card-meta">
+              <div class="meta-item">
+                <span class="icon">⏱</span>
+                <span>${minutes > 0 ? minutes + ' min' : 'Time varies'}</span>
+              </div>
+              <div class="meta-item">
+                <span class="icon">🍽</span>
+                <span>${servings > 0 ? servings + ' servings' : 'Flexible servings'}</span>
+              </div>
+            </div>
+            <div class="recipe-card-rating">
+              <div class="stars">
+                ${buildStars(recipe.rating)}
+              </div>
+              <span class="rating-count">
+                ${(Number(recipe.rating || 0)).toFixed(1)} / 5
+              </span>
+            </div>
+          </div>
+        `;
+
+        return card;
+      }
+
+      function applyFilters() {
+        const diffChecks = Array.from(
+          document.querySelectorAll('input[name="difficulty"]:checked')
+        ).map(x => x.value.toLowerCase());
+
+        const timeChecks = Array.from(
+          document.querySelectorAll('input[name="time"]:checked')
+        ).map(x => x.value);
+
+        const cards = els.grid.querySelectorAll('.recipe-card');
+
+        cards.forEach(card => {
+          let show = true;
+
+          if (diffChecks.length > 0) {
+            const hasDiff = diffChecks.some(d => card.classList.contains(d));
+            if (!hasDiff) show = false;
+          }
+
+          if (show && timeChecks.length > 0 && hasTimeData) {
+            const t = Number(card.dataset.time || 0);
+            let ok = false;
+            for (const window of timeChecks) {
+              if (window === '0-15' && t > 0 && t <= 15) ok = true;
+              else if (window === '15-30' && t > 15 && t <= 30) ok = true;
+              else if (window === '30-60' && t > 30 && t <= 60) ok = true;
+              else if (window === '60+' && t > 60) ok = true;
+            }
+            if (!ok) show = false;
+          }
+
+          card.style.display = show ? '' : 'none';
         });
-      });
-      
-      document.getElementById('clearFilters').addEventListener('click', () => {
-        document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
-          cb.checked = false;
-        });
-        applyFilters();
-      });
-      
-      let checkCount = 0;
-      const checkForCards = setInterval(() => {
-        const cards = document.querySelectorAll('.recipe-card[data-time]');
-        checkCount++;
-        
-        if (cards.length > 0) {
-          clearInterval(checkForCards);
+      }
+
+      async function loadRecipes() {
+        try {
+          const res = await fetch(API);
+          if (!res.ok) {
+            console.error('Failed to load recipes:', await res.text());
+            return;
+          }
+
+          const items = await res.json();
+          els.grid.innerHTML = '';
+
           let cardsWithTime = 0;
-          cards.forEach(card => {
-            const time = parseInt(card.getAttribute('data-time') || '0');
-            if (time > 0) cardsWithTime++;
+
+          (items || []).forEach(r => {
+            const card = createRecipeCard(r);
+            if (card.dataset.time && Number(card.dataset.time) > 0) {
+              cardsWithTime++;
+            }
+            els.grid.appendChild(card);
           });
+
           hasTimeData = cardsWithTime > 0;
-        } else if (checkCount > 20) {
-          clearInterval(checkForCards);
+          applyFilters();
+        } catch (err) {
+          console.error('Error loading recipes:', err);
         }
-      }, 500);
-    });
-  </script>
+      }
 
-  <!-- Modal Controls -->
-  <script>
-    const createModal = document.getElementById('createModal');
-    const openCreateBtn = document.getElementById('openCreateModal');
-    const closeCreateBtn = document.getElementById('closeCreateModal');
-    const cancelCreateBtn = document.getElementById('cancelCreate');
-    
-    openCreateBtn.addEventListener('click', () => {
-      createModal.hidden = false;
-      document.body.style.overflow = 'hidden';
-    });
-    
-    function closeModal() {
-      createModal.hidden = true;
-      document.body.style.overflow = '';
-    }
-    
-    closeCreateBtn.addEventListener('click', closeModal);
-    cancelCreateBtn.addEventListener('click', closeModal);
-    
-    createModal.addEventListener('click', (e) => {
-      if (e.target === createModal) closeModal();
-    });
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user && openCreateBtn) {
-          openCreateBtn.style.display = 'none';
-        }
-      } catch {}
-    });
-  </script>
+      async function handleCreate(e) {
+        e.preventDefault();
 
-  <!-- Difficulty decoration script -->
-  <script>
-    (async function attachDifficulty(){
-      try {
-        const res = await fetch('/api/recipes');
-        if(!res.ok) return;
-        const items = await res.json();
-        
-        const byTitle = new Map(items.map(x => {
-          const time = parseInt(
-            x.prepTime || 
-            x.prep_time || 
-            x.time || 
-            x.cookTime || 
-            x.cook_time || 
-            x.totalTime || 
-            x.total_time ||
-            x.minutes ||
-            x.duration ||
-            0
-          );
-          
-          return [
-            String(x.title||'').trim().toLowerCase(), 
-            {
-              difficulty: String(x.difficulty||'Easy'),
-              time: time
-            }
-          ];
-        }));
-        
-        const toClass = (d) => {
-          const s = (d||'').toLowerCase();
-          if (s==='hard') return 'hard';
-          if (s==='medium') return 'medium';
-          return 'easy';
-        };
-        
-        function decorate() {
-          document.querySelectorAll('.recipe-card').forEach(card=>{
-            if (card.__diffDecorated) return;
-            const titleEl = card.querySelector('h3, .recipe-card-title');
-            if (!titleEl) return;
-            const key = titleEl.textContent.trim().toLowerCase();
-            const recipeData = byTitle.get(key);
-            
-            if (recipeData) {
-              const diffClass = toClass(recipeData.difficulty);
-              card.classList.add(diffClass);
-              card.setAttribute('data-time', recipeData.time);
-              
-              // Check if badge already exists
-              if (!card.querySelector('.difficulty-badge')) {
-                const badge = document.createElement('div');
-                badge.className = 'difficulty-badge ' + diffClass;
-                const label = diffClass.charAt(0).toUpperCase()+diffClass.slice(1);
-                badge.textContent = label;
-                
-                const imgContainer = card.querySelector('.recipe-card-image');
-                if (imgContainer) {
-                  imgContainer.appendChild(badge);
-                }
-              }
-              
-              card.__diffDecorated = true;
-            }
-          });
+        if (!els.form) return;
+
+        const title = (els.title.value || '').trim();
+        const summary = (els.summary.value || '').trim();
+        const difficulty = (els.difficulty.value || '').trim();
+        const servings = parseInt(els.servings.value || '0', 10) || null;
+        const minutes = parseInt(els.minutes.value || '0', 10) || null;
+
+        const ingredientsText = (els.ingredients.value || '').trim();
+        const stepsText = (els.steps.value || '').trim();
+
+        if (!title || !ingredientsText || !stepsText) {
+          alert('Please fill in the title, ingredients, and instructions.');
+          return;
         }
-        
-        window.decorateDifficulty = decorate;
-        
-        decorate();
-        setTimeout(decorate, 250);
-        setTimeout(decorate, 500);
-        setTimeout(decorate, 1000);
-        setTimeout(decorate, 2000);
-        
-        const _refresh = window.refresh;
-        if (typeof _refresh === 'function') {
-          window.refresh = async function(){
-            const r = await _refresh.apply(this, arguments);
-            setTimeout(decorate, 50);
-            setTimeout(decorate, 250);
-            return r;
+
+        let coverUrl = (els.coverText.value || '').trim();
+        const file = els.coverFile && els.coverFile.files && els.coverFile.files[0];
+
+        if (!coverUrl && file) {
+          try {
+            coverUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+          } catch (err) {
+            console.warn('Could not read file, continuing without cover image:', err);
           }
         }
-      } catch(e) {
-        console.error('Error loading recipe data:', e);
+
+        const payload = {
+          title,
+          summary,
+          difficulty,
+          servings,
+          minutes,
+          ingredients: ingredientsText,
+          steps: stepsText,
+          coverUrl
+        };
+
+        try {
+          const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const txt = await res.text();
+            console.error('Create recipe failed:', txt);
+            alert('Could not create recipe. See console for details.');
+            return;
+          }
+
+          els.form.reset();
+          if (els.coverFile) els.coverFile.value = '';
+
+          const modal = document.getElementById('createModal');
+          if (modal) {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+          }
+
+          await loadRecipes();
+        } catch (err) {
+          console.error('Error creating recipe:', err);
+          alert('An unexpected error occurred while creating the recipe.');
+        }
       }
+
+      function wireModal() {
+        const modal = document.getElementById('createModal');
+
+        if (!modal) return;
+
+        function openModal() {
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+          modal.hidden = true;
+          document.body.style.overflow = '';
+        }
+
+        if (els.openCreate) {
+          els.openCreate.addEventListener('click', openModal);
+        }
+
+        if (els.closeCreate) {
+          els.closeCreate.addEventListener('click', closeModal);
+        }
+
+        if (els.cancelCreate) {
+          els.cancelCreate.addEventListener('click', closeModal);
+        }
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      function wireFilters() {
+        document.querySelectorAll('.filter-input').forEach(checkbox => {
+          checkbox.addEventListener('change', () => {
+            setTimeout(applyFilters, 50);
+          });
+        });
+
+        if (els.clearFilters) {
+          els.clearFilters.addEventListener('click', () => {
+            document
+              .querySelectorAll('.filter-checkbox input[type="checkbox"]')
+              .forEach(cb => { cb.checked = false; });
+            applyFilters();
+          });
+        }
+      }
+
+      function initAuthGate() {
+        try {
+          const user = JSON.parse(localStorage.getItem('user') || 'null');
+          if (!user && els.openCreate) {
+            els.openCreate.style.display = 'none';
+          }
+        } catch (e) {
+          console.warn('Could not read user from localStorage', e);
+        }
+      }
+
+      if (els.form) {
+        els.form.addEventListener('submit', handleCreate);
+      }
+
+      wireModal();
+      wireFilters();
+      initAuthGate();
+      loadRecipes();
+
+      window.refresh = loadRecipes;
     })();
   </script>
-
   <script src="/scripts/navigationForLoggedInUser.js"></script>
 </body>
 </html>
