@@ -1,0 +1,61 @@
+/* Favorite Recipe Button Styles */
+
+.btn-favorite {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  color: #ff6b6b;
+  border: 2px solid #ff6b6b;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-favorite:hover {
+  background-color: #ffe0e0;
+  transform: scale(1.05);
+}
+
+.btn-favorite:active {
+  transform: scale(0.98);
+}
+
+.btn-favorite.favorited {
+  background-color: #ff6b6b;
+  color: #ffffff;
+  border-color: #ff6b6b;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.btn-favorite.favorited:hover {
+  background-color: #ff5252;
+  border-color: #ff5252;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+/* Favorite button in recipe cards */
+.recipe-card-actions .btn-favorite {
+  flex: 1;
+  margin-right: 8px;
+}
+
+/* Favorite button in modal */
+.modal-actions .btn-favorite {
+  margin-right: 8px;
+}
+
+/* Disabled state for non-logged-in users */
+.btn-favorite:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-favorite:disabled:hover {
+  background-color: #ffffff;
+  transform: none;
+}
