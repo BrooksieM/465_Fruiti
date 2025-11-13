@@ -1,4 +1,4 @@
-module.exports = function (app, supabase)
+module.exports = function (app, supabase, supabaseAdmin)
 {
     // Create a recipe (requires authentication)
     app.post('/api/recipes', async (req, res) =>
@@ -138,10 +138,18 @@ module.exports = function (app, supabase)
         // Delete the image from Supabase Storage if it exists
         if (recipe.image) {
           try {
-            // Extract filename from the image URL
-            const filename = recipe.image.split('/').pop();
+            let filename;
 
-            await supabase.storage
+            // Handle both URL and filename formats
+            if (recipe.image.includes('/')) {
+              // If it's a full URL, extract the filename
+              filename = recipe.image.split('/').pop();
+            } else {
+              // If it's just a filename, use it directly
+              filename = recipe.image;
+            }
+
+            await supabaseAdmin.storage
               .from('recipe-images')
               .remove([filename]);
           } catch (storageError) {
