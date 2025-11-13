@@ -11,38 +11,47 @@ function setupFilterListeners() {
   const timeFilters = document.querySelectorAll('.time-filter');
 
   difficultyFilters.forEach(checkbox => {
-    checkbox.addEventListener('change', handleFilterChange);
+    checkbox.addEventListener('change', (e) => handleDifficultyFilterChange(e));
   });
 
   timeFilters.forEach(checkbox => {
-    checkbox.addEventListener('change', handleFilterChange);
+    checkbox.addEventListener('change', (e) => handleTimeFilterChange(e));
   });
 }
 
-// Handle filter checkbox changes
-function handleFilterChange() {
+// Handle difficulty filter changes - only allow one selection
+function handleDifficultyFilterChange(e) {
   const difficultyFilters = document.querySelectorAll('.difficulty-filter');
+
+  // Uncheck all other difficulty filters
+  difficultyFilters.forEach(checkbox => {
+    if (checkbox !== e.target) {
+      checkbox.checked = false;
+    }
+  });
+
+  // Get active difficulty filter
+  const activeDifficulty = e.target.checked ? e.target.value : null;
+  activeFilters.difficulty = activeDifficulty ? [activeDifficulty] : [];
+
+  // Apply filters and display results
+  applyFilters();
+}
+
+// Handle time filter changes - only allow one selection
+function handleTimeFilterChange(e) {
   const timeFilters = document.querySelectorAll('.time-filter');
 
-  // Get active difficulty filters
-  const activeDifficulties = [];
-  difficultyFilters.forEach(checkbox => {
-    if (checkbox.checked) {
-      activeDifficulties.push(checkbox.value);
-    }
-  });
-
-  // Get active time filters
-  const activeTimes = [];
+  // Uncheck all other time filters
   timeFilters.forEach(checkbox => {
-    if (checkbox.checked) {
-      activeTimes.push(checkbox.value);
+    if (checkbox !== e.target) {
+      checkbox.checked = false;
     }
   });
 
-  // Update activeFilters
-  activeFilters.difficulty = activeDifficulties;
-  activeFilters.time = activeTimes;
+  // Get active time filter
+  const activeTime = e.target.checked ? e.target.value : null;
+  activeFilters.time = activeTime ? [activeTime] : [];
 
   // Apply filters and display results
   applyFilters();
@@ -78,12 +87,12 @@ function isRecipeInTimeRange(cookingTime, timeRange) {
   switch(timeRange) {
     case '0-15':
       return time <= 15;
-    case '15-30':
-      return time > 15 && time <= 30;
-    case '30-60':
-      return time > 30 && time <= 60;
-    case '60+':
-      return time > 60;
+    case '15-45':
+      return time > 15 && time <= 45;
+    case '45-75':
+      return time > 45 && time <= 75;
+    case '75+':
+      return time > 75;
     default:
       return false;
   }

@@ -7,6 +7,7 @@
 <title>Recipe Page</title>
 <link rel="stylesheet" href="../css/standardLayout.css">
 <link rel="stylesheet" href="../css/recipePage/recipePage.css">
+<link rel="stylesheet" href="../css/recipePage/filter.css">
 <link rel="stylesheet" href="../css/footer/footer.css">
 
 </head>
@@ -48,10 +49,62 @@
       <button class="btn-create" onclick="openCreateRecipeModal()">+ Create Recipe</button>
     </div>
 
-    <!-- Recipes List -->
-    <h2>Recipes</h2>
-    <div id="recipesList" class="recipes-grid">
-      <!-- Recipes will be loaded here -->
+    <!-- Content Wrapper with Filters -->
+    <div class="recipe-content-wrapper">
+      <!-- Filter Sidebar -->
+      <aside class="recipe-filter-sidebar">
+        <h3>Filters</h3>
+
+        <div class="filter-group">
+          <h4>Difficulty</h4>
+          <label class="filter-label">
+            <input type="checkbox" class="difficulty-filter" value="Easy">
+            Easy
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="difficulty-filter" value="Medium">
+            Medium
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="difficulty-filter" value="Hard">
+            Hard
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Cooking Time</h4>
+          <label class="filter-label">
+            <input type="checkbox" class="time-filter" value="0-15">
+            0 - 15 mins
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="time-filter" value="15-45">
+            15 - 45 mins
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="time-filter" value="45-75">
+            45 - 75 mins
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="time-filter" value="75+">
+            75+ mins
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <p id="recipeCount">0 recipes found</p>
+          <button class="btn-clear-filters" onclick="clearFilters()">Clear Filters</button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="recipe-main-content">
+        <!-- Recipes List -->
+        <h2>Recipes</h2>
+        <div id="recipesList" class="recipes-grid">
+          <!-- Recipes will be loaded here -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -126,5 +179,6 @@
 
 <script src="../scripts/footer.js"></script>
 <script src="../scripts/navigationForLoggedInUser.js"></script>
+<script src="../scripts/filter.js"></script>
 <script src="../scripts/recipe.js"></script>
   </body>

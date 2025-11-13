@@ -1,7 +1,12 @@
 // Recipe Page Functionality
 let currentUser = null;
 let allRecipes = [];
+let filteredRecipes = [];
 let isEditingRecipe = null;
+let activeFilters = {
+  difficulty: [],
+  time: []
+};
 
 // Initialize page on load
 document.addEventListener('DOMContentLoaded', () => {
@@ -265,6 +270,9 @@ async function loadRecipes() {
 
 // Display recipes in the grid
 function displayRecipes() {
+  // Initialize filteredRecipes with all recipes
+  filteredRecipes = [...allRecipes];
+
   const recipesList = document.getElementById('recipesList');
   recipesList.innerHTML = '';
 
@@ -275,6 +283,13 @@ function displayRecipes() {
       const card = createRecipeCard(recipe);
       recipesList.appendChild(card);
     });
+  }
+
+  // Update recipe count in filter sidebar
+  const recipeCount = document.getElementById('recipeCount');
+  if (recipeCount) {
+    const count = allRecipes.length;
+    recipeCount.textContent = count === 1 ? '1 recipe found' : `${count} recipes found`;
   }
 
   // Check if current user has reached recipe limit
@@ -310,11 +325,14 @@ function createRecipeCard(recipe) {
     ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-card-image">`
     : `<div class="recipe-card-image-placeholder">No image</div>`;
 
+  const createdBy = recipe.creator_handle || 'Unknown';
+
   card.innerHTML = `
     ${imageHTML}
     <h3>${escapeHtml(recipe.name)}</h3>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${recipe.estimated_time} min</p>
+    <p><strong>Created by:</strong> ${escapeHtml(createdBy)}</p>
   `;
 
   card.addEventListener('click', () => viewRecipeDetail(recipe));

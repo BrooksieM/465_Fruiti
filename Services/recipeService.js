@@ -79,21 +79,27 @@ module.exports = function (app, supabase)
     });
   
     // List all recipes
-    app.get('/api/recipes', async (_req, res) => 
+    app.get('/api/recipes', async (_req, res) =>
     {
-      try 
+      try
       {
         const { data, error } = await supabase
           .from('recipe_new')
-          .select('*')
+          .select('*, accounts(handle)')
           .order('created_at', { ascending: false });
 
-        if (error) 
+        if (error)
           return res.status(500).json({ error: error.message });
 
-        res.json(data);
-      } 
-      catch (error) 
+        // Map the data to include creator handle at top level for easier frontend access
+        const recipesWithCreator = data.map(recipe => ({
+          ...recipe,
+          creator_handle: recipe.accounts?.handle || 'Unknown'
+        }));
+
+        res.json(recipesWithCreator);
+      }
+      catch (error)
       {
         res.status(500).json({ error: 'Internal server error' });
       }
