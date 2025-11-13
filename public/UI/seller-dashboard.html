@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard - Fruiti</title>
+<link rel="stylesheet" href="../css/standardLayout.css">
+<link rel="stylesheet" href="../css/SellerDashboard/seller-dashboard.css">
+<link rel="stylesheet" href="../css/footer/footer.css">
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <a href="/">
+        <img src="../images/fruiti.png" alt="Fruiti logo - Click to go home" />
+      </a>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+    <div class="auth-buttons" id="authButtons">
+        <button class="login-btn" onclick="location.href='/login'">Log In</button>
+        <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/become-seller">Become a Seller</a>
+    <a href="nutrition">Nutrition</a>
+    <a href="/recipe">Recipes</a>
+    <a href="/aboutus">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <!-- Main Content -->
+  <div class="page-layout">
+    <div class="dashboard-header">
+      <h1>Fruit Stand Dashboard</h1>
+      <p>Manage your fruit stand information, hours, and produce</p>
+    </div>
+
+    <!-- Error/Success Messages -->
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+    <div id="successMessage" class="success-message" style="display: none;"></div>
+
+    <div class="dashboard-container">
+      <!-- Left Section: Stand Info & Image -->
+      <div class="dashboard-section left-section">
+        <div class="image-upload-section">
+          <div class="image-preview-container">
+            <img src="../images/default-stand.png" alt="Stand Image" id="standImagePreview"
+                 onerror="this.src='../images/default-avatar.png'">
+            <div class="upload-overlay">
+              <button type="button" class="upload-btn" onclick="document.getElementById('standImageUpload').click()">
+                <span>📸</span>
+                <span>Upload Image</span>
+              </button>
+            </div>
+          </div>
+          <input type="file" id="standImageUpload" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="form-section">
+          <div class="form-group">
+            <label for="standName">Stand Name</label>
+            <input type="text" id="standName" name="standName" placeholder="Stand Name">
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="(555) 123-4567">
+          </div>
+
+          <div class="form-group">
+            <label for="addressLn1">Address Ln 1</label>
+            <input type="text" id="addressLn1" name="addressLn1" placeholder="Address Ln 1">
+          </div>
+
+          <div class="form-group">
+            <label for="addressLn2">Address Ln 2</label>
+            <input type="text" id="addressLn2" name="addressLn2" placeholder="Address Ln 2">
+          </div>
+
+          <div class="form-row-group">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" placeholder="City">
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" name="state" placeholder="CA" maxlength="2">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="zipCode">Zip Code</label>
+            <input type="text" id="zipCode" name="zipCode" placeholder="Zip Code">
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Section: Working Hours & Description -->
+      <div class="dashboard-section middle-section">
+        <div class="hours-section">
+          <h2>Working Hours</h2>
+          <div class="hours-list">
+            <!-- Monday -->
+            <div class="day-row">
+              <span class="day-name">Monday</span>
+              <input type="time" class="time-input" value="09:00">
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" value="17:00">
+              <span class="status-text">Open</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Tuesday -->
+            <div class="day-row">
+              <span class="day-name">Tuesday</span>
+              <input type="time" class="time-input" disabled>
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" disabled>
+              <span class="status-text closed">Closed</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Wednesday -->
+            <div class="day-row">
+              <span class="day-name">Wednesday</span>
+              <input type="time" class="time-input" disabled>
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" disabled>
+              <span class="status-text closed">Closed</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Thursday -->
+            <div class="day-row">
+              <span class="day-name">Thursday</span>
+              <input type="time" class="time-input" value="10:00">
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" value="18:00">
+              <span class="status-text">Open</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Friday -->
+            <div class="day-row">
+              <span class="day-name">Friday</span>
+              <input type="time" class="time-input" value="15:00">
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" value="17:00">
+              <span class="status-text">Open</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Saturday -->
+            <div class="day-row">
+              <span class="day-name">Saturday</span>
+              <input type="time" class="time-input" value="11:00">
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" value="13:00">
+              <span class="status-text">Open</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Sunday -->
+            <div class="day-row">
+              <span class="day-name">Sunday</span>
+              <input type="time" class="time-input" value="11:00">
+              <span class="time-separator">-</span>
+              <input type="time" class="time-input" value="13:00">
+              <span class="status-text">Open</span>
+              <label class="toggle-switch">
+                <input type="checkbox" class="day-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="description-section">
+          <h2>Description</h2>
+          <textarea id="standDescription" placeholder="Type anything here" rows="6"></textarea>
+        </div>
+      </div>
+
+      <!-- Right Section: Produce -->
+      <div class="dashboard-section right-section">
+        <h2>Produce</h2>
+        <div class="produce-tags" id="produceTags">
+          <span class="produce-tag">Apple <button class="remove-tag">×</button></span>
+          <span class="produce-tag">Pineapple <button class="remove-tag">×</button></span>
+          <span class="produce-tag">Peach <button class="remove-tag">×</button></span>
+          <span class="produce-tag">Lemon <button class="remove-tag">×</button></span>
+        </div>
+
+        <div class="add-fruit-section">
+          <input type="text" id="newFruitInput" placeholder="Enter fruit name..." class="fruit-input">
+          <button class="add-fruit-btn" onclick="addFruit()">Add Fruit</button>
+        </div>
+
+        <!-- Save Changes Button -->
+        <div class="save-section">
+          <button class="save-changes-btn" onclick="saveChanges()">
+            <span class="btn-text">Save Changes</span>
+            <span class="btn-loading" style="display: none;">Saving...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="../scripts/footer.js"></script>
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
+  <script src="/scripts/seller-dashboard.js"></script>
+</body>
+</html>
