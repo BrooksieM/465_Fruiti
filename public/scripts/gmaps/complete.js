@@ -3,8 +3,8 @@ let customMarkers = [];
 let sellerMarkers = [];
 
 // Initialize the map
-function initMap() {
-  // Define map styling to hide POIs (Points of Interest)
+function initMap()
+ {
   const mapStyles = [
     {
       featureType: 'poi',
@@ -147,7 +147,7 @@ function displaySellerMarker(seller, location, fullAddress) {
     <div style="padding: 10px; font-family: Arial, sans-serif; max-width: 250px;">
       <h3 style="margin: 0 0 8px 0; color: #333;">${escapeHtml(seller.business_name)}</h3>
       ${seller.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${escapeHtml(seller.description)}</p>` : ''}
-      <p style="margin: 0 0 8px 0; color: #666;"><strong>Handle:</strong> ${escapeHtml(sellerHandle)}</p>
+      <p style="margin: 0 0 8px 0; color: #666;"><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
       <p style="margin: 0 0 8px 0; color: #666;"><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
       ${seller.phone_number ? `<p style="margin: 0 0 8px 0; color: #666;"><strong>Phone:</strong> ${escapeHtml(seller.phone_number)}</p>` : ''}
       <a href="#" style="color: #1f73d1; text-decoration: none; font-size: 14px;" onclick="event.preventDefault(); alert('Contact this seller at ' + '${escapeHtml(seller.phone_number || 'N/A')}');">Contact Seller</a>
