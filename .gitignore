@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# Uploaded images
+# Uploaded images and user-generated content
 public/images/recipes/
+public/uploads/
 
 # Environment variables
 .env

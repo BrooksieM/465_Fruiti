@@ -196,7 +196,7 @@ app.post('/api/accounts', async (req, res) => {
           }
 
           if (!users || users.length === 0) {
-              return res.status(401).json({ error: 'Invalid credentials' });
+              return res.status(401).json({ error: 'The email address or password was incorrect. Please try again' });
           }
 
           const user = users[0];
@@ -205,7 +205,7 @@ app.post('/api/accounts', async (req, res) => {
           const isValidPassword = await bcrypt.compare(password, user.password);
           
           if (!isValidPassword) {
-              return res.status(401).json({ error: 'Invalid credentials' });
+              return res.status(401).json({ error: 'The email address or password was incorrect. Please try again' });
           }
 
           // Remove password from response for security
