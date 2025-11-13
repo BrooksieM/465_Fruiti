@@ -12,6 +12,10 @@
   font-size: 28px;
 }
 
+.recipe-main-content h2 {
+  text-align: center;
+}
+
 /* Recipe Form Styles for Modal */
 #createRecipeModal h2 {
   margin-top: 0;
@@ -225,8 +229,8 @@
 
 /* Create Recipe Button */
 .create-recipe-button {
-  text-align: center;
-  margin-bottom: 40px;
+  text-align: left;
+  margin-bottom: 20px;
 }
 
 .create-recipe-button.hidden {
