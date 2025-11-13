@@ -1,4 +1,4 @@
-module.exports = function (app, supabase)
+module.exports = function (app, supabase, supabaseAdmin)
 {
     // Create a recipe (requires authentication)
     app.post('/api/recipes', async (req, res) =>

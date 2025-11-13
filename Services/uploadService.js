@@ -1,6 +1,6 @@
 const multer = require('multer');
 
-module.exports = function (app, supabase)
+module.exports = function (app, supabaseAdmin)
 {
   // Configure multer for in-memory storage (we'll upload to Supabase)
   const storage = multer.memoryStorage();
@@ -52,7 +52,7 @@ module.exports = function (app, supabase)
       const fileName = 'recipe-' + uniqueSuffix + fileExt;
 
       // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabaseAdmin.storage
         .from('recipe-images')
         .upload(fileName, req.file.buffer, {
           contentType: req.file.mimetype,
@@ -65,7 +65,7 @@ module.exports = function (app, supabase)
       }
 
       // Get public URL for the uploaded file
-      const { data: publicUrlData } = supabase.storage
+      const { data: publicUrlData } = supabaseAdmin.storage
         .from('recipe-images')
         .getPublicUrl(fileName);
 

@@ -20,15 +20,14 @@ const { createClient } = require('@supabase/supabase-js');
 // Initialize Supabase client using environment variables
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_ANON_KEY
 );
 
 // Initialize Supabase client with service role key for file uploads
-// const supabaseAdmin = createClient(
-//   process.env.SUPABASE_URL,
-//   process.env.SUPABASE_SERVICE_ROLE_KEY
-// );
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const pageRoutes = require('./routes/pages');
 const apiRoutes = require('./routes/api');
@@ -105,9 +104,9 @@ require('./Services/commentService')(app, supabase);
 // require('./Services/contactService')(app, supabase);
 require('./Services/fruitstandService')(app, supabase);
 require('./Services/nutritionService')(app, supabase);
-require('./Services/recipeService')(app, supabase);
+require('./Services/recipeService')(app, supabase, supabaseAdmin);
 require('./Services/sellerApplicationService')(app, supabase);
-require('./Services/uploadService')(app, supabase);
+require('./Services/uploadService')(app, supabaseAdmin);
 
 //swagger 
 const swaggerSetup = require('./swagger/swagger');
