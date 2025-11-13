@@ -240,7 +240,7 @@
 /* Recipes Grid */
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 40px;
 }
@@ -496,6 +496,18 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .recipes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .recipe-container {
     margin: 20px auto;
