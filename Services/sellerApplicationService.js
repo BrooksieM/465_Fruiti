@@ -563,7 +563,9 @@ module.exports = function (app, supabase)
           }
         ])
         .select();
-
+      
+      //Change account seller status to TRUE
+      
       if (appError)
       {
         console.error('Application creation error:', appError);
