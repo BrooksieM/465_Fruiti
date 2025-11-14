@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <li><a href="/">Home</a></li>
         <li><a href="/become-seller">Become a Seller</a></li>
         <li><a href="nutrition">Nutrition</a></li>
-        <li><a href="/recipes">Recipes</a></li>
+        <li><a href="/recipe">Recipes</a></li>
         <li><a href="/aboutus">About Us</a></li>
       </ul>
     </div>
