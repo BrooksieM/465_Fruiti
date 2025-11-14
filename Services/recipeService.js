@@ -1,4 +1,4 @@
-module.exports = function (app, supabase)
+module.exports = function (app, supabase, supabaseAdmin)
 {
     // Create a recipe (requires authentication)
     app.post('/api/recipes', async (req, res) =>
@@ -124,7 +124,7 @@ module.exports = function (app, supabase)
         // Get the recipe and check ownership
         const { data: recipe, error: checkError } = await supabase
           .from('recipe_new')
-          .select('id, user_id')
+          .select('id, user_id, image')
           .eq('id', id)
           .single();
 
@@ -134,6 +134,29 @@ module.exports = function (app, supabase)
         // Verify user owns the recipe
         if (recipe.user_id !== userId)
           return res.status(403).json({ error: 'You can only delete your own recipes' });
+
+        // Delete the image from Supabase Storage if it exists
+        if (recipe.image) {
+          try {
+            let filename;
+
+            // Handle both URL and filename formats
+            if (recipe.image.includes('/')) {
+              // If it's a full URL, extract the filename
+              filename = recipe.image.split('/').pop();
+            } else {
+              // If it's just a filename, use it directly
+              filename = recipe.image;
+            }
+
+            await supabaseAdmin.storage
+              .from('recipe-images')
+              .remove([filename]);
+          } catch (storageError) {
+            console.error('Error deleting image from storage:', storageError);
+            // Continue with recipe deletion even if image deletion fails
+          }
+        }
 
         // Delete the recipe
         const { error } = await supabase

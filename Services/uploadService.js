@@ -1,35 +1,16 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-module.exports = function (app, supabase)
+module.exports = function (app, supabaseAdmin)
 {
-  // Configure upload directory
-  const uploadDir = path.join(__dirname, '../public/uploads');
-
-  // Create uploads directory if it doesn't exist
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
-  // Configure multer storage
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      // Generate unique filename with timestamp
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'recipe-' + uniqueSuffix + path.extname(file.originalname));
-    }
-  });
+  // Configure multer for in-memory storage (we'll upload to Supabase)
+  const storage = multer.memoryStorage();
 
   // File filter - only allow images
   const fileFilter = (req, file, cb) => {
     const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const allowedExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
-    const fileExt = path.extname(file.originalname).toLowerCase();
+    const fileExt = require('path').extname(file.originalname).toLowerCase();
 
     if (allowedMimes.includes(file.mimetype) && allowedExts.includes(fileExt)) {
       cb(null, true);
@@ -65,12 +46,34 @@ module.exports = function (app, supabase)
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // Generate the URL path for the uploaded file
-      const fileUrl = `/uploads/${req.file.filename}`;
+      // Generate unique filename
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const fileExt = require('path').extname(req.file.originalname);
+      const fileName = 'recipe-' + uniqueSuffix + fileExt;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabaseAdmin.storage
+        .from('recipe-images')
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Supabase upload error:', error);
+        return res.status(500).json({ error: `Upload failed: ${error.message}` });
+      }
+
+      // Get public URL for the uploaded file
+      const { data: publicUrlData } = supabaseAdmin.storage
+        .from('recipe-images')
+        .getPublicUrl(fileName);
+
+      const fileUrl = publicUrlData.publicUrl;
 
       res.status(201).json({
         url: fileUrl,
-        filename: req.file.filename,
+        filename: fileName,
         mimetype: req.file.mimetype,
         size: req.file.size
       });

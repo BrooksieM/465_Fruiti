@@ -48,9 +48,15 @@ function updateNavigationForLoggedInUser(user) {
                         <button class="dropdown-item" onclick="goToSettings()">
                             <span>⚙️</span> Account Preferences
                         </button>
-
+                        ${user.is_seller ? `
+                        <button class="dropdown-item" onclick="goToSellerDashboard()">
+                            <span>🏪</span> Seller Dashboard
+                        </button>
+                    ` : ''}
                     </div>
-                    
+
+
+
                     <div class="dropdown-section">
                         <button class="dropdown-item" onclick="goToStars()">
                             <span>⭐</span> Saved Recipes
@@ -59,8 +65,7 @@ function updateNavigationForLoggedInUser(user) {
                             <span>❤️</span> Favorite Fruit Stands
                         </button>
                     </div>
-                    
-                    
+
                     <div class="dropdown-section">
                         <button class="dropdown-item" onclick="logout()">
                             <span>🚪</span> Sign out
@@ -123,6 +128,13 @@ function goToSettings() {
     location.href = '/settings';
 }
 
+function goToSellerDashboard() {
+    location.href = '/seller-dashboard';
+}
+
+function goToFruitStand() {
+    window.location.href = '/fruit-stand-map';
+}
 
 // Logout function
 function logout() {
@@ -130,6 +142,8 @@ function logout() {
     localStorage.removeItem('user');
     localStorage.removeItem('userStatus');
     window.location.href = '/';
+
+    localStorage.setItem('isLoggedIn', 'false');
 }
 
 // Check authentication status when page loads
