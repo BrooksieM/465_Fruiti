@@ -136,6 +136,15 @@ function displaySellerMarker(seller, location, fullAddress) {
       scaledSize: new google.maps.Size(40, 40),
       anchor: new google.maps.Point(20, 40)
     },
+    label: {
+      text: seller.business_name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' '),
+      color: "#000",
+      fontSize: "12px",
+      fontWeight: "bold"
+    },
     title: seller.business_name
   });
 
