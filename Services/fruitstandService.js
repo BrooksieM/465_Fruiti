@@ -138,7 +138,17 @@ app.put('/api/fruitstands/:id', async (req, res) => {
     try 
     {
         const id = Number(req.params.id);
-        const { name, address, city, state, zip, phone } = req.body;
+        const { 
+            business_name, 
+            phone_number, 
+            address, 
+            city, 
+            state, 
+            zipcode, 
+            description,
+            working_hours,
+            produce 
+        } = req.body;
         
         if (!Number.isInteger(id) || id <= 0) 
         {
@@ -147,9 +157,9 @@ app.put('/api/fruitstands/:id', async (req, res) => {
 
         // Check if fruit stand exists
         const { data: existingFruitStand, error: checkError } = await supabase
-            .from('fruitstands')
+            .from('seller_applications')
             .select('id')
-            .eq('id', id)
+            .eq('user_id', id)
             .single();
 
         if (checkError) 
@@ -159,17 +169,20 @@ app.put('/api/fruitstands/:id', async (req, res) => {
 
         // Update in Supabase
         const { data, error } = await supabase
-            .from('fruitstands')
+            .from('seller_applications')
             .update({
-                name,
-                address,
-                city,
-                state,
-                zip,
-                phone,
+                business_name: business_name,
+                address: address,
+                city: city,
+                state: state,
+                zipcode: zipcode,
+                phone_number: phone_number,
+                description: description,
+                working_hours: working_hours,
+                produce: produce,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', id)
+            .eq('user_id', id)
             .select();
 
         if (error) 
@@ -202,10 +215,10 @@ app.get('/api/fruitstands/:id', async (req, res) => {
         }
 
         const { data, error } = await supabase
-            .from('fruitstands')
+            .from('seller_applications')
             .select('*')
-            .eq('id', id)
-            .single();
+            .eq('user_id', id)
+            .maybeSingle();
 
         if (error) 
         {
