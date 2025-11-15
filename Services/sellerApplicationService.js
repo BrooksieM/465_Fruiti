@@ -326,7 +326,7 @@ module.exports = function (app, supabase)
     {
       const { data, error } = await supabase
         .from('seller_applications')
-        .select('id, business_name, description, phone_number, address, city, state, zipcode, user_id, latitude, longitude')
+        .select('*')
         .eq('status', 'approved')
         .not('address', 'is', null)
         .not('city', 'is', null)
