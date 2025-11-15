@@ -68,33 +68,30 @@ function loadSellerMarkers() {
     .then(data => {
       console.log('Sellers data received:', data);
       if (data.sellers && data.sellers.length > 0) {
-        const geocoder = new google.maps.Geocoder();
-        let processedCount = 0;
-
         data.sellers.forEach(seller => {
           // Create full address string
           const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
-          console.log(`Processing seller: ${seller.business_name} at ${fullAddress}`);
 
-          // Geocode the address to get coordinates
-          geocoder.geocode({ address: fullAddress }, function(results, status) {
-            if (status === 'OK') {
-              const location = results[0].geometry.location;
-              console.log(`Geocoded ${seller.business_name} to:`, location.lat(), location.lng());
-              displaySellerMarker(seller, location, fullAddress);
-            } else {
-              console.warn(`Google Geocode error for ${seller.business_name}: ${status}, trying fallback...`);
-              // Try fallback geocoding using OpenStreetMap/Nominatim (free, no API key needed)
-              geocodeWithNominatim(fullAddress, function(location) {
-                if (location) {
-                  console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
-                  displaySellerMarker(seller, location, fullAddress);
-                } else {
-                  console.error(`Failed to geocode ${seller.business_name} with both methods`);
-                }
-              });
-            }
-          });
+          // Check if seller has pre-geocoded coordinates
+          if (seller.latitude && seller.longitude) {
+            console.log(`Using pre-geocoded coordinates for ${seller.business_name}: ${seller.latitude}, ${seller.longitude}`);
+            const location = {
+              lat: seller.latitude,
+              lng: seller.longitude
+            };
+            displaySellerMarker(seller, location, fullAddress);
+          } else {
+            console.warn(`No coordinates found for ${seller.business_name}, attempting fallback geocoding...`);
+            // Fallback: Geocode the address if coordinates are not available
+            geocodeWithNominatim(fullAddress, function(location) {
+              if (location) {
+                console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
+                displaySellerMarker(seller, location, fullAddress);
+              } else {
+                console.error(`Failed to geocode ${seller.business_name}`);
+              }
+            });
+          }
         });
       } else {
         console.log('No sellers found');
@@ -150,26 +147,9 @@ function displaySellerMarker(seller, location, fullAddress) {
 
   console.log('Marker created for:', seller.business_name);
 
-  // info window for sellers
-  const sellerHandle = seller.handle || 'N/A';
-  const infoContent = `
-    <div style="padding: 10px; font-family: Arial, sans-serif; max-width: 250px;">
-      <h3 style="margin: 0 0 8px 0; color: #333;">${escapeHtml(seller.business_name)}</h3>
-      ${seller.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${escapeHtml(seller.description)}</p>` : ''}
-      <p style="margin: 0 0 8px 0; color: #666;"><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-      <p style="margin: 0 0 8px 0; color: #666;"><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
-      ${seller.phone_number ? `<p style="margin: 0 0 8px 0; color: #666;"><strong>Phone:</strong> ${escapeHtml(seller.phone_number)}</p>` : ''}
-      <a href="#" style="color: #1f73d1; text-decoration: none; font-size: 14px;" onclick="event.preventDefault(); alert('Contact this seller at ' + '${escapeHtml(seller.phone_number || 'N/A')}');">Contact Seller</a>
-    </div>
-  `;
-
-  const infoWindow = new google.maps.InfoWindow({
-    content: infoContent
-  });
-
-  // Show info window on marker click
+  // Show modal on marker click
   marker.addListener('click', function() {
-    infoWindow.open(map, marker);
+    showSellerModal(seller, fullAddress);
   });
 
   sellerMarkers.push(marker);
@@ -280,8 +260,61 @@ function deleteThisMarker(index) {
   }
 }
 
+// Show seller modal
+function showSellerModal(seller, fullAddress) {
+  const sellerHandle = seller.handle || 'N/A';
+  const phoneNumber = seller.phone_number || 'N/A';
+
+  const modalHTML = `
+    <div class="custom-modal" id="sellerModal">
+      <div class="modal-overlay" onclick="closeSellerModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>${escapeHtml(seller.business_name)}</h3>
+          <button class="close-btn" onclick="closeSellerModal()">×</button>
+        </div>
+        <div class="modal-body">
+          ${seller.description ? `<p>${escapeHtml(seller.description)}</p>` : ''}
+          <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
+          <p><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
+          
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeSellerModal()">Close</button>
+         
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Remove any existing modal
+  const existingModal = document.getElementById('sellerModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Insert new modal
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Close seller modal
+function closeSellerModal() {
+  const modal = document.getElementById('sellerModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Contact seller function
+function contactSeller(phoneNumber) {
+  alert('Contact this seller at ' + phoneNumber);
+}
+
 // Make functions accessible globally
 window.placeMarkerByAddress = placeMarkerByAddress;
 window.clearAllCustomMarkers = clearAllCustomMarkers;
 window.deleteThisMarker = deleteThisMarker;
 window.loadSellerMarkers = loadSellerMarkers;
+window.showSellerModal = showSellerModal;
+window.closeSellerModal = closeSellerModal;
+window.contactSeller = contactSeller;
