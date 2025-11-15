@@ -126,9 +126,24 @@ function displaySellerMarker(seller, location, fullAddress) {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
+  // Check if this fruitstand belongs to the current signed-in user
+  let userLabel = '';
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      if (user.id === seller.user_id) {
+        userLabel = `<div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #019456; white-space: nowrap; margin-bottom: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">Your Stand</div>`;
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+  }
+
   // Create custom marker HTML with icon and name below
   const markerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+      ${userLabel}
       <div style="width: 40px; height: 40px; pointer-events: none;">${fruitStandSVG}</div>
       <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; margin-top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">${businessName}</div>
     </div>
