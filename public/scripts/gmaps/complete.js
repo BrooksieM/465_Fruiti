@@ -368,8 +368,8 @@ function showSellerModal(seller, fullAddress) {
           <div class="seller-info-group">
             <h4>Contact Information</h4>
             <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-            <p><strong>Phone:</strong> ${escapeHtml(phoneNumber)}</p>
-            <p><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
+            
+            <p><strong>Stand Address:</strong> ${escapeHtml(fullAddress)}</p>
           </div>
 
           ${produce && Array.isArray(produce) && produce.length > 0 ? `
