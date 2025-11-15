@@ -121,38 +121,67 @@ function displaySellerMarker(seller, location, fullAddress) {
     </svg>
   `;
 
-  // Convert SVG to data URL
-  const svgDataUrl = 'data:image/svg+xml;base64,' + btoa(fruitStandSVG);
+  const businessName = seller.business_name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 
-  // Create marker for seller
-  const marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    icon: {
-      url: svgDataUrl,
-      scaledSize: new google.maps.Size(40, 40),
-      anchor: new google.maps.Point(20, 40)
-    },
-    label: {
-      text: seller.business_name
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' '),
-      color: "#000",
-      fontSize: "12px",
-      fontWeight: "bold"
-    },
-    title: seller.business_name
-  });
+  // Create custom marker HTML with icon and name below
+  const markerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+      <div style="width: 40px; height: 40px; pointer-events: none;">${fruitStandSVG}</div>
+      <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; margin-top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">${businessName}</div>
+    </div>
+  `;
+
+  // Create a div element for the marker
+  const markerDiv = document.createElement('div');
+  markerDiv.innerHTML = markerHTML;
+  markerDiv.style.cursor = 'pointer';
+
+  // Create custom marker using OverlayView
+  class CustomMarker extends google.maps.OverlayView {
+    constructor(position, content, seller, fullAddress) {
+      super();
+      this.position = position;
+      this.content = content;
+      this.seller = seller;
+      this.fullAddress = fullAddress;
+    }
+
+    onAdd() {
+      const pane = this.getPanes().overlayMouseTarget;
+      pane.appendChild(this.content);
+
+      // Add click listener with proper event handling
+      this.content.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSellerModal(this.seller, this.fullAddress);
+      }, true);
+    }
+
+    draw() {
+      const projection = this.getProjection();
+      const position = projection.fromLatLngToDivPixel(this.position);
+      this.content.style.left = (position.x - 35) + 'px';
+      this.content.style.top = (position.y - 60) + 'px';
+      this.content.style.position = 'absolute';
+      this.content.style.zIndex = '100';
+    }
+
+    onRemove() {
+      if (this.content.parentElement) {
+        this.content.parentElement.removeChild(this.content);
+      }
+    }
+  }
+
+  const customMarker = new CustomMarker(location, markerDiv, seller, fullAddress);
+  customMarker.setMap(map);
 
   console.log('Marker created for:', seller.business_name);
 
-  // Show modal on marker click
-  marker.addListener('click', function() {
-    showSellerModal(seller, fullAddress);
-  });
-
-  sellerMarkers.push(marker);
+  sellerMarkers.push(customMarker);
 }
 
 // Fallback geocoding using OpenStreetMap Nominatim API (free, no API key needed)
