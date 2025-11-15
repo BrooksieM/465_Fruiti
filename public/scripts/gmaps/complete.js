@@ -67,8 +67,13 @@ function loadSellerMarkers() {
     .then(response => response.json())
     .then(data => {
       console.log('Sellers data received:', data);
+      console.log('Full sellers array:', JSON.stringify(data.sellers, null, 2));
       if (data.sellers && data.sellers.length > 0) {
         data.sellers.forEach(seller => {
+          console.log(`Processing seller: ${seller.business_name}`, {
+            working_hours: seller.working_hours,
+            produce: seller.produce
+          });
           // Create full address string
           const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
 
@@ -308,24 +313,90 @@ function deleteThisMarker(index) {
 function showSellerModal(seller, fullAddress) {
   const sellerHandle = seller.handle || 'N/A';
   const phoneNumber = seller.phone_number || 'N/A';
+  const description = seller.description || 'No description provided';
+
+  // Parse working_hours if it's a string (Supabase sometimes returns stringified JSON)
+  let workingHours = seller.working_hours;
+  if (typeof workingHours === 'string') {
+    try {
+      workingHours = JSON.parse(workingHours);
+    } catch (e) {
+      console.error('Failed to parse working_hours:', e);
+      workingHours = null;
+    }
+  }
+
+  // Parse produce if it's a string
+  let produce = seller.produce;
+  if (typeof produce === 'string') {
+    try {
+      produce = JSON.parse(produce);
+    } catch (e) {
+      console.error('Failed to parse produce:', e);
+      produce = null;
+    }
+  }
+
+  // Debug logging
+  console.log('Seller data received:', seller);
+  console.log('Raw working_hours:', seller.working_hours, 'Type:', typeof seller.working_hours);
+  console.log('Raw produce:', seller.produce, 'Type:', typeof seller.produce);
+  console.log('Working hours (parsed):', workingHours);
+  console.log('Produce (parsed):', produce);
+  console.log('All seller keys:', Object.keys(seller));
 
   const modalHTML = `
     <div class="custom-modal" id="sellerModal">
       <div class="modal-overlay" onclick="closeSellerModal()"></div>
-      <div class="modal-content">
+      <div class="modal-content seller-modal-large">
         <div class="modal-header">
           <h3>${escapeHtml(seller.business_name)}</h3>
           <button class="close-btn" onclick="closeSellerModal()">×</button>
         </div>
-        <div class="modal-body">
-          ${seller.description ? `<p>${escapeHtml(seller.description)}</p>` : ''}
-          <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-          <p><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
-          
+
+        <div class="seller-image-banner">
+          <img src="../images/default-stand.png" alt="${escapeHtml(seller.business_name)}" class="seller-banner-image"
+               onerror="this.src='../images/default-avatar.png'">
         </div>
+
+        <div class="modal-body seller-modal-body-vertical">
+          <div class="seller-info-group">
+            <h4>Description</h4>
+            <p>${escapeHtml(description)}</p>
+          </div>
+
+          <div class="seller-info-group">
+            <h4>Contact Information</h4>
+            <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
+            <p><strong>Phone:</strong> ${escapeHtml(phoneNumber)}</p>
+            <p><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
+          </div>
+
+          ${produce && Array.isArray(produce) && produce.length > 0 ? `
+            <div class="seller-info-group">
+              <h4>Available Produce</h4>
+              <div class="produce-list">
+                ${produce.map(fruit => `<span class="produce-item">${escapeHtml(typeof fruit === 'string' ? fruit : JSON.stringify(fruit))}</span>`).join('')}
+              </div>
+            </div>
+          ` : `<div class="seller-info-group"><h4>Available Produce</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+
+          ${workingHours && typeof workingHours === 'object' && Object.keys(workingHours).length > 0 ? `
+            <div class="seller-info-group">
+              <h4>Working Hours</h4>
+              <div class="hours-display">
+                ${Object.entries(workingHours).map(([day, hours]) => {
+                  const isOpen = typeof hours === 'object' && hours.open;
+                  const timeStr = isOpen ? `${hours.start} - ${hours.end}` : 'Closed';
+                  return `<div class="hour-row"><span class="day">${day}:</span><span class="time">${timeStr}</span></div>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : `<div class="seller-info-group"><h4>Working Hours</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+        </div>
+
         <div class="modal-footer">
           <button class="btn-secondary" onclick="closeSellerModal()">Close</button>
-         
         </div>
       </div>
     </div>
