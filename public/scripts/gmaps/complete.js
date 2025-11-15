@@ -130,7 +130,7 @@ function displaySellerMarker(seller, location, fullAddress) {
   const markerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
       <div style="width: 40px; height: 40px; pointer-events: none;">${fruitStandSVG}</div>
-      <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; margin-top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">${businessName}</div>
+      <div style="font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; margin-top: 2px; pointer-events: none;">${businessName}</div>
     </div>
   `;
 
