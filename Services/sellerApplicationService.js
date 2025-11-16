@@ -610,9 +610,15 @@ module.exports = function (app, supabase)
           }
         ])
         .select();
-      
+
       //Change account seller status to TRUE
-      
+      if (!appError) {
+        await supabase
+          .from('accounts')
+          .update({ is_seller: true })
+          .eq('id', userId);
+      }
+
       if (appError)
       {
         console.error('Application creation error:', appError);

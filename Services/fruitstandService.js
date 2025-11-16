@@ -1,7 +1,7 @@
 // ========== FRUIT STANDS CRUD OPERATIONS (Supabase) ==========
 
 // GET endpoint to search for nearby fruit stands
-module.exports = (app, supabase) => {
+module.exports = (app, supabase, supabaseAdmin) => {
 app.get('/api/fruitstands/search', async (req, res) => {
     try 
     {
@@ -362,11 +362,141 @@ app.get('/api/fruitstands', async (req, res) => {
         }
 
         res.json(data);
-    } 
-    catch (error) 
+    }
+    catch (error)
     {
         console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// ========== FRUIT STAND IMAGE OPERATIONS (Supabase Storage) ==========
+
+// GET endpoint to fetch all images for a fruit stand
+app.get('/api/fruitstand-images/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // List all files in the user's folder in the fruitstand-image bucket
+        const { data: files, error } = await supabaseAdmin.storage
+            .from('fruitstand-image')
+            .list(userId, {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' }
+            });
+
+        if (error) {
+            console.error('Error listing images:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Get public URLs for all images
+        const images = files.map(file => {
+            const { data } = supabaseAdmin.storage
+                .from('fruitstand-image')
+                .getPublicUrl(`${userId}/${file.name}`);
+
+            return {
+                name: file.name,
+                url: data.publicUrl,
+                createdAt: file.created_at
+            };
+        });
+
+        res.json({ images });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// DELETE endpoint to delete an image from a fruit stand
+app.delete('/api/fruitstand-images/:userId/:imageName', async (req, res) => {
+    try {
+        const { userId, imageName } = req.params;
+
+        // Delete the file from Supabase storage
+        const { error } = await supabaseAdmin.storage
+            .from('fruitstand-image')
+            .remove([`${userId}/${imageName}`]);
+
+        if (error) {
+            console.error('Error deleting image:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json({
+            message: 'Image deleted successfully',
+            deletedImage: imageName
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST endpoint to upload an image to a fruit stand
+app.post('/api/fruitstand-images/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { imageBase64, fileName } = req.body;
+
+        console.log('Upload request received for user:', userId);
+        console.log('FileName:', fileName);
+
+        if (!imageBase64 || !fileName) {
+            return res.status(400).json({ error: 'Image data and filename are required' });
+        }
+
+        // Convert base64 to buffer
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        console.log('Buffer size:', buffer.length, 'bytes');
+
+        // Upload to Supabase storage
+        const filePath = `${userId}/${fileName}`;
+        console.log('Uploading to path:', filePath);
+
+        const { data, error } = await supabaseAdmin.storage
+            .from('fruitstand-image')
+            .upload(filePath, buffer, {
+                contentType: 'image/jpeg',
+                upsert: true  // Changed to true to allow overwriting
+            });
+
+        if (error) {
+            console.error('Supabase storage error:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            return res.status(500).json({
+                error: error.message || 'Failed to upload to storage',
+                details: error
+            });
+        }
+
+        console.log('Upload successful, data:', data);
+
+        // Get public URL
+        const { data: publicUrlData } = supabaseAdmin.storage
+            .from('fruitstand-image')
+            .getPublicUrl(filePath);
+
+        console.log('Public URL:', publicUrlData.publicUrl);
+
+        res.status(201).json({
+            message: 'Image uploaded successfully',
+            url: publicUrlData.publicUrl,
+            path: data.path
+        });
+    } catch (error) {
+        console.error('Server error in image upload:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+            error: 'Internal server error',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 };

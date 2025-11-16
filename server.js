@@ -3,7 +3,8 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased limit for image uploads
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const PORT = 3000;
 const path = require('path');
 app.use(express.static('public'));
@@ -102,7 +103,7 @@ require('./Services/articleService')(app, supabase);
 // require('./Services/authService')(app, supabase);
 require('./Services/commentService')(app, supabase);
 // require('./Services/contactService')(app, supabase);
-require('./Services/fruitstandService')(app, supabase);
+require('./Services/fruitstandService')(app, supabase, supabaseAdmin);
 require('./Services/nutritionService')(app, supabase);
 require('./Services/recipeService')(app, supabase, supabaseAdmin);
 require('./Services/sellerApplicationService')(app, supabase);
