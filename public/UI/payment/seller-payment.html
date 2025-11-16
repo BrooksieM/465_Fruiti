@@ -74,7 +74,7 @@
         
         <div class="form-group">
           <label for="standName">Stand Name *</label>
-          <input type="text" id="standName" name="standName" placeholder="e.g., Johnson's Fresh Fruit Stand" required>
+          <input type="text" id="standName" name="standName" maxlength="50" placeholder="e.g., Johnson's Fresh Fruit Stand" required>
         </div>
 
         <div class="form-group">
@@ -84,12 +84,12 @@
 
         <div class="form-group">
           <label for="phone_number">Phone Number *</label>
-          <input type="tel" id="phone_number" name="phone_number" required>
+          <input type="tel" id="phone_number" name="phone_number" maxlength="14" required>
         </div>
 
         <div class="form-group">
           <label for="standAddress">Stand Address *</label>
-          <input type="text" id="standAddress" name="standAddress" placeholder="Street address" required>
+          <input type="text" id="standAddress" name="standAddress" placeholder="Street address" maxlength="70" required>
         </div>
 
         <div class="form-row">
@@ -403,6 +403,28 @@
     // ZIP code formatting (numbers only)
     document.getElementById('zipcode').addEventListener('input', function(e) {
       e.target.value = e.target.value.replace(/\D/g, '');
+    });
+
+    // Phone number formatting (XXX) XXX-XXXX
+    document.getElementById('phone_number').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+
+      if (value.length > 0) {
+        if (value.length <= 3) {
+          value = value;
+        } else if (value.length <= 6) {
+          value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+        } else {
+          value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+        }
+      }
+
+      e.target.value = value;
+    });
+
+    // CVV formatting (numbers only, max 3 digits)
+    document.getElementById('cvv').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
     });
 
     // Form submission
