@@ -501,6 +501,18 @@
           localStorage.setItem('userId', result.userId);
           localStorage.setItem('isLoggedIn', 'true');
 
+          // Fetch updated user data with is_seller: true
+          try {
+            const userResponse = await fetch(`/api/accounts/${result.userId}`);
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              localStorage.setItem('user', JSON.stringify(userData));
+              console.log('Updated user data stored in localStorage:', userData);
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+
           // Redirect to homepage or seller dashboard
           window.location.href = '/';
         } else {

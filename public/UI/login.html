@@ -48,7 +48,12 @@
           <input id="username" type="text" placeholder="username or email" required />
 
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="••••••••" required />
+          <div style="position: relative;">
+            <input id="password" type="password" placeholder="••••••••" required style="padding-right: 40px;" />
+            <button type="button" onclick="togglePassword('password', 'togglePasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+              <img id="togglePasswordIcon" width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/visible--v1.png" alt="Show password" />
+            </button>
+          </div>
 
           <div class="actions">
             <button class="btn primary full" id="loginBtn" type="submit">
@@ -72,6 +77,22 @@
 
 <script src="/scripts/login.js"></script>
 <script>
+// Password toggle function
+function togglePassword(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/invisible.png';
+        toggleIcon.alt = 'Hide password';
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/visible--v1.png';
+        toggleIcon.alt = 'Show password';
+    }
+}
+
 //focus/blur UX for input fields
 document.querySelectorAll('.form-group input').forEach(input => {
     input.addEventListener('focus', function() {

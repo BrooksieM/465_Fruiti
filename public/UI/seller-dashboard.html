@@ -47,20 +47,19 @@
     <div id="successMessage" class="success-message" style="display: none;"></div>
 
     <div class="dashboard-container">
-      <!-- Left Section: Stand Info & Image -->
+      <!-- Left Section: Stand Info -->
       <div class="dashboard-section left-section">
         <div class="image-upload-section">
-          <div class="image-preview-container">
-            <img src="../images/default-stand.png" alt="Stand Image" id="standImagePreview"
-                 onerror="this.src='../images/default-avatar.png'">
-            <div class="upload-overlay">
-              <button type="button" class="upload-btn" onclick="document.getElementById('standImageUpload').click()">
-                <span>📸</span>
-                <span>Upload Image</span>
-              </button>
-            </div>
-          </div>
           <input type="file" id="standImageUpload" accept="image/*" style="display: none;">
+
+          <div class="image-buttons-container">
+            <button type="button" class="upload-image-btn" onclick="document.getElementById('standImageUpload').click()">
+              <span>📸</span> Upload Image
+            </button>
+            <button type="button" class="view-images-btn" onclick="openImageGallery()">
+              <span>🖼️</span> View Images
+            </button>
+          </div>
         </div>
 
         <div class="form-section">
@@ -320,6 +319,25 @@
             <span class="btn-loading" style="display: none;">Saving...</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Gallery Modal -->
+  <div id="imageGalleryModal" class="gallery-modal" style="display: none;">
+    <div class="gallery-modal-content">
+      <div class="gallery-header">
+        <h2>Fruit Stand Images</h2>
+        <button class="gallery-close-btn" onclick="closeImageGallery()">&times;</button>
+      </div>
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Images will be loaded here -->
+      </div>
+      <div class="gallery-loading" id="galleryLoading" style="display: none;">
+        Loading images...
+      </div>
+      <div class="gallery-empty" id="galleryEmpty" style="display: none;">
+        No images uploaded yet. Upload your first image!
       </div>
     </div>
   </div>

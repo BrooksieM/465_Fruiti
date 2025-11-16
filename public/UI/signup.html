@@ -81,14 +81,20 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="password">Password *</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            placeholder="Create a password (min. 6 characters)" 
-                            required 
-                            minlength="6"
-                        />
+                        <div style="position: relative;">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Create a password (min. 6 characters)"
+                                required
+                                minlength="6"
+                                style="padding-right: 40px;"
+                            />
+                            <button type="button" onclick="togglePassword('password', 'togglePasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                                <img id="togglePasswordIcon" width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/visible--v1.png" alt="Show password" />
+                            </button>
+                        </div>
                         <div class="password-strength">
                             <div class="strength-bar" id="strengthBar"></div>
                         </div>
@@ -98,13 +104,19 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="confirmPassword">Confirm Password *</label>
-                        <input 
-                            type="password" 
-                            id="confirmPassword" 
-                            name="confirmPassword" 
-                            placeholder="Confirm your password" 
-                            required 
-                        />
+                        <div style="position: relative;">
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Confirm your password"
+                                required
+                                style="padding-right: 40px;"
+                            />
+                            <button type="button" onclick="togglePassword('confirmPassword', 'toggleConfirmPasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                                <img id="toggleConfirmPasswordIcon" width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/visible--v1.png" alt="Show password" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -133,6 +145,22 @@
 <script src="../scripts/footer.js"></script>
 
     <script>
+        // Password toggle function
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/invisible.png';
+                toggleIcon.alt = 'Hide password';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/visible--v1.png';
+                toggleIcon.alt = 'Show password';
+            }
+        }
+
         // Password strength indicator
         document.getElementById('password').addEventListener('input', function() {
             const password = this.value;
@@ -157,20 +185,6 @@
                 strengthBar.classList.add('strength-medium');
             } else {
                 strengthBar.classList.add('strength-strong');
-            }
-        });
-
-        // Real-time password confirmation validation
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            const errorMessage = document.getElementById('errorMessage');
-
-            if (confirmPassword && password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match';
-                errorMessage.style.display = 'block';
-            } else if (confirmPassword && password === confirmPassword) {
-                errorMessage.style.display = 'none';
             }
         });
 
