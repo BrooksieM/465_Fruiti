@@ -310,7 +310,7 @@ function deleteThisMarker(index) {
 }
 
 // Show seller modal
-function showSellerModal(seller, fullAddress) {
+async function showSellerModal(seller, fullAddress) {
   const sellerHandle = seller.handle || 'N/A';
   const phoneNumber = seller.phone_number || 'N/A';
   const description = seller.description || 'No description provided';
@@ -345,6 +345,49 @@ function showSellerModal(seller, fullAddress) {
   console.log('Produce (parsed):', produce);
   console.log('All seller keys:', Object.keys(seller));
 
+  // Fetch seller's images from fruitstand-image bucket
+  let sellerImages = [];
+  try {
+    const imageResponse = await fetch(`/api/fruitstand-images/${seller.user_id}`);
+    if (imageResponse.ok) {
+      const imageData = await imageResponse.json();
+      sellerImages = imageData.images || [];
+      console.log('Loaded seller images:', sellerImages);
+    }
+  } catch (error) {
+    console.error('Error loading seller images:', error);
+  }
+
+  // Create image gallery HTML
+  let imageGalleryHTML = '';
+  if (sellerImages.length > 0) {
+    imageGalleryHTML = `
+      <div class="seller-image-gallery">
+        <div class="gallery-main-image">
+          <img id="mainGalleryImage" src="${sellerImages[0].url}" alt="${escapeHtml(seller.business_name)}"
+               onerror="this.src='../images/default-stand.png'">
+        </div>
+        ${sellerImages.length > 1 ? `
+          <div class="gallery-thumbnails">
+            ${sellerImages.map((img, index) => `
+              <img src="${img.url}" alt="Gallery image ${index + 1}"
+                   class="gallery-thumbnail ${index === 0 ? 'active' : ''}"
+                   onclick="changeMainImage('${img.url}', this)"
+                   onerror="this.src='../images/default-stand.png'">
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } else {
+    imageGalleryHTML = `
+      <div class="seller-image-banner">
+        <img src="../images/default-stand.png" alt="${escapeHtml(seller.business_name)}" class="seller-banner-image"
+             onerror="this.src='../images/default-avatar.png'">
+      </div>
+    `;
+  }
+
   const modalHTML = `
     <div class="custom-modal" id="sellerModal">
       <div class="modal-overlay" onclick="closeSellerModal()"></div>
@@ -354,10 +397,7 @@ function showSellerModal(seller, fullAddress) {
           <button class="close-btn" onclick="closeSellerModal()">×</button>
         </div>
 
-        <div class="seller-image-banner">
-          <img src="../images/default-stand.png" alt="${escapeHtml(seller.business_name)}" class="seller-banner-image"
-               onerror="this.src='../images/default-avatar.png'">
-        </div>
+        ${imageGalleryHTML}
 
         <div class="modal-body seller-modal-body-vertical">
           <div class="seller-info-group">
@@ -368,7 +408,7 @@ function showSellerModal(seller, fullAddress) {
           <div class="seller-info-group">
             <h4>Contact Information</h4>
             <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-            
+
             <p><strong>Stand Address:</strong> ${escapeHtml(fullAddress)}</p>
           </div>
 
@@ -412,6 +452,21 @@ function showSellerModal(seller, fullAddress) {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
+// Change main gallery image
+function changeMainImage(imageUrl, thumbnail) {
+  const mainImage = document.getElementById('mainGalleryImage');
+  if (mainImage) {
+    mainImage.src = imageUrl;
+  }
+
+  // Update active thumbnail
+  const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+  thumbnails.forEach(thumb => thumb.classList.remove('active'));
+  if (thumbnail) {
+    thumbnail.classList.add('active');
+  }
+}
+
 // Close seller modal
 function closeSellerModal() {
   const modal = document.getElementById('sellerModal');
@@ -433,3 +488,4 @@ window.loadSellerMarkers = loadSellerMarkers;
 window.showSellerModal = showSellerModal;
 window.closeSellerModal = closeSellerModal;
 window.contactSeller = contactSeller;
+window.changeMainImage = changeMainImage;
