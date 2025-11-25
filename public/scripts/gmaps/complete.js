@@ -388,12 +388,24 @@ async function showSellerModal(seller, fullAddress) {
     `;
   }
 
+  // Check if user is logged in
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const isLoggedIn = user && user.id;
+  const isFavorited = isLoggedIn ? await isFruitStandFavorited(seller.user_id) : false;
+
   const modalHTML = `
-    <div class="custom-modal" id="sellerModal">
+    <div class="custom-modal" id="sellerModal" data-seller-id="${seller.user_id}">
       <div class="modal-overlay" onclick="closeSellerModal()"></div>
       <div class="modal-content seller-modal-large">
         <div class="modal-header">
-          <h3>${escapeHtml(seller.business_name)}</h3>
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <h3>${escapeHtml(seller.business_name)}</h3>
+            ${isLoggedIn ? `
+              <button class="btn-heart" onclick="toggleFavoriteFruitStand(${seller.user_id})" title="${isFavorited ? 'Unfavorite this stand' : 'Favorite this stand'}">
+                ${isFavorited ? '❤️' : '🤍'}
+              </button>
+            ` : ''}
+          </div>
           <button class="close-btn" onclick="closeSellerModal()">×</button>
         </div>
 
