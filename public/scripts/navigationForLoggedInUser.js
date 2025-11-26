@@ -133,7 +133,7 @@ function goToSellerDashboard() {
 }
 
 function goToFruitStand() {
-    window.location.href = '/fruit-stand-map';
+    window.location.href = '/fruitstand-favorite';
 }
 
 // Logout function

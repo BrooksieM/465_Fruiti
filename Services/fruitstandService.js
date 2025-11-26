@@ -205,11 +205,11 @@ app.put('/api/fruitstands/:id', async (req, res) => {
 
 // GET endpoint to get fruit stand details by ID
 app.get('/api/fruitstands/:id', async (req, res) => {
-    try 
+    try
     {
         const id = Number(req.params.id);
-        
-        if (!Number.isInteger(id) || id <= 0) 
+
+        if (!Number.isInteger(id) || id <= 0)
         {
             return res.status(400).json({ error: 'Invalid fruit stand ID' });
         }
@@ -217,10 +217,10 @@ app.get('/api/fruitstands/:id', async (req, res) => {
         const { data, error } = await supabase
             .from('seller_applications')
             .select('*')
-            .eq('user_id', id)
+            .eq('id', id)
             .maybeSingle();
 
-        if (error) 
+        if (error)
         {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Fruit stand not found' });
@@ -230,8 +230,8 @@ app.get('/api/fruitstands/:id', async (req, res) => {
         }
 
         res.json(data);
-    } 
-    catch (error) 
+    }
+    catch (error)
     {
         console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorite Fruit Stands</title>
+  <link rel="stylesheet" href="../css/standardLayout.css">
+  <link rel="stylesheet" href="../css/favoriteFruitStands/favoriteFruitStands.css">
+  <link rel="stylesheet" href="../css/footer/footer.css">
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <a href="/">
+        <img src="../images/fruiti.png" alt="Fruiti logo - Click to go home" />
+      </a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+    <div class="auth-buttons" id="authButtons">
+      <!-- Default state - show login/signup -->
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/become-seller">Become a Seller</a>
+    <a href="/nutrition">Nutrition</a>
+    <a href="/recipe">Recipes</a>
+    <a href="/aboutus">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <div class="page-layout">
+    <div class="favorite-stands-container">
+      <h1 class="page-title">My Favorite Fruit Stands</h1>
+
+      <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading your favorite stands...</p>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">❤️</div>
+        <h2>No Favorite Stands Yet</h2>
+        <p>Start exploring fruit stands and add your favorites to see them here</p>
+        <button class="btn-explore" onclick="location.href='/'">Explore Fruit Stands</button>
+      </div>
+
+      <div id="standsList" class="stands-grid"></div>
+
+      <div id="maxFavoritesMessage" class="max-favorites-message" style="display: none;">
+        <p>⭐ You have reached the maximum of 5 favorite fruit stands!</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../scripts/footer.js"></script>
+  <script src="../scripts/navigationForLoggedInUser.js"></script>
+  <script src="../scripts/favoriteFruitStand.js"></script>
+  <script src="../scripts/favoriteFruitStandsPage.js"></script>
+</body>
+</html>
