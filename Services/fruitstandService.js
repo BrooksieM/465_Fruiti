@@ -205,11 +205,11 @@ app.put('/api/fruitstands/:id', async (req, res) => {
 
 // GET endpoint to get fruit stand details by ID
 app.get('/api/fruitstands/:id', async (req, res) => {
-    try 
+    try
     {
         const id = Number(req.params.id);
-        
-        if (!Number.isInteger(id) || id <= 0) 
+
+        if (!Number.isInteger(id) || id <= 0)
         {
             return res.status(400).json({ error: 'Invalid fruit stand ID' });
         }
@@ -217,10 +217,10 @@ app.get('/api/fruitstands/:id', async (req, res) => {
         const { data, error } = await supabase
             .from('seller_applications')
             .select('*')
-            .eq('user_id', id)
+            .eq('id', id)
             .maybeSingle();
 
-        if (error) 
+        if (error)
         {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Fruit stand not found' });
@@ -230,8 +230,8 @@ app.get('/api/fruitstands/:id', async (req, res) => {
         }
 
         res.json(data);
-    } 
-    catch (error) 
+    }
+    catch (error)
     {
         console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -429,6 +429,112 @@ app.delete('/api/fruitstand-images/:userId/:imageName', async (req, res) => {
         res.json({
             message: 'Image deleted successfully',
             deletedImage: imageName
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST endpoint to toggle favorite status for a fruit stand
+app.post('/api/favorite-fruit-stands/:sellerId', async (req, res) => {
+    try {
+        let { userId } = req.body;
+        const sellerId = parseInt(req.params.sellerId);
+
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        // Convert userId to number if it's a string
+        userId = parseInt(userId);
+
+        if (!Number.isInteger(sellerId) || sellerId <= 0) {
+            return res.status(400).json({ error: 'Invalid seller ID' });
+        }
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        // Get user's current favorited_stands
+        const { data: userData, error: userError } = await supabase
+            .from('accounts')
+            .select('favorited_stands')
+            .eq('id', userId)
+            .single();
+
+        if (userError) {
+            console.error('User lookup error:', userError);
+            console.log('Looking for userId:', userId);
+            return res.status(404).json({ error: 'User not found', details: userError.message });
+        }
+
+        let favorites = userData.favorited_stands || [];
+
+        // Toggle the favorite
+        if (favorites.includes(sellerId)) {
+            favorites = favorites.filter(id => id !== sellerId);
+        } else {
+            // Check if user has reached the 5 stand limit
+            if (favorites.length >= 5) {
+                return res.status(400).json({ error: 'You can only favorite up to 5 fruit stands' });
+            }
+            favorites.push(sellerId);
+        }
+
+        // Update the favorited_stands in the database
+        const { error: updateError } = await supabase
+            .from('accounts')
+            .update({ favorited_stands: favorites })
+            .eq('id', userId);
+
+        if (updateError) {
+            console.error('Update error:', updateError);
+            return res.status(500).json({ error: 'Failed to update favorites' });
+        }
+
+        const isFavorited = favorites.includes(sellerId);
+        res.json({
+            message: isFavorited ? 'Fruit stand added to favorites' : 'Fruit stand removed from favorites',
+            isFavorited: isFavorited,
+            favorite_stands: favorites
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET endpoint to fetch user's favorite fruit stands
+app.get('/api/favorite-fruit-stands', async (req, res) => {
+    try {
+        // Get user ID from query or session (you may need to adjust this based on your auth setup)
+        let userId = req.query.userId || req.body?.userId;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        // Convert userId to number if it's a string
+        userId = parseInt(userId);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        const { data, error } = await supabase
+            .from('accounts')
+            .select('favorited_stands')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({
+            favorite_stands: data.favorited_stands || []
         });
     } catch (error) {
         console.error('Server error:', error);
