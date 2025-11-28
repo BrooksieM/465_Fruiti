@@ -1,10 +1,4 @@
-/* Favorite Fruit Stands Page Styles */
-
-.favorite-stands-container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 20px;
-}
+/* Favorite Recipes Page Styles */
 
 .page-title {
   font-size: 28px;
@@ -97,16 +91,16 @@
   box-shadow: 0 4px 12px rgba(1, 125, 73, 0.3);
 }
 
-/* Stands Grid */
-.stands-grid {
+/* Recipes Grid */
+.recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
   margin-bottom: 30px;
 }
 
-/* Fruit Stand Card */
-.stand-card {
+/* Recipe Card */
+.recipe-card-favorite {
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -118,20 +112,46 @@
   cursor: pointer;
 }
 
-.stand-card:hover {
+.recipe-card-favorite:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   transform: translateY(-4px);
 }
 
-.stand-card-image-container {
+/* Difficulty-based shadows */
+.recipe-card-favorite.difficulty-easy {
+  box-shadow: 0 6px 16px rgba(1, 125, 73, 0.4), 0 2px 4px rgba(1, 125, 73, 0.3);
+}
+
+.recipe-card-favorite.difficulty-easy:hover {
+  box-shadow: 0 10px 24px rgba(1, 125, 73, 0.5), 0 4px 8px rgba(1, 125, 73, 0.4);
+}
+
+.recipe-card-favorite.difficulty-medium {
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4), 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
+.recipe-card-favorite.difficulty-medium:hover {
+  box-shadow: 0 10px 24px rgba(255, 152, 0, 0.5), 0 4px 8px rgba(255, 152, 0, 0.4);
+}
+
+.recipe-card-favorite.difficulty-hard {
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4), 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.recipe-card-favorite.difficulty-hard:hover {
+  box-shadow: 0 10px 24px rgba(220, 53, 69, 0.5), 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Image Container */
+.recipe-card-favorite-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%;
+  padding-top: 75%;
   overflow: hidden;
   background: #f5f5f5;
 }
 
-.stand-card-image {
+.recipe-card-favorite-image {
   position: absolute;
   top: 0;
   left: 0;
@@ -141,11 +161,29 @@
   transition: transform 0.3s ease;
 }
 
-.stand-card:hover .stand-card-image {
+.recipe-card-favorite:hover .recipe-card-favorite-image {
   transform: scale(1.05);
 }
 
-.btn-heart-overlay {
+.recipe-card-favorite-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #017d49;
+  font-size: 24px;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Star Button */
+.btn-star-overlay {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -164,48 +202,40 @@
   z-index: 10;
 }
 
-.btn-heart-overlay:hover {
+.btn-star-overlay:hover {
   background: white;
   transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.btn-heart-overlay.favorited {
-  text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+.btn-star-overlay.favorited {
+  text-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
 }
 
-.stand-card-info {
+/* Card Info Section */
+.recipe-card-favorite-info {
   padding: 16px;
   background: white;
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.stand-name-overlay {
-  font-size: 18px;
+.recipe-name-overlay {
+  font-size: 16px;
   font-weight: 600;
   margin: 0;
   color: #333;
   word-break: break-word;
+  line-height: 1.3;
 }
 
-/* Max Favorites Message */
-.max-favorites-message {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
-  border: 2px solid #ffc107;
-  border-radius: 8px;
-  padding: 16px 20px;
-  text-align: center;
-  color: #856404;
-  font-weight: 500;
-  margin-top: 20px;
-}
-
-.max-favorites-message p {
+.recipe-difficulty {
+  font-size: 13px;
+  color: #666;
   margin: 0;
+  font-weight: 500;
 }
 
 /* Responsive Design */
@@ -214,12 +244,9 @@
     font-size: 24px;
   }
 
-  .stands-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .favorite-stands-container {
-    margin: 30px auto;
+  .recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
   }
 
   .empty-state {
@@ -233,15 +260,6 @@
   .empty-state h2 {
     font-size: 20px;
   }
-
-  .stand-card-footer {
-    flex-wrap: wrap;
-  }
-
-  .btn-visit,
-  .btn-remove {
-    min-width: 100px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -250,39 +268,22 @@
     margin-bottom: 20px;
   }
 
-  .stands-grid {
-    gap: 16px;
+  .recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .stand-card-header {
-    padding: 16px;
+  .btn-star-overlay {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
 
-  .stand-name {
-    font-size: 16px;
+  .recipe-name-overlay {
+    font-size: 14px;
   }
 
-  .stand-card-body {
-    padding: 16px;
-    gap: 10px;
-  }
-
-  .stand-info-icon {
-    font-size: 16px;
-  }
-
-  .stand-info-content {
-    font-size: 13px;
-  }
-
-  .stand-card-footer {
-    padding: 12px 16px;
-    gap: 8px;
-  }
-
-  .btn-visit,
-  .btn-remove {
-    padding: 8px 12px;
-    font-size: 13px;
+  .recipe-difficulty {
+    font-size: 12px;
   }
 }
