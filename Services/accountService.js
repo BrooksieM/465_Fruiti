@@ -567,4 +567,110 @@ app.post('/api/accounts/:id/verify-password', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  // GET /api/user/:id -> get user with favorite recipes
+  app.get('/api/user/:id', async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('id, handle, email, avatar, favorite_recipe')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        console.error('User query error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // POST /api/recipes/:recipeId/favorite -> toggle favorite recipe
+  app.post('/api/recipes/:recipeId/favorite', async (req, res) => {
+    try {
+      const recipeId = Number(req.params.recipeId);
+      const { userId } = req.body;
+
+      if (!Number.isInteger(recipeId) || recipeId <= 0) {
+        return res.status(400).json({ error: 'Invalid recipe ID' });
+      }
+
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      // Get current user data
+      const { data: user, error: getUserError } = await supabase
+        .from('accounts')
+        .select('favorite_recipe')
+        .eq('id', userId)
+        .single();
+
+      if (getUserError) {
+        console.error('Get user error:', getUserError);
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Initialize favorite_recipe if it doesn't exist
+      let favoriteRecipes = user.favorite_recipe || [];
+
+      // Handle case where it might be a string
+      if (typeof favoriteRecipes === 'string') {
+        try {
+          favoriteRecipes = JSON.parse(favoriteRecipes);
+        } catch {
+          favoriteRecipes = [];
+        }
+      }
+
+      // Ensure it's an array
+      if (!Array.isArray(favoriteRecipes)) {
+        favoriteRecipes = [];
+      }
+
+      // Check if recipe is already favorited
+      const index = favoriteRecipes.indexOf(recipeId);
+      if (index > -1) {
+        // Remove from favorites
+        favoriteRecipes.splice(index, 1);
+      } else {
+        // Add to favorites
+        favoriteRecipes.push(recipeId);
+      }
+
+      // Update user's favorite_recipe
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('accounts')
+        .update({ favorite_recipe: favoriteRecipes })
+        .eq('id', userId)
+        .select('favorite_recipe');
+
+      if (updateError) {
+        console.error('Update favorite error:', updateError);
+        return res.status(500).json({ error: 'Failed to update favorite' });
+      }
+
+      res.json({
+        success: true,
+        isFavorited: favoriteRecipes.includes(recipeId),
+        favorite_recipe: updatedUser[0].favorite_recipe
+      });
+    } catch (error) {
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 };

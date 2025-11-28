@@ -286,14 +286,68 @@
   box-shadow: 0 10px 24px rgba(220, 53, 69, 0.5), 0 4px 8px rgba(220, 53, 69, 0.4);
 }
 
+/* Recipe Card Image Wrapper */
+.recipe-card-image-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
 /* Recipe Card Image */
 .recipe-card-image {
   width: 100%;
   height: 240px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 16px;
   background-color: #f0f0f0;
+}
+
+/* Recipe Card Star Button */
+.btn-star-recipe {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(200, 200, 200, 0.5);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  opacity: 0;
+  color: #ccc;
+}
+
+.recipe-card:hover .btn-star-recipe {
+  opacity: 1;
+}
+
+.btn-star-recipe:hover {
+  background: white;
+  border-color: #ffc107;
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.btn-star-recipe.favorited {
+  opacity: 1 !important;
+  background: #ffc107;
+  border-color: #ff9800;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-star-recipe.favorited:hover {
+  background: #ffb300;
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.8);
+  transform: scale(1.2);
 }
 
 .recipe-card-image-placeholder {
@@ -347,6 +401,32 @@
   color: #666;
   padding: 40px;
   font-size: 16px;
+}
+
+/* Modal Star Button */
+.btn-star-modal {
+  display: inline-block;
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.btn-star-modal:hover {
+  background-color: #f57c00;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.btn-star-modal.favorited {
+  background-color: #ffc107;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
 }
 
 /* Modal */

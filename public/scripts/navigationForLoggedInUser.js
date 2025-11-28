@@ -116,7 +116,7 @@ function goToProfile() {
 
 
 function goToStars() {
-    window.location.href = 'stars.html';
+    window.location.href = '/recipe-favorite';
 }
 
 

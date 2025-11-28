@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorite Recipes</title>
+  <link rel="stylesheet" href="../css/standardLayout.css">
+  <link rel="stylesheet" href="../css/recipePage/recipePage.css">
+  <link rel="stylesheet" href="../css/recipePage/favoriteRecipes.css">
+  <link rel="stylesheet" href="../css/footer/footer.css">
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <a href="/">
+        <img src="../images/fruiti.png" alt="Fruiti logo - Click to go home" />
+      </a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+    <div class="auth-buttons" id="authButtons">
+      <!-- Default state - show login/signup -->
+      <button class="login-btn" onclick="location.href='/login'">Log In</button>
+      <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/become-seller">Become a Seller</a>
+    <a href="/nutrition">Nutrition</a>
+    <a href="/recipe">Recipes</a>
+    <a href="/aboutus">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <div class="recipe-container">
+    <h1 class="page-title">My Favorite Recipes</h1>
+
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading your favorite recipes...</p>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-icon">P</div>
+      <h2>No Favorite Recipes Yet</h2>
+      <p>Start exploring recipes and save your favorites to see them here</p>
+      <button class="btn-explore" onclick="location.href='/recipe'">Explore Recipes</button>
+    </div>
+
+    <div id="recipesList" class="recipes-grid"></div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Recipe Detail Modal -->
+  <div id="recipeModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="closeRecipeModal()">&times;</span>
+      <div id="recipeDetail">
+        <!-- Recipe details will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/footer.js"></script>
+  <script src="../scripts/navigationForLoggedInUser.js"></script>
+  <script src="../scripts/recipe.js"></script>
+  <script src="../scripts/favoriteRecipesPage.js"></script>
+</body>
+</html>
