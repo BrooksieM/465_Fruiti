@@ -115,6 +115,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  cursor: pointer;
 }
 
 .stand-card:hover {
@@ -122,123 +123,73 @@
   transform: translateY(-4px);
 }
 
-.stand-card-header {
-  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
-  color: white;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 12px;
+.stand-card-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
+  background: #f5f5f5;
 }
 
-.stand-name {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  flex: 1;
-  word-break: break-word;
+.stand-card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-.btn-heart {
-  background: none;
+.stand-card:hover .stand-card-image {
+  transform: scale(1.05);
+}
+
+.btn-heart-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
-  font-size: 24px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-  padding: 0;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
 }
 
-.btn-heart:hover {
-  transform: scale(1.2);
+.btn-heart-overlay:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.btn-heart.favorited {
+.btn-heart-overlay.favorited {
   text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
 }
 
-.stand-card-body {
-  padding: 20px;
+.stand-card-info {
+  padding: 16px;
+  background: white;
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-.stand-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  color: #666;
-}
-
-.stand-info-icon {
+.stand-name-overlay {
   font-size: 18px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.stand-info-content {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.stand-address {
-  color: #017d49;
-  font-weight: 500;
-}
-
-.stand-phone {
-  color: #666;
-}
-
-.stand-location {
-  color: #666;
-}
-
-/* Card footer with action buttons */
-.stand-card-footer {
-  padding: 16px 20px;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  gap: 10px;
-}
-
-.btn-visit {
-  flex: 1;
-  padding: 10px 16px;
-  background-color: #017d49;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-visit:hover {
-  background-color: #019456;
-}
-
-.btn-remove {
-  padding: 10px 16px;
-  background-color: #f5f5f5;
-  color: #666;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-remove:hover {
-  background-color: #ffe0e0;
-  border-color: #ff6b6b;
-  color: #ff6b6b;
+  margin: 0;
+  color: #333;
+  word-break: break-word;
 }
 
 /* Max Favorites Message */

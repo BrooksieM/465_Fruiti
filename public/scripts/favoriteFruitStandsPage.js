@@ -114,58 +114,52 @@ function createStandCard(stand, userId) {
 
   const standId = stand.id;
   const standName = stand.business_name || stand.name || 'Unknown Stand';
-  const address = stand.address || '';
-  const city = stand.city || '';
-  const state = stand.state || '';
-  const zipcode = stand.zipcode || '';
-  const phone = stand.phone_number || stand.phone || '';
 
-  const fullAddress = [address, city, state, zipcode].filter(Boolean).join(', ');
+  // Fetch and display image
+  loadStandImage(standId, stand.user_id || standId);
 
   card.innerHTML = `
-    <div class="stand-card-header">
-      <h2 class="stand-name">${escapeHtml(standName)}</h2>
-      <button class="btn-heart favorited"
+    <div class="stand-card-image-container">
+      <img id="stand-image-${standId}" src="../images/default-stand.png" alt="${escapeHtml(standName)}" class="stand-card-image"
+           onerror="this.src='../images/default-stand.png'">
+      <button class="btn-heart-overlay favorited"
               onclick="removeFavorite(${standId}, event)"
               title="Unfavorite this stand">
         ❤️
       </button>
     </div>
 
-    <div class="stand-card-body">
-      ${address ? `
-        <div class="stand-info">
-          <div class="stand-info-icon">📍</div>
-          <div class="stand-info-content stand-address">${escapeHtml(address)}</div>
-        </div>
-      ` : ''}
-
-      ${fullAddress && fullAddress !== address ? `
-        <div class="stand-info">
-          <div class="stand-info-icon">🌍</div>
-          <div class="stand-info-content stand-location">${escapeHtml(fullAddress)}</div>
-        </div>
-      ` : ''}
-
-      ${phone ? `
-        <div class="stand-info">
-          <div class="stand-info-icon">📞</div>
-          <div class="stand-info-content stand-phone">
-            <a href="tel:${escapeHtml(phone)}" style="text-decoration: none; color: #666;">
-              ${escapeHtml(phone)}
-            </a>
-          </div>
-        </div>
-      ` : ''}
-    </div>
-
-    <div class="stand-card-footer">
-      <button class="btn-visit" onclick="openStand(${standId})">View Details</button>
-      <button class="btn-remove" onclick="removeFavorite(${standId}, event)">Remove</button>
+    <div class="stand-card-info">
+      <h3 class="stand-name-overlay">${escapeHtml(standName)}</h3>
     </div>
   `;
 
+  // Add click handler to open modal
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.btn-heart-overlay')) return;
+    openStandModal(stand);
+  });
+
   return card;
+}
+
+// Load stand image from API
+async function loadStandImage(standId, userId) {
+  try {
+    const imageResponse = await fetch(`/api/fruitstand-images/${userId}`);
+    if (imageResponse.ok) {
+      const imageData = await imageResponse.json();
+      const images = imageData.images || [];
+      if (images.length > 0) {
+        const imageElement = document.getElementById(`stand-image-${standId}`);
+        if (imageElement) {
+          imageElement.src = images[0].url;
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Error loading image for stand ${standId}:`, error);
+  }
 }
 
 // Remove a fruit stand from favorites
@@ -217,11 +211,13 @@ async function removeFavorite(standId, event) {
   }
 }
 
-// Open stand details (placeholder for future implementation)
-function openStand(standId) {
-  console.log(`Opening stand ${standId}`);
-  // TODO: Implement navigation to stand details page
-  alert(`Stand ${standId} details view coming soon!`);
+// Open stand modal with full details (same as gmaps page)
+async function openStandModal(stand) {
+  console.log('Opening modal for stand:', stand.business_name);
+  const fullAddress = [stand.address, stand.city, stand.state, stand.zipcode].filter(Boolean).join(', ');
+
+  // Show the modal using the same function from gmaps
+  await showSellerModal(stand, fullAddress);
 }
 
 // Check if grid is empty and show empty state
