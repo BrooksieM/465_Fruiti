@@ -474,12 +474,14 @@ function viewRecipeDetail(recipe) {
   const favoriteButtonHTML = isLoggedIn ? `
     <button class="btn-star-modal"
             onclick="toggleRecipeFavorite(${recipe.id}, event)"
-            title="Add to favorites">⭐ Save Recipe</button>
+            title="Add to favorites">⭐</button>
   ` : '';
 
   let detailHTML = `
-    <h2>${escapeHtml(recipe.name)}</h2>
-    ${favoriteButtonHTML}
+    <div class="recipe-header">
+      <h2>${escapeHtml(recipe.name)}</h2>
+      ${favoriteButtonHTML}
+    </div>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
     <h3>Ingredients:</h3>

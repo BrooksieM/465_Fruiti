@@ -403,30 +403,40 @@
   font-size: 16px;
 }
 
-/* Modal Star Button */
-.btn-star-modal {
-  display: inline-block;
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* Recipe Header in Modal */
+.recipe-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
+.recipe-header h2 {
+  margin: 0;
+}
+
+/* Modal Star Button */
+.btn-star-modal {
+  background: none;
+  border: 2px solid #ffc107;
+  border-radius: 4px;
+  color: #ffc107;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 6px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
 .btn-star-modal:hover {
-  background-color: #f57c00;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  background-color: rgba(255, 193, 7, 0.1);
+  transform: scale(1.1);
 }
 
 .btn-star-modal.favorited {
   background-color: #ffc107;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
+  color: white;
 }
 
 /* Modal */
