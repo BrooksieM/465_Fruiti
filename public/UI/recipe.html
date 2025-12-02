@@ -155,6 +155,31 @@
         </div>
 
         <div class="form-group">
+          <label>Season:</label>
+          <div class="season-options">
+            <input type="hidden" id="seasonInput" name="season" value="auto">
+            <div class="season-button" data-season="auto" id="seasonAuto">
+              Auto
+            </div>
+            <div class="season-button" data-season="none" id="seasonNone">
+              None
+            </div>
+            <div class="season-button" data-season="spring" id="seasonSpring">
+              Spring
+            </div>
+            <div class="season-button" data-season="summer" id="seasonSummer">
+              Summer
+            </div>
+            <div class="season-button" data-season="fall" id="seasonFall">
+              Fall
+            </div>
+            <div class="season-button" data-season="winter" id="seasonWinter">
+              Winter
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label>Difficulty Level:</label>
           <div class="difficulty-options">
             <input type="hidden" id="difficultyInput" name="difficulty" value="">
@@ -172,7 +197,7 @@
 
         <div class="form-group">
           <label for="estimatedTime">Estimated Time (minutes):</label>
-          <input type="number" id="estimatedTime" min="1">
+          <input type="number" id="estimatedTime" min="1" max="512">
         </div>
 
         <div class="form-actions">

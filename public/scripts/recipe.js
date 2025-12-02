@@ -31,6 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
   difficultyCircles.forEach(circle => {
     circle.addEventListener('click', handleDifficultySelect);
   });
+
+  // Handle season button selection
+  const seasonButtons = document.querySelectorAll('.season-button');
+  seasonButtons.forEach(button => {
+    button.addEventListener('click', handleSeasonSelect);
+  });
+
+  // Set Auto as default selected season button
+  const autoSeasonButton = document.getElementById('seasonAuto');
+  if (autoSeasonButton) {
+    autoSeasonButton.classList.add('selected');
+  }
+
+  // Handle estimated time validation - max 512
+  const estimatedTimeInput = document.getElementById('estimatedTime');
+  if (estimatedTimeInput) {
+    estimatedTimeInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      if (value > 512) {
+        e.target.value = 512;
+      }
+    });
+  }
 });
 
 // Check if user is logged in and setup the page accordingly
@@ -117,6 +140,22 @@ function handleDifficultySelect(e) {
 
   // Update hidden input
   difficultyInput.value = selectedCircle.getAttribute('data-difficulty');
+}
+
+// Handle season button selection
+function handleSeasonSelect(e) {
+  const selectedButton = e.target.closest('.season-button');
+  const allButtons = document.querySelectorAll('.season-button');
+  const seasonInput = document.getElementById('seasonInput');
+
+  // Remove selected class from all buttons
+  allButtons.forEach(button => button.classList.remove('selected'));
+
+  // Add selected class to clicked button
+  selectedButton.classList.add('selected');
+
+  // Update hidden input
+  seasonInput.value = selectedButton.getAttribute('data-season');
 }
 
 // Handle image preview
@@ -339,6 +378,7 @@ async function handleCreateRecipe(e) {
   const name = document.getElementById('recipeName').value.trim();
   const difficulty = document.getElementById('difficultyInput').value.trim();
   const estimatedTime = document.getElementById('estimatedTime').value.trim();
+  const season = document.getElementById('seasonInput').value.trim();
   const imageFile = document.getElementById('recipeImage').files[0];
 
   // Get ingredients from selected ingredients array
@@ -411,6 +451,7 @@ async function handleCreateRecipe(e) {
         instructions: instructionSteps,
         difficulty: difficulty,
         estimatedTime: parseInt(estimatedTime),
+        season: season,
         image: imageUrl,
         userId: currentUser.id || localStorage.getItem('userId'),
       }),
@@ -663,10 +704,18 @@ function viewRecipeDetail(recipe) {
             title="Add to favorites">⭐</button>
   ` : '';
 
+  // Create image HTML
+  const imageHTML = recipe.image
+    ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-modal-image">`
+    : `<div class="recipe-modal-image-placeholder">No image available</div>`;
+
   let detailHTML = `
     <div class="recipe-header">
       <h2>${escapeHtml(recipe.name)}</h2>
       ${favoriteButtonHTML}
+    </div>
+    <div class="recipe-modal-image-wrapper">
+      ${imageHTML}
     </div>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
