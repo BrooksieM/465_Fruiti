@@ -185,7 +185,16 @@ function initializeIngredientSearch() {
 
 // Handle ingredient search
 function handleIngredientSearch(e) {
-  const searchTerm = e.target.value.toLowerCase().trim();
+  let inputValue = e.target.value;
+
+  // Remove any numbers from input
+  const cleanValue = inputValue.replace(/[0-9]/g, '');
+  if (inputValue !== cleanValue) {
+    e.target.value = cleanValue;
+    inputValue = cleanValue;
+  }
+
+  const searchTerm = inputValue.toLowerCase().trim();
   const resultsContainer = document.getElementById('ingredientSearchResults');
 
   if (!searchTerm) {
@@ -230,6 +239,14 @@ function addSelectedIngredient(ingredient) {
 function removeSelectedIngredient(ingredient) {
   selectedIngredients = selectedIngredients.filter(ing => ing !== ingredient);
   displaySelectedIngredients();
+}
+
+// Remove all selected ingredients
+function removeAllIngredients() {
+  selectedIngredients = [];
+  displaySelectedIngredients();
+  document.getElementById('ingredientSearch').value = '';
+  hideIngredientSearchResults();
 }
 
 // Display selected ingredients as tags

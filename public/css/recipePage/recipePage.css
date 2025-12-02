@@ -97,11 +97,19 @@
   border: 1px solid #ddd;
 }
 
+/* Ingredient Search Wrapper */
+.ingredient-search-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
 /* Ingredient Search Box */
 .ingredient-search-box {
   position: relative;
   margin-bottom: 12px;
-  max-width: 200px;
+  max-width: 300px;
+  flex: 1;
 }
 
 .ingredient-search-input {
@@ -196,6 +204,28 @@
 
 .ingredient-tag button:hover {
   transform: scale(1.2);
+}
+
+/* Remove All Ingredients Button */
+.btn-remove-all-ingredients {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  height: 32px;
+  margin-bottom: 12px;
+}
+
+.btn-remove-all-ingredients:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 /* Instructions Container */

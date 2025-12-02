@@ -128,9 +128,12 @@
         <div class="form-group">
           <label>Ingredients:</label>
           <div id="selectedIngredientsContainer" class="selected-ingredients"></div>
-          <div class="ingredient-search-box">
-            <input type="text" id="ingredientSearch" class="ingredient-search-input" placeholder="Search for ingredients">
-            <div id="ingredientSearchResults" class="ingredient-search-results hidden"></div>
+          <div class="ingredient-search-wrapper">
+            <div class="ingredient-search-box">
+              <input type="text" id="ingredientSearch" class="ingredient-search-input" placeholder="Search for ingredients" maxlength="20">
+              <div id="ingredientSearchResults" class="ingredient-search-results hidden"></div>
+            </div>
+            <button type="button" class="btn-remove-all-ingredients" onclick="removeAllIngredients()">Remove All</button>
           </div>
         </div>
 
