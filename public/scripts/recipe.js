@@ -12,6 +12,7 @@ let activeFilters = {
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthStatusAndSetup();
   loadRecipes();
+  initializeIngredientSearch();
 
   // Handle form submission
   const recipeForm = document.getElementById('createRecipeForm');
@@ -88,6 +89,18 @@ function closeCreateRecipeModal() {
   const preview = document.getElementById('imagePreview');
   preview.innerHTML = '';
   preview.classList.remove('show');
+  // Reset selected ingredients
+  selectedIngredients = [];
+  document.getElementById('selectedIngredientsContainer').innerHTML = '';
+  document.getElementById('ingredientSearch').value = '';
+  // Reset instructions to single input
+  const instructionsContainer = document.getElementById('instructionsContainer');
+  instructionsContainer.innerHTML = `
+    <div class="instruction-input-wrapper">
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+      <button type="button" class="btn-remove-instruction hidden" onclick="removeInstruction(this)">Remove</button>
+    </div>
+  `;
 }
 
 // Handle difficulty circle selection
@@ -124,6 +137,167 @@ function handleImagePreview(e) {
   }
 }
 
+// Common ingredients list for search - Fruits, Vegetables & Seasonings
+const COMMON_INGREDIENTS = [
+  // Fruits
+  'Apple', 'Banana', 'Orange', 'Lemon', 'Lime', 'Strawberry', 'Blueberry',
+  'Raspberry', 'Watermelon', 'Mango', 'Pineapple', 'Peach', 'Pear', 'Grape',
+  'Kiwi', 'Coconut', 'Avocado', 'Pomegranate', 'Papaya', 'Dragon Fruit',
+
+  // Vegetables
+  'Broccoli', 'Carrot', 'Spinach', 'Lettuce', 'Tomato', 'Onion', 'Garlic',
+  'Bell Pepper', 'Cucumber', 'Zucchini', 'Eggplant', 'Potato', 'Sweet Potato',
+  'Corn', 'Peas', 'Beans', 'Mushroom', 'Celery', 'Cabbage', 'Cauliflower',
+  'Kale', 'Arugula', 'Radish', 'Beet', 'Squash', 'Asparagus', 'Green Beans',
+
+  // Seasonings & Herbs
+  'Salt', 'Black Pepper', 'Garlic Powder', 'Onion Powder', 'Paprika', 'Cumin',
+  'Cinnamon', 'Ginger', 'Turmeric', 'Oregano', 'Basil', 'Thyme', 'Rosemary',
+  'Parsley', 'Cilantro', 'Dill', 'Chives', 'Cayenne Pepper', 'Red Pepper Flakes'
+];
+
+let selectedIngredients = [];
+
+// Initialize ingredient search
+function initializeIngredientSearch() {
+  const searchInput = document.getElementById('ingredientSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', handleIngredientSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = searchInput.value.trim();
+        if (value && !selectedIngredients.includes(value)) {
+          addSelectedIngredient(value);
+          searchInput.value = '';
+          hideIngredientSearchResults();
+        }
+      }
+    });
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.ingredient-search-box')) {
+        hideIngredientSearchResults();
+      }
+    });
+  }
+}
+
+// Handle ingredient search
+function handleIngredientSearch(e) {
+  const searchTerm = e.target.value.toLowerCase().trim();
+  const resultsContainer = document.getElementById('ingredientSearchResults');
+
+  if (!searchTerm) {
+    hideIngredientSearchResults();
+    return;
+  }
+
+  // Filter ingredients
+  const filtered = COMMON_INGREDIENTS.filter(ing =>
+    ing.toLowerCase().includes(searchTerm) &&
+    !selectedIngredients.includes(ing)
+  );
+
+  if (filtered.length === 0) {
+    hideIngredientSearchResults();
+    return;
+  }
+
+  // Display results
+  resultsContainer.innerHTML = filtered.map(ing =>
+    `<div class="ingredient-result-item" onclick="addSelectedIngredient('${ing}')">${ing}</div>`
+  ).join('');
+  resultsContainer.classList.remove('hidden');
+}
+
+// Add selected ingredient
+function addSelectedIngredient(ingredient) {
+  if (selectedIngredients.length >= 50) {
+    alert('Maximum 50 ingredients allowed');
+    return;
+  }
+
+  if (!selectedIngredients.includes(ingredient)) {
+    selectedIngredients.push(ingredient);
+    displaySelectedIngredients();
+    document.getElementById('ingredientSearch').value = '';
+    hideIngredientSearchResults();
+  }
+}
+
+// Remove selected ingredient
+function removeSelectedIngredient(ingredient) {
+  selectedIngredients = selectedIngredients.filter(ing => ing !== ingredient);
+  displaySelectedIngredients();
+}
+
+// Display selected ingredients as tags
+function displaySelectedIngredients() {
+  const container = document.getElementById('selectedIngredientsContainer');
+  container.innerHTML = selectedIngredients.map(ing =>
+    `<div class="ingredient-tag">
+      ${ing}
+      <button type="button" onclick="removeSelectedIngredient('${ing}')">×</button>
+    </div>`
+  ).join('');
+}
+
+// Hide search results
+function hideIngredientSearchResults() {
+  const resultsContainer = document.getElementById('ingredientSearchResults');
+  resultsContainer.classList.add('hidden');
+}
+
+// Add instruction input field
+function addInstruction() {
+  const container = document.getElementById('instructionsContainer');
+  const MAX_INSTRUCTIONS = 12;
+  const currentCount = container.querySelectorAll('.instruction-input-wrapper').length;
+
+  if (currentCount >= MAX_INSTRUCTIONS) {
+    alert(`Maximum of ${MAX_INSTRUCTIONS} instructions allowed`);
+    return;
+  }
+
+  const newInstruction = document.createElement('div');
+  newInstruction.className = 'instruction-input-wrapper';
+  newInstruction.innerHTML = `
+    <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+    <button type="button" class="btn-remove-instruction" onclick="removeInstruction(this)">Remove</button>
+  `;
+
+  container.appendChild(newInstruction);
+
+  // Show remove button for all instructions if there are more than 1
+  updateRemoveButtons();
+}
+
+// Remove instruction input field
+function removeInstruction(button) {
+  const container = document.getElementById('instructionsContainer');
+  button.closest('.instruction-input-wrapper').remove();
+
+  // Show/hide remove buttons
+  updateRemoveButtons();
+}
+
+// Update remove button visibility
+function updateRemoveButtons() {
+  const container = document.getElementById('instructionsContainer');
+  const wrappers = container.querySelectorAll('.instruction-input-wrapper');
+
+  wrappers.forEach((wrapper, index) => {
+    const removeBtn = wrapper.querySelector('.btn-remove-instruction');
+    // Only show remove button if there's more than 1 instruction
+    if (wrappers.length > 1) {
+      removeBtn.classList.remove('hidden');
+    } else {
+      removeBtn.classList.add('hidden');
+    }
+  });
+}
+
 // Handle creating or updating a recipe
 async function handleCreateRecipe(e) {
   e.preventDefault();
@@ -146,15 +320,32 @@ async function handleCreateRecipe(e) {
   }
 
   const name = document.getElementById('recipeName').value.trim();
-  const ingredientsInput = document.getElementById('ingredients').value.trim();
-  const instructions = document.getElementById('instructions').value.trim();
   const difficulty = document.getElementById('difficultyInput').value.trim();
   const estimatedTime = document.getElementById('estimatedTime').value.trim();
   const imageFile = document.getElementById('recipeImage').files[0];
 
+  // Get ingredients from selected ingredients array
+  const ingredients = selectedIngredients;
+
+  // Get instructions from input fields
+  const instructionInputs = document.querySelectorAll('.instruction-input');
+  const instructionSteps = Array.from(instructionInputs)
+    .map(input => input.value.trim())
+    .filter(step => step.length > 0);
+
   // Validate inputs
-  if (!name || !ingredientsInput || !instructions) {
-    showError('Please fill in all fields');
+  if (!name) {
+    showError('Please fill in recipe name');
+    return;
+  }
+
+  if (ingredients.length === 0) {
+    showError('Please enter at least one ingredient');
+    return;
+  }
+
+  if (instructionSteps.length === 0) {
+    showError('Please enter at least one instruction step');
     return;
   }
 
@@ -165,28 +356,6 @@ async function handleCreateRecipe(e) {
 
   if (!estimatedTime) {
     showError('Please enter an estimated time');
-    return;
-  }
-
-  // Parse ingredients - split by comma or newline
-  const ingredients = ingredientsInput
-    .split(/[,\n]/)
-    .map(ing => ing.trim())
-    .filter(ing => ing.length > 0);
-
-  if (ingredients.length === 0) {
-    showError('Please enter at least one ingredient');
-    return;
-  }
-
-  // Parse instructions - split by newline (each line is a step)
-  const instructionSteps = instructions
-    .split(/\n/)
-    .map(step => step.trim())
-    .filter(step => step.length > 0);
-
-  if (instructionSteps.length === 0) {
-    showError('Please enter at least one instruction step');
     return;
   }
 

@@ -97,6 +97,182 @@
   border: 1px solid #ddd;
 }
 
+/* Ingredient Search Box */
+.ingredient-search-box {
+  position: relative;
+  margin-bottom: 12px;
+  max-width: 200px;
+}
+
+.ingredient-search-input {
+  width: 100%;
+  padding: 6px 10px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  height: 32px !important;
+}
+
+.ingredient-search-input:focus {
+  outline: none;
+  border-color: #017d49 !important;
+  box-shadow: 0 0 0 3px rgba(1, 125, 73, 0.1) !important;
+}
+
+.ingredient-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ingredient-search-results.hidden {
+  display: none;
+}
+
+.ingredient-result-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.ingredient-result-item:hover {
+  background-color: #f5f5f5;
+}
+
+.ingredient-result-item:last-child {
+  border-bottom: none;
+}
+
+/* Selected Ingredients Tags */
+.selected-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  min-height: 40px;
+  align-items: center;
+}
+
+.ingredient-tag {
+  background-color: #017d49;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.ingredient-tag button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.ingredient-tag button:hover {
+  transform: scale(1.2);
+}
+
+/* Instructions Container */
+.instructions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.instruction-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.instruction-number {
+  min-width: 30px;
+  font-weight: 600;
+  color: #017d49;
+}
+
+.instruction-input {
+  flex: 1;
+  padding: 10px 12px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  min-height: auto !important;
+}
+
+.instruction-input:focus {
+  outline: none;
+  border-color: #017d49 !important;
+  box-shadow: 0 0 0 3px rgba(1, 125, 73, 0.1) !important;
+}
+
+.btn-remove-instruction {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.btn-remove-instruction:hover {
+  background-color: #c82333;
+}
+
+.btn-remove-instruction.hidden {
+  visibility: hidden;
+  cursor: default;
+}
+
+.btn-add-instruction {
+  background-color: #017d49;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-instruction:hover {
+  background-color: #019456;
+}
+
 /* Difficulty Options */
 .difficulty-options {
   display: flex;
@@ -462,7 +638,7 @@
   background-color: white;
   padding: 30px;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 800px;
   width: 100%;
   max-height: 95vh;
   overflow-y: auto;
