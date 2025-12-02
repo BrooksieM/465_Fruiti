@@ -663,10 +663,18 @@ function viewRecipeDetail(recipe) {
             title="Add to favorites">⭐</button>
   ` : '';
 
+  // Create image HTML
+  const imageHTML = recipe.image
+    ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-modal-image">`
+    : `<div class="recipe-modal-image-placeholder">No image available</div>`;
+
   let detailHTML = `
     <div class="recipe-header">
       <h2>${escapeHtml(recipe.name)}</h2>
       ${favoriteButtonHTML}
+    </div>
+    <div class="recipe-modal-image-wrapper">
+      ${imageHTML}
     </div>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
