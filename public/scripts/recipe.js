@@ -43,6 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (autoSeasonButton) {
     autoSeasonButton.classList.add('selected');
   }
+
+  // Handle estimated time validation - max 512
+  const estimatedTimeInput = document.getElementById('estimatedTime');
+  if (estimatedTimeInput) {
+    estimatedTimeInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      if (value > 512) {
+        e.target.value = 512;
+      }
+    });
+  }
 });
 
 // Check if user is logged in and setup the page accordingly
