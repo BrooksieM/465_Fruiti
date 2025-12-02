@@ -88,6 +88,14 @@ function closeCreateRecipeModal() {
   const preview = document.getElementById('imagePreview');
   preview.innerHTML = '';
   preview.classList.remove('show');
+  // Reset instructions to single input
+  const instructionsContainer = document.getElementById('instructionsContainer');
+  instructionsContainer.innerHTML = `
+    <div class="instruction-input-wrapper">
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+      <button type="button" class="btn-remove-instruction hidden" onclick="removeInstruction(this)">Remove</button>
+    </div>
+  `;
 }
 
 // Handle difficulty circle selection
@@ -124,6 +132,55 @@ function handleImagePreview(e) {
   }
 }
 
+// Add instruction input field
+function addInstruction() {
+  const container = document.getElementById('instructionsContainer');
+  const MAX_INSTRUCTIONS = 12;
+  const currentCount = container.querySelectorAll('.instruction-input-wrapper').length;
+
+  if (currentCount >= MAX_INSTRUCTIONS) {
+    alert(`Maximum of ${MAX_INSTRUCTIONS} instructions allowed`);
+    return;
+  }
+
+  const newInstruction = document.createElement('div');
+  newInstruction.className = 'instruction-input-wrapper';
+  newInstruction.innerHTML = `
+    <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+    <button type="button" class="btn-remove-instruction" onclick="removeInstruction(this)">Remove</button>
+  `;
+
+  container.appendChild(newInstruction);
+
+  // Show remove button for all instructions if there are more than 1
+  updateRemoveButtons();
+}
+
+// Remove instruction input field
+function removeInstruction(button) {
+  const container = document.getElementById('instructionsContainer');
+  button.closest('.instruction-input-wrapper').remove();
+
+  // Show/hide remove buttons
+  updateRemoveButtons();
+}
+
+// Update remove button visibility
+function updateRemoveButtons() {
+  const container = document.getElementById('instructionsContainer');
+  const wrappers = container.querySelectorAll('.instruction-input-wrapper');
+
+  wrappers.forEach((wrapper, index) => {
+    const removeBtn = wrapper.querySelector('.btn-remove-instruction');
+    // Only show remove button if there's more than 1 instruction
+    if (wrappers.length > 1) {
+      removeBtn.classList.remove('hidden');
+    } else {
+      removeBtn.classList.add('hidden');
+    }
+  });
+}
+
 // Handle creating or updating a recipe
 async function handleCreateRecipe(e) {
   e.preventDefault();
@@ -147,14 +204,24 @@ async function handleCreateRecipe(e) {
 
   const name = document.getElementById('recipeName').value.trim();
   const ingredientsInput = document.getElementById('ingredients').value.trim();
-  const instructions = document.getElementById('instructions').value.trim();
   const difficulty = document.getElementById('difficultyInput').value.trim();
   const estimatedTime = document.getElementById('estimatedTime').value.trim();
   const imageFile = document.getElementById('recipeImage').files[0];
 
+  // Get instructions from input fields
+  const instructionInputs = document.querySelectorAll('.instruction-input');
+  const instructionSteps = Array.from(instructionInputs)
+    .map(input => input.value.trim())
+    .filter(step => step.length > 0);
+
   // Validate inputs
-  if (!name || !ingredientsInput || !instructions) {
+  if (!name || !ingredientsInput) {
     showError('Please fill in all fields');
+    return;
+  }
+
+  if (instructionSteps.length === 0) {
+    showError('Please enter at least one instruction step');
     return;
   }
 
@@ -176,17 +243,6 @@ async function handleCreateRecipe(e) {
 
   if (ingredients.length === 0) {
     showError('Please enter at least one ingredient');
-    return;
-  }
-
-  // Parse instructions - split by newline (each line is a step)
-  const instructionSteps = instructions
-    .split(/\n/)
-    .map(step => step.trim())
-    .filter(step => step.length > 0);
-
-  if (instructionSteps.length === 0) {
-    showError('Please enter at least one instruction step');
     return;
   }
 
