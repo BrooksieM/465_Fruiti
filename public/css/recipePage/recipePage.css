@@ -40,7 +40,8 @@
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ddd;
@@ -52,8 +53,19 @@
   transition: border-color 0.2s ease;
 }
 
+.form-group textarea {
+  min-height: 80px;
+}
+
+.form-group select {
+  min-height: auto;
+  height: 40px;
+  cursor: pointer;
+}
+
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
   border-color: #017d49;
   box-shadow: 0 0 0 3px rgba(1, 125, 73, 0.1);
@@ -95,6 +107,37 @@
   max-height: 200px;
   border-radius: 8px;
   border: 1px solid #ddd;
+}
+
+/* Season Options */
+.season-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.season-button {
+  padding: 10px 18px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.season-button:hover {
+  border-color: #017d49;
+  background-color: rgba(1, 125, 73, 0.05);
+}
+
+.season-button.selected {
+  background-color: #017d49;
+  color: white;
+  border-color: #017d49;
 }
 
 /* Ingredient Search Wrapper */
