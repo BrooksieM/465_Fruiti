@@ -623,8 +623,8 @@ function createRecipeCard(recipe) {
 
   // Show edit/delete buttons only for the recipe creator (if user is logged in AND owns the recipe)
   if (currentUser) {
-    const currentUserId = currentUser.id || localStorage.getItem('userId');
-    const recipeOwnerId = recipe.user_id || recipe.userId;
+    const currentUserId = String(currentUser.id || localStorage.getItem('userId'));
+    const recipeOwnerId = String(recipe.user_id || recipe.userId);
 
     // Only show buttons if the current user owns this recipe
     if (currentUserId === recipeOwnerId) {
@@ -731,8 +731,8 @@ function viewRecipeDetail(recipe) {
 
   // Add edit/delete buttons only if user is the recipe owner
   if (currentUser) {
-    const currentUserId = currentUser.id || localStorage.getItem('userId');
-    const recipeOwnerId = recipe.user_id || recipe.userId;
+    const currentUserId = String(currentUser.id || localStorage.getItem('userId'));
+    const recipeOwnerId = String(recipe.user_id || recipe.userId);
 
     if (currentUserId === recipeOwnerId) {
       detailHTML += `
@@ -806,8 +806,35 @@ function editRecipe(recipe) {
 
   // Populate form with recipe data
   document.getElementById('recipeName').value = recipe.name;
-  document.getElementById('ingredients').value = ingredientsList.join(', ');
-  document.getElementById('instructions').value = instructionsList.join('\n');
+
+  // Set selected ingredients
+  selectedIngredients = [...ingredientsList];
+  displaySelectedIngredients();
+
+  // Set instructions - clear existing and add new ones
+  const instructionsContainer = document.getElementById('instructionsContainer');
+  instructionsContainer.innerHTML = '';
+  instructionsList.forEach((instruction, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'instruction-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required value="${instruction.replace(/"/g, '&quot;')}">
+      <button type="button" class="btn-remove-instruction ${index === 0 && instructionsList.length === 1 ? 'hidden' : ''}" onclick="removeInstruction(this)">Remove</button>
+    `;
+    instructionsContainer.appendChild(wrapper);
+  });
+
+  // If no instructions, add one empty field
+  if (instructionsList.length === 0) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'instruction-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+      <button type="button" class="btn-remove-instruction hidden" onclick="removeInstruction(this)">Remove</button>
+    `;
+    instructionsContainer.appendChild(wrapper);
+  }
+
   document.getElementById('estimatedTime').value = recipe.estimated_time || '';
 
   // Set difficulty level
@@ -821,6 +848,21 @@ function editRecipe(recipe) {
       circle.classList.remove('selected');
       if (circle.getAttribute('data-difficulty') === recipe.difficulty) {
         circle.classList.add('selected');
+      }
+    });
+  }
+
+  // Set season
+  if (recipe.season) {
+    const seasonInput = document.getElementById('seasonInput');
+    seasonInput.value = recipe.season;
+
+    // Update season button visual
+    const allSeasonButtons = document.querySelectorAll('.season-button');
+    allSeasonButtons.forEach(button => {
+      button.classList.remove('selected');
+      if (button.getAttribute('data-season') === recipe.season) {
+        button.classList.add('selected');
       }
     });
   }
