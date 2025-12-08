@@ -81,8 +81,8 @@ function loadSellerMarkers() {
           if (seller.latitude && seller.longitude) {
             console.log(`Using pre-geocoded coordinates for ${seller.business_name}: ${seller.latitude}, ${seller.longitude}`);
             const location = {
-              lat: seller.latitude,
-              lng: seller.longitude
+              lat: parseFloat(seller.latitude),
+              lng: parseFloat(seller.longitude)
             };
             displaySellerMarker(seller, location, fullAddress);
           } else {
