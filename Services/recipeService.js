@@ -337,12 +337,8 @@ module.exports = function (app, supabase, supabaseAdmin)
         if (!imageUrl)
           return res.status(400).json({ error: 'Missing required field: imageUrl' });
 
-        console.log('Analyzing image for season...');
-
         // Call OpenAI to analyze the image
         const detectedSeason = await analyzeRecipeImageForSeason(imageUrl);
-
-        console.log('Season detected:', detectedSeason);
 
         res.status(200).json({
           season: detectedSeason,
@@ -352,12 +348,9 @@ module.exports = function (app, supabase, supabaseAdmin)
       catch (error)
       {
         console.error('Error analyzing recipe image:', error);
-        console.error('Error details:', error.message);
-        console.error('Error stack:', error.stack);
         res.status(500).json({
           error: 'Failed to analyze image',
-          details: error.message,
-          hint: 'Check server logs for more details'
+          details: error.message
         });
       }
     });
