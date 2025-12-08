@@ -47,18 +47,10 @@
   <div class="section-heading">Fruit Stands Near you!</div>
   <div id="map"></div>
 
-<div class="info-grid">
-  <!-- Left section: Interesting Facts -->
-  <div class="info-section">
-  <div class="section-heading">Interesting Facts</div>
-    <div class="homepage-images top-row"></div>
-    <div class="homepage-images bottom-row"></div>
-</div>
-  <!-- Right section -->
-  <div class="info-section">
-    <div class="section-heading">Hot Recipes</div>
-  </div>
-
+<div class="section-heading">Featured Fruit Stands</div>
+<div class="featured-stands-container" id="featuredStands">
+  <!-- Featured stands will be dynamically loaded here -->
+  <div class="loading-placeholder">Loading featured stands...</div>
 </div>
 <div class="spacing"></div>
 
@@ -70,6 +62,8 @@
 <script src="/scripts/favoriteFruitStand.js"></script>
 
 <script src="/scripts/randomizer.js"></script>
+
+<script src="/scripts/featuredStands.js"></script>
 
 <script>
   // Fetch Google Maps API key from server and load the Maps script
