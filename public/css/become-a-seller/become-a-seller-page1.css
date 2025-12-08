@@ -51,13 +51,10 @@
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: all 0.3s ease;
   border: 2px solid transparent;
 }
 
 .benefit-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 30px rgba(1, 125, 73, 0.2);
   border-color: #019456;
 }
 
@@ -119,7 +116,6 @@
   padding: 40px 30px;
   text-align: center;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   border: 3px solid transparent;
 
@@ -128,12 +124,10 @@
 }
 
 .price-card:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(1, 125, 73, 0.25);
+  border-color: #019456;
 }
 
 .price-card.featured {
-  border-color: #017d49;
   background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
 }
 
@@ -230,17 +224,10 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(1, 125, 73, 0.3);
   width: 100%;
   margin-top: 10px;
    margin-top: auto;
-}
-
-.select-plan-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(1, 125, 73, 0.4);
-  background: linear-gradient(135deg, #019456, #01a662);
 }
 
 .select-plan-btn:active {
@@ -280,13 +267,7 @@
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.cta-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive */

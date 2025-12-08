@@ -864,6 +864,20 @@
   display: block;
 }
 
+.info-message {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 15px;
+  border-radius: 8px;
+  color: #1976d2;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.info-message.show {
+  display: block;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .recipes-grid {

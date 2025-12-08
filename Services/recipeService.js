@@ -1,3 +1,5 @@
+const { analyzeRecipeImageForSeason } = require('./openaiService');
+
 module.exports = function (app, supabase, supabaseAdmin)
 {
     // Create a recipe (requires authentication)
@@ -5,7 +7,7 @@ module.exports = function (app, supabase, supabaseAdmin)
     {
       try
       {
-        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId } = req.body;
+        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId, season } = req.body;
 
         // Validate required fields
         if (!name || !ingredients || !instructions || !userId)
@@ -39,6 +41,12 @@ module.exports = function (app, supabase, supabaseAdmin)
         if (!Number.isInteger(estimatedTime) || estimatedTime <= 0)
           return res.status(400).json({ error: 'Estimated time must be a positive integer' });
 
+        // Validate season (optional field)
+        const validSeasons = ['spring', 'summer', 'fall', 'winter', 'none', 'auto'];
+        if (season && !validSeasons.includes(season.toLowerCase())) {
+          return res.status(400).json({ error: 'Season must be one of: spring, summer, fall, winter, none, or auto' });
+        }
+
         // Validate ingredients format
         let parsedIngredients = ingredients;
         if (typeof ingredients === 'string') {
@@ -62,6 +70,7 @@ module.exports = function (app, supabase, supabaseAdmin)
             estimated_time: estimatedTime,
             image: image || null,
             user_id: userId,
+            season_name: season ? season.toLowerCase() : 'auto',
             created_at: new Date().toISOString()
           }])
           .select();
@@ -213,7 +222,7 @@ module.exports = function (app, supabase, supabaseAdmin)
       try
       {
         const id = Number(req.params.id);
-        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId } = req.body;
+        const { name, ingredients, instructions, difficulty, estimatedTime, image, userId, season } = req.body;
 
         // Validate ID
         if (!Number.isInteger(id) || id <= 0)
@@ -224,7 +233,7 @@ module.exports = function (app, supabase, supabaseAdmin)
           return res.status(401).json({ error: 'User ID required for updates' });
 
         // Validate that at least one field is being updated
-        if (!name && !ingredients && !instructions && !difficulty && !estimatedTime && !image)
+        if (!name && !ingredients && !instructions && !difficulty && !estimatedTime && !image && !season)
           return res.status(400).json({ error: 'At least one field must be provided' });
 
         // Validate inputs if provided
@@ -253,6 +262,12 @@ module.exports = function (app, supabase, supabaseAdmin)
         // Validate estimated time if provided
         if (estimatedTime && (!Number.isInteger(estimatedTime) || estimatedTime <= 0))
           return res.status(400).json({ error: 'Estimated time must be a positive integer' });
+
+        // Validate season if provided
+        const validSeasons = ['spring', 'summer', 'fall', 'winter', 'none', 'auto'];
+        if (season && !validSeasons.includes(season.toLowerCase())) {
+          return res.status(400).json({ error: 'Season must be one of: spring, summer, fall, winter, none, or auto' });
+        }
 
         // Validate ingredients format if provided
         let parsedIngredients = ingredients;
@@ -291,6 +306,7 @@ module.exports = function (app, supabase, supabaseAdmin)
         if (difficulty) updateData.difficulty = difficulty;
         if (estimatedTime) updateData.estimated_time = estimatedTime;
         if (image) updateData.image = image;
+        if (season) updateData.season_name = season.toLowerCase();
 
         const { data, error } = await supabase
           .from('recipe_new')
@@ -307,6 +323,42 @@ module.exports = function (app, supabase, supabaseAdmin)
       {
         console.error('Error updating recipe:', error);
         res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    // Analyze recipe image for season using OpenAI
+    app.post('/api/recipes/analyze-image', async (req, res) =>
+    {
+      try
+      {
+        const { imageUrl } = req.body;
+
+        // Validate required fields
+        if (!imageUrl)
+          return res.status(400).json({ error: 'Missing required field: imageUrl' });
+
+        console.log('Analyzing image for season...');
+
+        // Call OpenAI to analyze the image
+        const detectedSeason = await analyzeRecipeImageForSeason(imageUrl);
+
+        console.log('Season detected:', detectedSeason);
+
+        res.status(200).json({
+          season: detectedSeason,
+          message: `Image analyzed successfully. Detected season: ${detectedSeason}`
+        });
+      }
+      catch (error)
+      {
+        console.error('Error analyzing recipe image:', error);
+        console.error('Error details:', error.message);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+          error: 'Failed to analyze image',
+          details: error.message,
+          hint: 'Check server logs for more details'
+        });
       }
     });
 };
