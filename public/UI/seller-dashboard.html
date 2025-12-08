@@ -47,20 +47,19 @@
     <div id="successMessage" class="success-message" style="display: none;"></div>
 
     <div class="dashboard-container">
-      <!-- Left Section: Stand Info & Image -->
+      <!-- Left Section: Stand Info -->
       <div class="dashboard-section left-section">
         <div class="image-upload-section">
-          <div class="image-preview-container">
-            <img src="../images/default-stand.png" alt="Stand Image" id="standImagePreview"
-                 onerror="this.src='../images/default-avatar.png'">
-            <div class="upload-overlay">
-              <button type="button" class="upload-btn" onclick="document.getElementById('standImageUpload').click()">
-                <span>📸</span>
-                <span>Upload Image</span>
-              </button>
-            </div>
-          </div>
           <input type="file" id="standImageUpload" accept="image/*" style="display: none;">
+
+          <div class="image-buttons-container">
+            <button type="button" class="upload-image-btn" onclick="document.getElementById('standImageUpload').click()">
+              <span>📸</span> Upload Image
+            </button>
+            <button type="button" class="view-images-btn" onclick="openImageGallery()">
+              <span>🖼️</span> View Images
+            </button>
+          </div>
         </div>
 
         <div class="form-section">
@@ -272,7 +271,44 @@
         </div>
 
         <div class="add-fruit-section">
-          <input type="text" id="newFruitInput" placeholder="Enter fruit name..." class="fruit-input">
+          <select id="newFruitInput" class="fruit-input">
+            <option value="">Select fruit...</option>
+            <option value="Apple">Apple</option>
+            <option value="Apricot">Apricot</option>
+            <option value="Avocado">Avocado</option>
+            <option value="Banana">Banana</option>
+            <option value="Blackberry">Blackberry</option>
+            <option value="Blueberry">Blueberry</option>
+            <option value="Cherry">Cherry</option>
+            <!-- <option value="Coconut">Coconut</option> -->
+            <option value="Cranberry">Cranberry</option>
+            <!-- <option value="Dragon Fruit">Dragon Fruit</option>
+            <option value="Fig">Fig</option> -->
+            <option value="Grape">Grape</option>
+            <option value="Grapefruit">Grapefruit</option>
+            <option value="Guava">Guava</option>
+            <option value="Kiwi">Kiwi</option>
+            <option value="Lemon">Lemon</option>
+            <option value="Lime">Lime</option>
+            <option value="Lychee">Lychee</option>
+            <option value="Mango">Mango</option>
+            <option value="Melon">Melon</option>
+            <option value="Nectarine">Nectarine</option>
+            <option value="Orange">Orange</option>
+            <!-- <option value="Papaya">Papaya</option> -->
+            <option value="Passionfruit">Passionfruit</option>
+            <option value="Peach">Peach</option>
+            <option value="Pear">Pear</option>
+            <option value="Persimmon">Persimmon</option>
+            <option value="Pineapple">Pineapple</option>
+            <option value="Plum">Plum</option>
+            <option value="Pomegranate">Pomegranate</option>
+            <option value="Raspberry">Raspberry</option>
+            <option value="Starfruit">Starfruit</option>
+            <option value="Strawberry">Strawberry</option>
+            <option value="Tangerine">Tangerine</option>
+            <option value="Watermelon">Watermelon</option>
+          </select>
           <button class="add-fruit-btn" onclick="addFruit()">Add Fruit</button>
         </div>
 
@@ -283,6 +319,25 @@
             <span class="btn-loading" style="display: none;">Saving...</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Gallery Modal -->
+  <div id="imageGalleryModal" class="gallery-modal" style="display: none;">
+    <div class="gallery-modal-content">
+      <div class="gallery-header">
+        <h2>Fruit Stand Images</h2>
+        <button class="gallery-close-btn" onclick="closeImageGallery()">&times;</button>
+      </div>
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Images will be loaded here -->
+      </div>
+      <div class="gallery-loading" id="galleryLoading" style="display: none;">
+        Loading images...
+      </div>
+      <div class="gallery-empty" id="galleryEmpty" style="display: none;">
+        No images uploaded yet. Upload your first image!
       </div>
     </div>
   </div>

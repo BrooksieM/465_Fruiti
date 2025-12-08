@@ -202,13 +202,16 @@ document.querySelectorAll('.day-toggle').forEach(toggle => {
     });
 });
 
-// Stand image upload preview
-document.getElementById('standImageUpload')?.addEventListener('change', function(e) {
+// Global variable to store pending image upload
+let pendingImageUpload = null;
+
+// Stand image upload preview (no upload yet)
+document.getElementById('standImageUpload')?.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (file) {
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            showError('Image size must be less than 5MB');
+        // Check file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showError('Image size must be less than 10MB');
             this.value = '';
             return;
         }
@@ -220,11 +223,16 @@ document.getElementById('standImageUpload')?.addEventListener('change', function
             return;
         }
 
-        // Show preview
+        // Store image for upload when Save Changes is clicked
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('standImagePreview').src = e.target.result;
-            showSuccess('Image preview updated! Click "Save Changes" to save.');
+            // Store the image data for later upload when Save Changes is clicked
+            pendingImageUpload = {
+                imageBase64: e.target.result,
+                fileName: `stand-${Date.now()}.jpg`
+            };
+
+            showSuccess('Image selected. Click "Save Changes" to upload.');
         };
         reader.readAsDataURL(file);
     }
@@ -365,15 +373,42 @@ async function saveChanges() {
 
         console.log('Form data:', formData);
 
-
-        const response = await fetch(`/api/fruitstands/${user.id}`, {
+        // Save fruit stand data
+        await fetch(`/api/fruitstands/${user.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
 
+        // Upload pending image if there is one
+        if (pendingImageUpload) {
+            console.log('Uploading pending image...');
+            try {
+                const imageResponse = await fetch(`/api/fruitstand-images/${user.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pendingImageUpload)
+                });
 
-        showSuccess('Changes saved successfully!');
+                if (!imageResponse.ok) {
+                    throw new Error('Failed to upload image');
+                }
+
+                const imageResult = await imageResponse.json();
+                console.log('Image uploaded:', imageResult);
+
+                // Clear pending upload after successful upload
+                pendingImageUpload = null;
+
+                showSuccess('Changes saved and image uploaded successfully!');
+            } catch (imageError) {
+                console.error('Error uploading image:', imageError);
+                showError('Changes saved but image upload failed: ' + imageError.message);
+                return;
+            }
+        } else {
+            showSuccess('Changes saved successfully!');
+        }
 
     } catch (error) {
         console.error('Error saving changes:', error);
@@ -420,6 +455,110 @@ function hideMessages() {
     if (successElement) successElement.style.display = 'none';
     if (errorElement) errorElement.style.display = 'none';
 }
+
+// Image Gallery Functions
+async function openImageGallery() {
+    const user = checkSellerAuth();
+    if (!user) return;
+
+    const modal = document.getElementById('imageGalleryModal');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const galleryLoading = document.getElementById('galleryLoading');
+    const galleryEmpty = document.getElementById('galleryEmpty');
+
+    // Show modal and loading state
+    modal.style.display = 'flex';
+    galleryLoading.style.display = 'block';
+    galleryEmpty.style.display = 'none';
+    galleryGrid.innerHTML = '';
+
+    try {
+        // Fetch images from the fruitstand-image bucket
+        const response = await fetch(`/api/fruitstand-images/${user.id}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch images');
+        }
+
+        const data = await response.json();
+        galleryLoading.style.display = 'none';
+
+        // Show pending preview image first if it exists
+        if (pendingImageUpload) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'gallery-item';
+            previewItem.style.border = '3px solid #4CAF50';
+            previewItem.innerHTML = `
+                <img src="${pendingImageUpload.imageBase64}" alt="Pending upload">
+                <div class="gallery-item-actions">
+                    <span style="background: #4CAF50; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem;">Preview (Not uploaded yet)</span>
+                </div>
+            `;
+            galleryGrid.appendChild(previewItem);
+        }
+
+        if (!data.images || data.images.length === 0) {
+            if (!pendingImageUpload) {
+                galleryEmpty.style.display = 'block';
+            }
+            return;
+        }
+
+        // Display uploaded images in grid
+        data.images.forEach(image => {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'gallery-item';
+            imageItem.innerHTML = `
+                <img src="${image.url}" alt="Fruit stand image">
+                <div class="gallery-item-actions">
+                    <button class="gallery-delete-btn" onclick="deleteImage('${image.name}', '${user.id}')">Delete</button>
+                </div>
+            `;
+            galleryGrid.appendChild(imageItem);
+        });
+
+    } catch (error) {
+        console.error('Error loading images:', error);
+        galleryLoading.style.display = 'none';
+        showError('Error loading images: ' + error.message);
+    }
+}
+
+function closeImageGallery() {
+    const modal = document.getElementById('imageGalleryModal');
+    modal.style.display = 'none';
+}
+
+async function deleteImage(imageName, userId) {
+    if (!confirm('Are you sure you want to delete this image?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/fruitstand-images/${userId}/${imageName}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete image');
+        }
+
+        showSuccess('Image deleted successfully');
+        // Reload the gallery
+        openImageGallery();
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        showError('Error deleting image: ' + error.message);
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('imageGalleryModal');
+    if (e.target === modal) {
+        closeImageGallery();
+    }
+});
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', async function() {

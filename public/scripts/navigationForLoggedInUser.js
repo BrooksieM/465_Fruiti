@@ -116,7 +116,7 @@ function goToProfile() {
 
 
 function goToStars() {
-    window.location.href = 'stars.html';
+    window.location.href = '/recipe-favorite';
 }
 
 
@@ -133,7 +133,7 @@ function goToSellerDashboard() {
 }
 
 function goToFruitStand() {
-    window.location.href = '/fruit-stand-map';
+    window.location.href = '/fruitstand-favorite';
 }
 
 // Logout function

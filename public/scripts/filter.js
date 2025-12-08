@@ -99,7 +99,7 @@ function isRecipeInTimeRange(cookingTime, timeRange) {
 }
 
 // Display filtered recipes
-function displayFilteredRecipes() {
+async function displayFilteredRecipes() {
   const recipesList = document.getElementById('recipesList');
   const recipeCount = document.getElementById('recipeCount');
 
@@ -119,6 +119,43 @@ function displayFilteredRecipes() {
     // Update recipe count
     const count = filteredRecipes.length;
     recipeCount.textContent = count === 1 ? '1 recipe found' : `${count} recipes found`;
+
+    // Apply favorited class to recipe cards for logged-in users
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      try {
+        const response = await fetch(`/api/user/${user.id}`);
+        if (response.ok) {
+          const userData = await response.json();
+          let favoriteRecipeIds = userData.favorite_recipe || [];
+
+          // Parse if string
+          if (typeof favoriteRecipeIds === 'string') {
+            try {
+              favoriteRecipeIds = JSON.parse(favoriteRecipeIds);
+            } catch {
+              favoriteRecipeIds = [];
+            }
+          }
+
+          // Apply favorited class to recipe cards
+          if (Array.isArray(favoriteRecipeIds)) {
+            favoriteRecipeIds.forEach(recipeId => {
+              const card = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+              if (card) {
+                const starBtn = card.querySelector('.btn-star-recipe');
+                if (starBtn) {
+                  starBtn.classList.add('favorited');
+                  starBtn.title = 'Remove from favorites';
+                }
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorite recipes:', error);
+      }
+    }
   }
 }
 

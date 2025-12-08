@@ -85,29 +85,29 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="displayName">Display Name</label>
-                <input type="text" id="displayName" name="displayName" placeholder="Enter your display name" />
+                <input type="text" id="displayName" name="displayName" placeholder="Enter your display name" maxlength="50" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Choose a username" />
-                <small>This is your unique identifier on Fruiti</small>
+                <input type="text" id="username" name="username" placeholder="Choose a username" maxlength="30" />
+                <small>This is your unique identifier on Fruiti (max 30 characters)</small>
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" />
+                <input type="email" id="email" name="email" placeholder="Enter your email" maxlength="100" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="bio">Bio</label>
-                <textarea id="bio" name="bio" placeholder="Tell us about yourself..." rows="4"></textarea>
+                <textarea id="bio" name="bio" placeholder="Tell us about yourself..." rows="4" maxlength="200"></textarea>
                 <small>Brief description about yourself (max 200 characters)</small>
               </div>
             </div>
@@ -134,7 +134,12 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="newPassword">New Password</label>
-                <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" required minlength="6" />
+                <div style="position: relative;">
+                  <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" required minlength="6" maxlength="128" style="padding-right: 40px;" />
+                  <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleNewPasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                    <img id="toggleNewPasswordIcon" width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/visible--v1.png" alt="Show password" />
+                  </button>
+                </div>
                 <div class="password-strength">
                   <div class="strength-bar" id="securityStrengthBar"></div>
                 </div>
@@ -144,7 +149,12 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="confirmNewPassword">Confirm New Password</label>
-                <input type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm new password" required />
+                <div style="position: relative;">
+                  <input type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm new password" required maxlength="128" style="padding-right: 40px;" />
+                  <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'toggleConfirmNewPasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                    <img id="toggleConfirmNewPasswordIcon" width="20" height="20" src="https://img.icons8.com/ios-glyphs/30/visible--v1.png" alt="Show password" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -273,6 +283,22 @@
 
 <script src="/scripts/navigationForLoggedInUser.js"></script>
   <script>
+// Password visibility toggle function
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/invisible.png';
+        toggleIcon.alt = 'Hide password';
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.src = 'https://img.icons8.com/ios-glyphs/30/visible--v1.png';
+        toggleIcon.alt = 'Show password';
+    }
+}
+
 // User data management
 let originalUserData = null;
 

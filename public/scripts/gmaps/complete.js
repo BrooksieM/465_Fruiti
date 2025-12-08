@@ -67,34 +67,36 @@ function loadSellerMarkers() {
     .then(response => response.json())
     .then(data => {
       console.log('Sellers data received:', data);
+      console.log('Full sellers array:', JSON.stringify(data.sellers, null, 2));
       if (data.sellers && data.sellers.length > 0) {
-        const geocoder = new google.maps.Geocoder();
-        let processedCount = 0;
-
         data.sellers.forEach(seller => {
+          console.log(`Processing seller: ${seller.business_name}`, {
+            working_hours: seller.working_hours,
+            produce: seller.produce
+          });
           // Create full address string
           const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
-          console.log(`Processing seller: ${seller.business_name} at ${fullAddress}`);
 
-          // Geocode the address to get coordinates
-          geocoder.geocode({ address: fullAddress }, function(results, status) {
-            if (status === 'OK') {
-              const location = results[0].geometry.location;
-              console.log(`Geocoded ${seller.business_name} to:`, location.lat(), location.lng());
-              displaySellerMarker(seller, location, fullAddress);
-            } else {
-              console.warn(`Google Geocode error for ${seller.business_name}: ${status}, trying fallback...`);
-              // Try fallback geocoding using OpenStreetMap/Nominatim (free, no API key needed)
-              geocodeWithNominatim(fullAddress, function(location) {
-                if (location) {
-                  console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
-                  displaySellerMarker(seller, location, fullAddress);
-                } else {
-                  console.error(`Failed to geocode ${seller.business_name} with both methods`);
-                }
-              });
-            }
-          });
+          // Check if seller has pre-geocoded coordinates
+          if (seller.latitude && seller.longitude) {
+            console.log(`Using pre-geocoded coordinates for ${seller.business_name}: ${seller.latitude}, ${seller.longitude}`);
+            const location = {
+              lat: seller.latitude,
+              lng: seller.longitude
+            };
+            displaySellerMarker(seller, location, fullAddress);
+          } else {
+            console.warn(`No coordinates found for ${seller.business_name}, attempting fallback geocoding...`);
+            // Fallback: Geocode the address if coordinates are not available
+            geocodeWithNominatim(fullAddress, function(location) {
+              if (location) {
+                console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
+                displaySellerMarker(seller, location, fullAddress);
+              } else {
+                console.error(`Failed to geocode ${seller.business_name}`);
+              }
+            });
+          }
         });
       } else {
         console.log('No sellers found');
@@ -124,46 +126,82 @@ function displaySellerMarker(seller, location, fullAddress) {
     </svg>
   `;
 
-  // Convert SVG to data URL
-  const svgDataUrl = 'data:image/svg+xml;base64,' + btoa(fruitStandSVG);
+  const businessName = seller.business_name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 
-  // Create marker for seller
-  const marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    icon: {
-      url: svgDataUrl,
-      scaledSize: new google.maps.Size(40, 40),
-      anchor: new google.maps.Point(20, 40)
-    },
-    title: seller.business_name
-  });
+  // Check if this fruitstand belongs to the current signed-in user
+  let userLabel = '';
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      if (user.id === seller.user_id) {
+        userLabel = `<div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #019456; white-space: nowrap; margin-bottom: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">Your Stand</div>`;
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+  }
 
-  console.log('Marker created for:', seller.business_name);
-
-  // info window for sellers
-  const sellerHandle = seller.handle || 'N/A';
-  const infoContent = `
-    <div style="padding: 10px; font-family: Arial, sans-serif; max-width: 250px;">
-      <h3 style="margin: 0 0 8px 0; color: #333;">${escapeHtml(seller.business_name)}</h3>
-      ${seller.description ? `<p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${escapeHtml(seller.description)}</p>` : ''}
-      <p style="margin: 0 0 8px 0; color: #666;"><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-      <p style="margin: 0 0 8px 0; color: #666;"><strong>Address:</strong> ${escapeHtml(fullAddress)}</p>
-      ${seller.phone_number ? `<p style="margin: 0 0 8px 0; color: #666;"><strong>Phone:</strong> ${escapeHtml(seller.phone_number)}</p>` : ''}
-      <a href="#" style="color: #1f73d1; text-decoration: none; font-size: 14px;" onclick="event.preventDefault(); alert('Contact this seller at ' + '${escapeHtml(seller.phone_number || 'N/A')}');">Contact Seller</a>
+  // Create custom marker HTML with icon and name below
+  const markerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+      ${userLabel}
+      <div style="width: 40px; height: 40px; pointer-events: none;">${fruitStandSVG}</div>
+      <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #000; white-space: nowrap; margin-top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); pointer-events: none;">${businessName}</div>
     </div>
   `;
 
-  const infoWindow = new google.maps.InfoWindow({
-    content: infoContent
-  });
+  // Create a div element for the marker
+  const markerDiv = document.createElement('div');
+  markerDiv.innerHTML = markerHTML;
+  markerDiv.style.cursor = 'pointer';
 
-  // Show info window on marker click
-  marker.addListener('click', function() {
-    infoWindow.open(map, marker);
-  });
+  // Create custom marker using OverlayView
+  class CustomMarker extends google.maps.OverlayView {
+    constructor(position, content, seller, fullAddress) {
+      super();
+      this.position = position;
+      this.content = content;
+      this.seller = seller;
+      this.fullAddress = fullAddress;
+    }
 
-  sellerMarkers.push(marker);
+    onAdd() {
+      const pane = this.getPanes().overlayMouseTarget;
+      pane.appendChild(this.content);
+
+      // Add click listener with proper event handling
+      this.content.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSellerModal(this.seller, this.fullAddress);
+      }, true);
+    }
+
+    draw() {
+      const projection = this.getProjection();
+      const position = projection.fromLatLngToDivPixel(this.position);
+      this.content.style.left = (position.x - 35) + 'px';
+      this.content.style.top = (position.y - 60) + 'px';
+      this.content.style.position = 'absolute';
+      this.content.style.zIndex = '100';
+    }
+
+    onRemove() {
+      if (this.content.parentElement) {
+        this.content.parentElement.removeChild(this.content);
+      }
+    }
+  }
+
+  const customMarker = new CustomMarker(location, markerDiv, seller, fullAddress);
+  customMarker.setMap(map);
+
+  console.log('Marker created for:', seller.business_name);
+
+  sellerMarkers.push(customMarker);
 }
 
 // Fallback geocoding using OpenStreetMap Nominatim API (free, no API key needed)
@@ -271,8 +309,195 @@ function deleteThisMarker(index) {
   }
 }
 
+// Show seller modal
+async function showSellerModal(seller, fullAddress) {
+  const sellerHandle = seller.handle || 'N/A';
+  const phoneNumber = seller.phone_number || 'N/A';
+  const description = seller.description || 'No description provided';
+
+  // Parse working_hours if it's a string (Supabase sometimes returns stringified JSON)
+  let workingHours = seller.working_hours;
+  if (typeof workingHours === 'string') {
+    try {
+      workingHours = JSON.parse(workingHours);
+    } catch (e) {
+      console.error('Failed to parse working_hours:', e);
+      workingHours = null;
+    }
+  }
+
+  // Parse produce if it's a string
+  let produce = seller.produce;
+  if (typeof produce === 'string') {
+    try {
+      produce = JSON.parse(produce);
+    } catch (e) {
+      console.error('Failed to parse produce:', e);
+      produce = null;
+    }
+  }
+
+  // Debug logging
+  console.log('Seller data received:', seller);
+  console.log('Raw working_hours:', seller.working_hours, 'Type:', typeof seller.working_hours);
+  console.log('Raw produce:', seller.produce, 'Type:', typeof seller.produce);
+  console.log('Working hours (parsed):', workingHours);
+  console.log('Produce (parsed):', produce);
+  console.log('All seller keys:', Object.keys(seller));
+
+  // Fetch seller's images from fruitstand-image bucket
+  let sellerImages = [];
+  try {
+    const imageResponse = await fetch(`/api/fruitstand-images/${seller.user_id}`);
+    if (imageResponse.ok) {
+      const imageData = await imageResponse.json();
+      sellerImages = imageData.images || [];
+      console.log('Loaded seller images:', sellerImages);
+    }
+  } catch (error) {
+    console.error('Error loading seller images:', error);
+  }
+
+  // Create image gallery HTML
+  let imageGalleryHTML = '';
+  if (sellerImages.length > 0) {
+    imageGalleryHTML = `
+      <div class="seller-image-gallery">
+        <div class="gallery-main-image">
+          <img id="mainGalleryImage" src="${sellerImages[0].url}" alt="${escapeHtml(seller.business_name)}"
+               onerror="this.src='../images/default-stand.png'">
+        </div>
+        ${sellerImages.length > 1 ? `
+          <div class="gallery-thumbnails">
+            ${sellerImages.map((img, index) => `
+              <img src="${img.url}" alt="Gallery image ${index + 1}"
+                   class="gallery-thumbnail ${index === 0 ? 'active' : ''}"
+                   onclick="changeMainImage('${img.url}', this)"
+                   onerror="this.src='../images/default-stand.png'">
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } else {
+    imageGalleryHTML = `
+      <div class="seller-image-banner">
+        <img src="../images/default-stand.png" alt="${escapeHtml(seller.business_name)}" class="seller-banner-image"
+             onerror="this.src='../images/default-avatar.png'">
+      </div>
+    `;
+  }
+
+  // Check if user is logged in
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const isLoggedIn = user && user.id;
+  const isFavorited = isLoggedIn ? await isFruitStandFavorited(seller.user_id) : false;
+
+  const modalHTML = `
+    <div class="custom-modal" id="sellerModal" data-seller-id="${seller.user_id}">
+      <div class="modal-overlay" onclick="closeSellerModal()"></div>
+      <div class="modal-content seller-modal-large">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <h3>${escapeHtml(seller.business_name)}</h3>
+            ${isLoggedIn ? `
+              <button class="btn-heart" onclick="toggleFavoriteFruitStand(${seller.user_id})" title="${isFavorited ? 'Unfavorite this stand' : 'Favorite this stand'}">
+                ${isFavorited ? '❤️' : '🤍'}
+              </button>
+            ` : ''}
+          </div>
+          <button class="close-btn" onclick="closeSellerModal()">×</button>
+        </div>
+
+        ${imageGalleryHTML}
+
+        <div class="modal-body seller-modal-body-vertical">
+          <div class="seller-info-group">
+            <h4>Description</h4>
+            <p>${escapeHtml(description)}</p>
+          </div>
+
+          <div class="seller-info-group">
+            <h4>Contact Information</h4>
+            <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
+
+            <p><strong>Stand Address:</strong> ${escapeHtml(fullAddress)}</p>
+          </div>
+
+          ${produce && Array.isArray(produce) && produce.length > 0 ? `
+            <div class="seller-info-group">
+              <h4>Available Produce</h4>
+              <div class="produce-list">
+                ${produce.map(fruit => `<span class="produce-item">${escapeHtml(typeof fruit === 'string' ? fruit : JSON.stringify(fruit))}</span>`).join('')}
+              </div>
+            </div>
+          ` : `<div class="seller-info-group"><h4>Available Produce</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+
+          ${workingHours && typeof workingHours === 'object' && Object.keys(workingHours).length > 0 ? `
+            <div class="seller-info-group">
+              <h4>Working Hours</h4>
+              <div class="hours-display">
+                ${Object.entries(workingHours).map(([day, hours]) => {
+                  const isOpen = typeof hours === 'object' && hours.open;
+                  const timeStr = isOpen ? `${hours.start} - ${hours.end}` : 'Closed';
+                  return `<div class="hour-row"><span class="day">${day}:</span><span class="time">${timeStr}</span></div>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : `<div class="seller-info-group"><h4>Working Hours</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeSellerModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Remove any existing modal
+  const existingModal = document.getElementById('sellerModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Insert new modal
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Change main gallery image
+function changeMainImage(imageUrl, thumbnail) {
+  const mainImage = document.getElementById('mainGalleryImage');
+  if (mainImage) {
+    mainImage.src = imageUrl;
+  }
+
+  // Update active thumbnail
+  const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+  thumbnails.forEach(thumb => thumb.classList.remove('active'));
+  if (thumbnail) {
+    thumbnail.classList.add('active');
+  }
+}
+
+// Close seller modal
+function closeSellerModal() {
+  const modal = document.getElementById('sellerModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Contact seller function
+function contactSeller(phoneNumber) {
+  alert('Contact this seller at ' + phoneNumber);
+}
+
 // Make functions accessible globally
 window.placeMarkerByAddress = placeMarkerByAddress;
 window.clearAllCustomMarkers = clearAllCustomMarkers;
 window.deleteThisMarker = deleteThisMarker;
 window.loadSellerMarkers = loadSellerMarkers;
+window.showSellerModal = showSellerModal;
+window.closeSellerModal = closeSellerModal;
+window.contactSeller = contactSeller;
+window.changeMainImage = changeMainImage;

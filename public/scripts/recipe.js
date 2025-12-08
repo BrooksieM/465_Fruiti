@@ -12,6 +12,7 @@ let activeFilters = {
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthStatusAndSetup();
   loadRecipes();
+  initializeIngredientSearch();
 
   // Handle form submission
   const recipeForm = document.getElementById('createRecipeForm');
@@ -30,6 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
   difficultyCircles.forEach(circle => {
     circle.addEventListener('click', handleDifficultySelect);
   });
+
+  // Handle season button selection
+  const seasonButtons = document.querySelectorAll('.season-button');
+  seasonButtons.forEach(button => {
+    button.addEventListener('click', handleSeasonSelect);
+  });
+
+  // Set Auto as default selected season button
+  const autoSeasonButton = document.getElementById('seasonAuto');
+  if (autoSeasonButton) {
+    autoSeasonButton.classList.add('selected');
+  }
+
+  // Handle estimated time validation - max 512
+  const estimatedTimeInput = document.getElementById('estimatedTime');
+  if (estimatedTimeInput) {
+    estimatedTimeInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      if (value > 512) {
+        e.target.value = 512;
+      }
+    });
+  }
 });
 
 // Check if user is logged in and setup the page accordingly
@@ -88,6 +112,18 @@ function closeCreateRecipeModal() {
   const preview = document.getElementById('imagePreview');
   preview.innerHTML = '';
   preview.classList.remove('show');
+  // Reset selected ingredients
+  selectedIngredients = [];
+  document.getElementById('selectedIngredientsContainer').innerHTML = '';
+  document.getElementById('ingredientSearch').value = '';
+  // Reset instructions to single input
+  const instructionsContainer = document.getElementById('instructionsContainer');
+  instructionsContainer.innerHTML = `
+    <div class="instruction-input-wrapper">
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+      <button type="button" class="btn-remove-instruction hidden" onclick="removeInstruction(this)">Remove</button>
+    </div>
+  `;
 }
 
 // Handle difficulty circle selection
@@ -106,22 +142,298 @@ function handleDifficultySelect(e) {
   difficultyInput.value = selectedCircle.getAttribute('data-difficulty');
 }
 
+// Handle season button selection
+function handleSeasonSelect(e) {
+  const selectedButton = e.target.closest('.season-button');
+  const allButtons = document.querySelectorAll('.season-button');
+  const seasonInput = document.getElementById('seasonInput');
+
+  // Remove selected class from all buttons
+  allButtons.forEach(button => button.classList.remove('selected'));
+
+  // Add selected class to clicked button
+  selectedButton.classList.add('selected');
+
+  // Update hidden input
+  seasonInput.value = selectedButton.getAttribute('data-season');
+}
+
 // Handle image preview
-function handleImagePreview(e) {
+async function handleImagePreview(e) {
   const file = e.target.files[0];
   const preview = document.getElementById('imagePreview');
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = function (event) {
-      preview.innerHTML = `<img src="${event.target.result}" alt="Recipe preview">`;
+    reader.onload = async function (event) {
+      const imageDataUrl = event.target.result;
+      preview.innerHTML = `<img src="${imageDataUrl}" alt="Recipe preview">`;
       preview.classList.add('show');
+
+      // Automatically analyze the image for season detection
+      await analyzeImageForSeason(imageDataUrl);
     };
     reader.readAsDataURL(file);
   } else {
     preview.innerHTML = '';
     preview.classList.remove('show');
   }
+}
+
+// Analyze image for season using OpenAI
+async function analyzeImageForSeason(imageDataUrl) {
+  try {
+    // Show loading indicator on season buttons
+    const seasonButtons = document.querySelectorAll('.season-button');
+    const seasonInput = document.getElementById('seasonInput');
+
+    // Add loading state
+    seasonButtons.forEach(button => {
+      button.style.opacity = '0.5';
+      button.style.pointerEvents = 'none';
+    });
+
+    const response = await fetch('/api/recipes/analyze-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageUrl: imageDataUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to analyze image');
+    }
+
+    const data = await response.json();
+    const detectedSeason = data.season;
+
+    // Auto-select the detected season
+    if (detectedSeason && detectedSeason !== 'none' && detectedSeason !== 'auto') {
+      seasonInput.value = detectedSeason;
+
+      seasonButtons.forEach(button => {
+        button.classList.remove('selected');
+        if (button.getAttribute('data-season') === detectedSeason) {
+          button.classList.add('selected');
+        }
+      });
+
+      // Show a subtle notification
+      showSuccess(`Season auto-detected: ${detectedSeason.charAt(0).toUpperCase() + detectedSeason.slice(1)}`);
+    } else {
+      // If no season detected, set to 'none'
+      seasonInput.value = 'none';
+
+      seasonButtons.forEach(button => {
+        button.classList.remove('selected');
+        if (button.getAttribute('data-season') === 'none') {
+          button.classList.add('selected');
+        }
+      });
+
+      showInfo('No specific season detected.');
+    }
+
+    // Remove loading state
+    seasonButtons.forEach(button => {
+      button.style.opacity = '1';
+      button.style.pointerEvents = 'auto';
+    });
+
+  } catch (error) {
+    console.error('Error analyzing image for season:', error);
+
+    // Remove loading state
+    const seasonButtons = document.querySelectorAll('.season-button');
+    seasonButtons.forEach(button => {
+      button.style.opacity = '1';
+      button.style.pointerEvents = 'auto';
+    });
+
+    // Don't show error to user, just silently fail and keep current selection
+    console.warn('Season auto-detection unavailable, user can select manually');
+  }
+}
+
+// Common ingredients list for search - Fruits, Vegetables & Seasonings
+const COMMON_INGREDIENTS = [
+  // Fruits
+  'Apple', 'Banana', 'Orange', 'Lemon', 'Lime', 'Strawberry', 'Blueberry',
+  'Raspberry', 'Watermelon', 'Mango', 'Pineapple', 'Peach', 'Pear', 'Grape',
+  'Kiwi', 'Coconut', 'Avocado', 'Pomegranate', 'Papaya', 'Dragon Fruit',
+
+  // Vegetables
+  'Broccoli', 'Carrot', 'Spinach', 'Lettuce', 'Tomato', 'Onion', 'Garlic',
+  'Bell Pepper', 'Cucumber', 'Zucchini', 'Eggplant', 'Potato', 'Sweet Potato',
+  'Corn', 'Peas', 'Beans', 'Mushroom', 'Celery', 'Cabbage', 'Cauliflower',
+  'Kale', 'Arugula', 'Radish', 'Beet', 'Squash', 'Asparagus', 'Green Beans',
+
+  // Seasonings & Herbs
+  'Salt', 'Black Pepper', 'Garlic Powder', 'Onion Powder', 'Paprika', 'Cumin',
+  'Cinnamon', 'Ginger', 'Turmeric', 'Oregano', 'Basil', 'Thyme', 'Rosemary',
+  'Parsley', 'Cilantro', 'Dill', 'Chives', 'Cayenne Pepper', 'Red Pepper Flakes'
+];
+
+let selectedIngredients = [];
+
+// Initialize ingredient search
+function initializeIngredientSearch() {
+  const searchInput = document.getElementById('ingredientSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', handleIngredientSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = searchInput.value.trim();
+        if (value && !selectedIngredients.includes(value)) {
+          addSelectedIngredient(value);
+          searchInput.value = '';
+          hideIngredientSearchResults();
+        }
+      }
+    });
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.ingredient-search-box')) {
+        hideIngredientSearchResults();
+      }
+    });
+  }
+}
+
+// Handle ingredient search
+function handleIngredientSearch(e) {
+  let inputValue = e.target.value;
+
+  // Remove any numbers from input
+  const cleanValue = inputValue.replace(/[0-9]/g, '');
+  if (inputValue !== cleanValue) {
+    e.target.value = cleanValue;
+    inputValue = cleanValue;
+  }
+
+  const searchTerm = inputValue.toLowerCase().trim();
+  const resultsContainer = document.getElementById('ingredientSearchResults');
+
+  if (!searchTerm) {
+    hideIngredientSearchResults();
+    return;
+  }
+
+  // Filter ingredients
+  const filtered = COMMON_INGREDIENTS.filter(ing =>
+    ing.toLowerCase().includes(searchTerm) &&
+    !selectedIngredients.includes(ing)
+  );
+
+  if (filtered.length === 0) {
+    hideIngredientSearchResults();
+    return;
+  }
+
+  // Display results
+  resultsContainer.innerHTML = filtered.map(ing =>
+    `<div class="ingredient-result-item" onclick="addSelectedIngredient('${ing}')">${ing}</div>`
+  ).join('');
+  resultsContainer.classList.remove('hidden');
+}
+
+// Add selected ingredient
+function addSelectedIngredient(ingredient) {
+  if (selectedIngredients.length >= 50) {
+    alert('Maximum 50 ingredients allowed');
+    return;
+  }
+
+  if (!selectedIngredients.includes(ingredient)) {
+    selectedIngredients.push(ingredient);
+    displaySelectedIngredients();
+    document.getElementById('ingredientSearch').value = '';
+    hideIngredientSearchResults();
+  }
+}
+
+// Remove selected ingredient
+function removeSelectedIngredient(ingredient) {
+  selectedIngredients = selectedIngredients.filter(ing => ing !== ingredient);
+  displaySelectedIngredients();
+}
+
+// Remove all selected ingredients
+function removeAllIngredients() {
+  selectedIngredients = [];
+  displaySelectedIngredients();
+  document.getElementById('ingredientSearch').value = '';
+  hideIngredientSearchResults();
+}
+
+// Display selected ingredients as tags
+function displaySelectedIngredients() {
+  const container = document.getElementById('selectedIngredientsContainer');
+  container.innerHTML = selectedIngredients.map(ing =>
+    `<div class="ingredient-tag">
+      ${ing}
+      <button type="button" onclick="removeSelectedIngredient('${ing}')">×</button>
+    </div>`
+  ).join('');
+}
+
+// Hide search results
+function hideIngredientSearchResults() {
+  const resultsContainer = document.getElementById('ingredientSearchResults');
+  resultsContainer.classList.add('hidden');
+}
+
+// Add instruction input field
+function addInstruction() {
+  const container = document.getElementById('instructionsContainer');
+  const MAX_INSTRUCTIONS = 12;
+  const currentCount = container.querySelectorAll('.instruction-input-wrapper').length;
+
+  if (currentCount >= MAX_INSTRUCTIONS) {
+    alert(`Maximum of ${MAX_INSTRUCTIONS} instructions allowed`);
+    return;
+  }
+
+  const newInstruction = document.createElement('div');
+  newInstruction.className = 'instruction-input-wrapper';
+  newInstruction.innerHTML = `
+    <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+    <button type="button" class="btn-remove-instruction" onclick="removeInstruction(this)">Remove</button>
+  `;
+
+  container.appendChild(newInstruction);
+
+  // Show remove button for all instructions if there are more than 1
+  updateRemoveButtons();
+}
+
+// Remove instruction input field
+function removeInstruction(button) {
+  const container = document.getElementById('instructionsContainer');
+  button.closest('.instruction-input-wrapper').remove();
+
+  // Show/hide remove buttons
+  updateRemoveButtons();
+}
+
+// Update remove button visibility
+function updateRemoveButtons() {
+  const container = document.getElementById('instructionsContainer');
+  const wrappers = container.querySelectorAll('.instruction-input-wrapper');
+
+  wrappers.forEach((wrapper, index) => {
+    const removeBtn = wrapper.querySelector('.btn-remove-instruction');
+    // Only show remove button if there's more than 1 instruction
+    if (wrappers.length > 1) {
+      removeBtn.classList.remove('hidden');
+    } else {
+      removeBtn.classList.add('hidden');
+    }
+  });
 }
 
 // Handle creating or updating a recipe
@@ -146,15 +458,33 @@ async function handleCreateRecipe(e) {
   }
 
   const name = document.getElementById('recipeName').value.trim();
-  const ingredientsInput = document.getElementById('ingredients').value.trim();
-  const instructions = document.getElementById('instructions').value.trim();
   const difficulty = document.getElementById('difficultyInput').value.trim();
   const estimatedTime = document.getElementById('estimatedTime').value.trim();
+  const season = document.getElementById('seasonInput').value.trim();
   const imageFile = document.getElementById('recipeImage').files[0];
 
+  // Get ingredients from selected ingredients array
+  const ingredients = selectedIngredients;
+
+  // Get instructions from input fields
+  const instructionInputs = document.querySelectorAll('.instruction-input');
+  const instructionSteps = Array.from(instructionInputs)
+    .map(input => input.value.trim())
+    .filter(step => step.length > 0);
+
   // Validate inputs
-  if (!name || !ingredientsInput || !instructions) {
-    showError('Please fill in all fields');
+  if (!name) {
+    showError('Please fill in recipe name');
+    return;
+  }
+
+  if (ingredients.length === 0) {
+    showError('Please enter at least one ingredient');
+    return;
+  }
+
+  if (instructionSteps.length === 0) {
+    showError('Please enter at least one instruction step');
     return;
   }
 
@@ -165,28 +495,6 @@ async function handleCreateRecipe(e) {
 
   if (!estimatedTime) {
     showError('Please enter an estimated time');
-    return;
-  }
-
-  // Parse ingredients - split by comma or newline
-  const ingredients = ingredientsInput
-    .split(/[,\n]/)
-    .map(ing => ing.trim())
-    .filter(ing => ing.length > 0);
-
-  if (ingredients.length === 0) {
-    showError('Please enter at least one ingredient');
-    return;
-  }
-
-  // Parse instructions - split by newline (each line is a step)
-  const instructionSteps = instructions
-    .split(/\n/)
-    .map(step => step.trim())
-    .filter(step => step.length > 0);
-
-  if (instructionSteps.length === 0) {
-    showError('Please enter at least one instruction step');
     return;
   }
 
@@ -225,6 +533,7 @@ async function handleCreateRecipe(e) {
         instructions: instructionSteps,
         difficulty: difficulty,
         estimatedTime: parseInt(estimatedTime),
+        season: season,
         image: imageUrl,
         userId: currentUser.id || localStorage.getItem('userId'),
       }),
@@ -269,7 +578,7 @@ async function loadRecipes() {
 }
 
 // Display recipes in the grid
-function displayRecipes() {
+async function displayRecipes() {
   // Initialize filteredRecipes with all recipes
   filteredRecipes = [...allRecipes];
 
@@ -285,6 +594,43 @@ function displayRecipes() {
     });
   }
 
+  // Load user's favorite recipes if logged in
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user && user.id) {
+    try {
+      const response = await fetch(`/api/user/${user.id}`);
+      if (response.ok) {
+        const userData = await response.json();
+        let favoriteRecipeIds = userData.favorite_recipe || [];
+
+        // Parse if string
+        if (typeof favoriteRecipeIds === 'string') {
+          try {
+            favoriteRecipeIds = JSON.parse(favoriteRecipeIds);
+          } catch {
+            favoriteRecipeIds = [];
+          }
+        }
+
+        // Apply favorited class to recipe cards
+        if (Array.isArray(favoriteRecipeIds)) {
+          favoriteRecipeIds.forEach(recipeId => {
+            const card = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+            if (card) {
+              const starBtn = card.querySelector('.btn-star-recipe');
+              if (starBtn) {
+                starBtn.classList.add('favorited');
+                starBtn.title = 'Remove from favorites';
+              }
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading favorite recipes:', error);
+    }
+  }
+
   // Update recipe count in filter sidebar
   const recipeCount = document.getElementById('recipeCount');
   if (recipeCount) {
@@ -295,19 +641,23 @@ function displayRecipes() {
   // Check if current user has reached recipe limit
   if (currentUser) {
     const createButton = document.getElementById('createRecipeButton');
-    const userRecipes = allRecipes.filter(recipe => recipe.userId === (currentUser.id || localStorage.getItem('userId')));
-    const btn = createButton.querySelector('.btn-create');
+    if (createButton) {
+      const userRecipes = allRecipes.filter(recipe => recipe.userId === (currentUser.id || localStorage.getItem('userId')));
+      const btn = createButton.querySelector('.btn-create');
 
-    if (userRecipes.length >= 3) {
-      btn.disabled = true;
-      btn.title = 'You have reached the maximum of 3 recipes';
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-    } else {
-      btn.disabled = false;
-      btn.title = '';
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
+      if (btn) {
+        if (userRecipes.length >= 3) {
+          btn.disabled = true;
+          btn.title = 'You have reached the maximum of 3 recipes';
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+        } else {
+          btn.disabled = false;
+          btn.title = '';
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        }
+      }
     }
   }
 }
@@ -319,6 +669,7 @@ function createRecipeCard(recipe) {
   // Add difficulty-based class
   const difficultyClass = recipe.difficulty ? `difficulty-${recipe.difficulty.toLowerCase()}` : '';
   card.className = `recipe-card ${difficultyClass}`;
+  card.setAttribute('data-recipe-id', recipe.id);
 
   // Create image element or placeholder
   const imageHTML = recipe.image
@@ -327,11 +678,33 @@ function createRecipeCard(recipe) {
 
   const createdBy = recipe.creator_handle || 'Unknown';
 
+  // Check if user is logged in
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isLoggedIn = user && user.id;
+
+  // Favorite button HTML (only show if logged in)
+  const favoriteButtonHTML = isLoggedIn ? `
+    <button class="btn-star-recipe"
+            onclick="toggleRecipeFavorite(${recipe.id}, event)"
+            title="Add to favorites"
+            style="display: none;">⭐</button>
+  ` : '';
+
+  // Get season display
+  const seasonName = recipe.season_name || recipe.season || 'auto';
+  const seasonDisplay = seasonName !== 'none' && seasonName !== 'auto'
+    ? `<p class="recipe-season"><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
+    : '';
+
   card.innerHTML = `
-    ${imageHTML}
+    <div class="recipe-card-image-wrapper">
+      ${imageHTML}
+      ${favoriteButtonHTML}
+    </div>
     <h3>${escapeHtml(recipe.name)}</h3>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${recipe.estimated_time} min</p>
+    ${seasonDisplay}
     <p><strong>Created by:</strong> ${escapeHtml(createdBy)}</p>
   `;
 
@@ -339,8 +712,8 @@ function createRecipeCard(recipe) {
 
   // Show edit/delete buttons only for the recipe creator (if user is logged in AND owns the recipe)
   if (currentUser) {
-    const currentUserId = currentUser.id || localStorage.getItem('userId');
-    const recipeOwnerId = recipe.user_id || recipe.userId;
+    const currentUserId = String(currentUser.id || localStorage.getItem('userId'));
+    const recipeOwnerId = String(recipe.user_id || recipe.userId);
 
     // Only show buttons if the current user owns this recipe
     if (currentUserId === recipeOwnerId) {
@@ -409,10 +782,39 @@ function viewRecipeDetail(recipe) {
 
   const estimatedTime = recipe.estimated_time !== undefined ? recipe.estimated_time : (recipe.estimatedTime !== undefined ? recipe.estimatedTime : 'N/A');
 
+  // Check if user is logged in
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isLoggedIn = user && user.id;
+
+  // Add favorite button if logged in
+  const favoriteButtonHTML = isLoggedIn ? `
+    <button class="btn-star-modal"
+            onclick="toggleRecipeFavorite(${recipe.id}, event)"
+            title="Add to favorites">⭐</button>
+  ` : '';
+
+  // Create image HTML
+  const imageHTML = recipe.image
+    ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-modal-image">`
+    : `<div class="recipe-modal-image-placeholder">No image available</div>`;
+
+  // Get season display
+  const seasonName = recipe.season_name || recipe.season || 'auto';
+  const seasonHTML = seasonName !== 'none' && seasonName !== 'auto'
+    ? `<p><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
+    : '';
+
   let detailHTML = `
-    <h2>${escapeHtml(recipe.name)}</h2>
+    <div class="recipe-header">
+      <h2>${escapeHtml(recipe.name)}</h2>
+      ${favoriteButtonHTML}
+    </div>
+    <div class="recipe-modal-image-wrapper">
+      ${imageHTML}
+    </div>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
+    ${seasonHTML}
     <h3>Ingredients:</h3>
     <ul>
       ${ingredientHTML}
@@ -425,8 +827,8 @@ function viewRecipeDetail(recipe) {
 
   // Add edit/delete buttons only if user is the recipe owner
   if (currentUser) {
-    const currentUserId = currentUser.id || localStorage.getItem('userId');
-    const recipeOwnerId = recipe.user_id || recipe.userId;
+    const currentUserId = String(currentUser.id || localStorage.getItem('userId'));
+    const recipeOwnerId = String(recipe.user_id || recipe.userId);
 
     if (currentUserId === recipeOwnerId) {
       detailHTML += `
@@ -440,6 +842,34 @@ function viewRecipeDetail(recipe) {
 
   recipeDetail.innerHTML = detailHTML;
   modal.classList.remove('hidden');
+
+  // Check if this recipe is in user's favorites and apply styling
+  if (isLoggedIn && user && user.id) {
+    fetch(`/api/user/${user.id}`)
+      .then(response => response.json())
+      .then(userData => {
+        let favoriteRecipeIds = userData.favorite_recipe || [];
+
+        // Parse if string
+        if (typeof favoriteRecipeIds === 'string') {
+          try {
+            favoriteRecipeIds = JSON.parse(favoriteRecipeIds);
+          } catch {
+            favoriteRecipeIds = [];
+          }
+        }
+
+        // Apply favorited class to modal button if needed
+        if (Array.isArray(favoriteRecipeIds) && favoriteRecipeIds.includes(recipe.id)) {
+          const modalBtn = document.querySelector('.btn-star-modal');
+          if (modalBtn) {
+            modalBtn.classList.add('favorited');
+            modalBtn.title = 'Remove from favorites';
+          }
+        }
+      })
+      .catch(error => console.error('Error checking favorite status:', error));
+  }
 }
 
 // Close recipe modal
@@ -472,8 +902,35 @@ function editRecipe(recipe) {
 
   // Populate form with recipe data
   document.getElementById('recipeName').value = recipe.name;
-  document.getElementById('ingredients').value = ingredientsList.join(', ');
-  document.getElementById('instructions').value = instructionsList.join('\n');
+
+  // Set selected ingredients
+  selectedIngredients = [...ingredientsList];
+  displaySelectedIngredients();
+
+  // Set instructions - clear existing and add new ones
+  const instructionsContainer = document.getElementById('instructionsContainer');
+  instructionsContainer.innerHTML = '';
+  instructionsList.forEach((instruction, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'instruction-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required value="${instruction.replace(/"/g, '&quot;')}">
+      <button type="button" class="btn-remove-instruction ${index === 0 && instructionsList.length === 1 ? 'hidden' : ''}" onclick="removeInstruction(this)">Remove</button>
+    `;
+    instructionsContainer.appendChild(wrapper);
+  });
+
+  // If no instructions, add one empty field
+  if (instructionsList.length === 0) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'instruction-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="instruction-input" placeholder="Enter instruction step" required>
+      <button type="button" class="btn-remove-instruction hidden" onclick="removeInstruction(this)">Remove</button>
+    `;
+    instructionsContainer.appendChild(wrapper);
+  }
+
   document.getElementById('estimatedTime').value = recipe.estimated_time || '';
 
   // Set difficulty level
@@ -487,6 +944,21 @@ function editRecipe(recipe) {
       circle.classList.remove('selected');
       if (circle.getAttribute('data-difficulty') === recipe.difficulty) {
         circle.classList.add('selected');
+      }
+    });
+  }
+
+  // Set season
+  if (recipe.season) {
+    const seasonInput = document.getElementById('seasonInput');
+    seasonInput.value = recipe.season;
+
+    // Update season button visual
+    const allSeasonButtons = document.querySelectorAll('.season-button');
+    allSeasonButtons.forEach(button => {
+      button.classList.remove('selected');
+      if (button.getAttribute('data-season') === recipe.season) {
+        button.classList.add('selected');
       }
     });
   }
@@ -583,6 +1055,20 @@ function showSuccess(message) {
   }, 4000);
 }
 
+// Show info message
+function showInfo(message) {
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'info-message show';
+  infoDiv.textContent = message;
+
+  const container = document.querySelector('.recipe-container');
+  container.insertBefore(infoDiv, container.firstChild);
+
+  setTimeout(() => {
+    infoDiv.remove();
+  }, 4000);
+}
+
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
   const map = {
@@ -593,6 +1079,69 @@ function escapeHtml(text) {
     "'": '&#039;',
   };
   return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Toggle favorite recipe
+async function toggleRecipeFavorite(recipeId, event) {
+  event.stopPropagation();
+
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  if (!user || !user.id) {
+    alert('Please log in to save recipes');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/recipes/${recipeId}/favorite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update favorite');
+    }
+
+    const result = await response.json();
+
+    // Update the card's star button appearance
+    const card = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+    if (card) {
+      const starBtn = card.querySelector('.btn-star-recipe');
+      if (starBtn) {
+        if (result.isFavorited) {
+          starBtn.classList.add('favorited');
+          starBtn.title = 'Remove from favorites';
+        } else {
+          starBtn.classList.remove('favorited');
+          starBtn.title = 'Add to favorites';
+        }
+      }
+    }
+
+    // Update the modal button appearance
+    const modalBtn = document.querySelector('.btn-star-modal');
+    if (modalBtn) {
+      if (result.isFavorited) {
+        modalBtn.classList.add('favorited');
+        modalBtn.title = 'Remove from favorites';
+      } else {
+        modalBtn.classList.remove('favorited');
+        modalBtn.title = 'Add to favorites';
+      }
+    }
+
+    console.log(`✅ Recipe ${recipeId} favorite toggled`);
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    alert('Failed to save recipe: ' + error.message);
+  }
 }
 
 // Close modals when clicking outside of them

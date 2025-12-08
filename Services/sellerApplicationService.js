@@ -1,6 +1,48 @@
 // Services/sellerApplicationService.js
 
-module.exports = function (app, supabase) 
+// Geocoding utility function - converts address to latitude/longitude
+async function geocodeAddress(address, city, state, zipcode) {
+  try {
+    // Construct full address
+    const fullAddress = `${address}, ${city}, ${state} ${zipcode}`;
+    const encodedAddress = encodeURIComponent(fullAddress);
+
+    // Try Google Maps Geocoding API first (requires env variable GOOGLE_MAPS_API_KEY)
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (apiKey) {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`);
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng
+        };
+      }
+    }
+
+    // Fallback to OpenStreetMap Nominatim API (free, no key needed)
+    const nominatimResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}`);
+    const nominatimData = await nominatimResponse.json();
+
+    if (nominatimData && nominatimData.length > 0) {
+      return {
+        latitude: parseFloat(nominatimData[0].lat),
+        longitude: parseFloat(nominatimData[0].lon)
+      };
+    }
+
+    // If both geocoding methods fail, return null
+    console.warn(`Could not geocode address: ${fullAddress}`);
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+}
+
+module.exports = function (app, supabase)
 {
   // GET /api/seller_subscriptions -> get all subscription plans
   app.get('/api/seller_subscriptions', async (req, res) => 
@@ -284,7 +326,7 @@ module.exports = function (app, supabase)
     {
       const { data, error } = await supabase
         .from('seller_applications')
-        .select('id, business_name, description, phone_number, address, city, state, zipcode, user_id')
+        .select('*')
         .eq('status', 'approved')
         .not('address', 'is', null)
         .not('city', 'is', null)
@@ -544,6 +586,9 @@ module.exports = function (app, supabase)
       const endDate = new Date(now);
       endDate.setMonth(endDate.getMonth() + months);
 
+      // Geocode the address before creating the application
+      const coordinates = await geocodeAddress(standAddress, city, state, zipcode);
+
       // Create seller application with subscription
       const { data: application, error: appError } = await supabase
         .from('seller_applications')
@@ -559,10 +604,20 @@ module.exports = function (app, supabase)
             city: city,
             state: state,
             zipcode: zipcode,
+            latitude: coordinates?.latitude || null,
+            longitude: coordinates?.longitude || null,
             created_at: now.toISOString()
           }
         ])
         .select();
+
+      //Change account seller status to TRUE
+      if (!appError) {
+        await supabase
+          .from('accounts')
+          .update({ is_seller: true })
+          .eq('id', userId);
+      }
 
       if (appError)
       {
