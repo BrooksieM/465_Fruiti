@@ -159,20 +159,102 @@ function handleSeasonSelect(e) {
 }
 
 // Handle image preview
-function handleImagePreview(e) {
+async function handleImagePreview(e) {
   const file = e.target.files[0];
   const preview = document.getElementById('imagePreview');
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = function (event) {
-      preview.innerHTML = `<img src="${event.target.result}" alt="Recipe preview">`;
+    reader.onload = async function (event) {
+      const imageDataUrl = event.target.result;
+      preview.innerHTML = `<img src="${imageDataUrl}" alt="Recipe preview">`;
       preview.classList.add('show');
+
+      // Automatically analyze the image for season detection
+      await analyzeImageForSeason(imageDataUrl);
     };
     reader.readAsDataURL(file);
   } else {
     preview.innerHTML = '';
     preview.classList.remove('show');
+  }
+}
+
+// Analyze image for season using OpenAI
+async function analyzeImageForSeason(imageDataUrl) {
+  try {
+    // Show loading indicator on season buttons
+    const seasonButtons = document.querySelectorAll('.season-button');
+    const seasonInput = document.getElementById('seasonInput');
+
+    // Add loading state
+    seasonButtons.forEach(button => {
+      button.style.opacity = '0.5';
+      button.style.pointerEvents = 'none';
+    });
+
+    const response = await fetch('/api/recipes/analyze-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageUrl: imageDataUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to analyze image');
+    }
+
+    const data = await response.json();
+    const detectedSeason = data.season;
+
+    // Auto-select the detected season
+    if (detectedSeason && detectedSeason !== 'none' && detectedSeason !== 'auto') {
+      seasonInput.value = detectedSeason;
+
+      seasonButtons.forEach(button => {
+        button.classList.remove('selected');
+        if (button.getAttribute('data-season') === detectedSeason) {
+          button.classList.add('selected');
+        }
+      });
+
+      // Show a subtle notification
+      showSuccess(`Season auto-detected: ${detectedSeason.charAt(0).toUpperCase() + detectedSeason.slice(1)}`);
+    } else {
+      // If no season detected, set to 'none'
+      seasonInput.value = 'none';
+
+      seasonButtons.forEach(button => {
+        button.classList.remove('selected');
+        if (button.getAttribute('data-season') === 'none') {
+          button.classList.add('selected');
+        }
+      });
+
+      showInfo('No specific season detected.');
+    }
+
+    // Remove loading state
+    seasonButtons.forEach(button => {
+      button.style.opacity = '1';
+      button.style.pointerEvents = 'auto';
+    });
+
+  } catch (error) {
+    console.error('Error analyzing image for season:', error);
+
+    // Remove loading state
+    const seasonButtons = document.querySelectorAll('.season-button');
+    seasonButtons.forEach(button => {
+      button.style.opacity = '1';
+      button.style.pointerEvents = 'auto';
+    });
+
+    // Don't show error to user, just silently fail and keep current selection
+    console.warn('Season auto-detection unavailable, user can select manually');
   }
 }
 
@@ -608,6 +690,12 @@ function createRecipeCard(recipe) {
             style="display: none;">⭐</button>
   ` : '';
 
+  // Get season display
+  const seasonName = recipe.season_name || recipe.season || 'auto';
+  const seasonDisplay = seasonName !== 'none' && seasonName !== 'auto'
+    ? `<p class="recipe-season"><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
+    : '';
+
   card.innerHTML = `
     <div class="recipe-card-image-wrapper">
       ${imageHTML}
@@ -616,6 +704,7 @@ function createRecipeCard(recipe) {
     <h3>${escapeHtml(recipe.name)}</h3>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${recipe.estimated_time} min</p>
+    ${seasonDisplay}
     <p><strong>Created by:</strong> ${escapeHtml(createdBy)}</p>
   `;
 
@@ -709,6 +798,12 @@ function viewRecipeDetail(recipe) {
     ? `<img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" class="recipe-modal-image">`
     : `<div class="recipe-modal-image-placeholder">No image available</div>`;
 
+  // Get season display
+  const seasonName = recipe.season_name || recipe.season || 'auto';
+  const seasonHTML = seasonName !== 'none' && seasonName !== 'auto'
+    ? `<p><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
+    : '';
+
   let detailHTML = `
     <div class="recipe-header">
       <h2>${escapeHtml(recipe.name)}</h2>
@@ -719,6 +814,7 @@ function viewRecipeDetail(recipe) {
     </div>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
+    ${seasonHTML}
     <h3>Ingredients:</h3>
     <ul>
       ${ingredientHTML}
@@ -956,6 +1052,20 @@ function showSuccess(message) {
 
   setTimeout(() => {
     successDiv.remove();
+  }, 4000);
+}
+
+// Show info message
+function showInfo(message) {
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'info-message show';
+  infoDiv.textContent = message;
+
+  const container = document.querySelector('.recipe-container');
+  container.insertBefore(infoDiv, container.firstChild);
+
+  setTimeout(() => {
+    infoDiv.remove();
   }, 4000);
 }
 

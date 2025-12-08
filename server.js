@@ -16,6 +16,9 @@ require('dotenv').config();
 // Load Google Maps API key from gmaps_api/.env
 require('dotenv').config({ path: './gmaps_api/.env' });
 
+// Load OpenAI API key from openai_api/.env
+require('dotenv').config({ path: './openai_api/.env' });
+
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client using environment variables
