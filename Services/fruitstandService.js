@@ -1,7 +1,97 @@
 // ========== FRUIT STANDS CRUD OPERATIONS (Supabase) ==========
 
+// Geocoding utility function - converts address to latitude/longitude
+async function geocodeAddress(address, city, state, zipcode) {
+  try {
+    // Construct full address
+    const fullAddress = `${address}, ${city}, ${state} ${zipcode}`;
+    const encodedAddress = encodeURIComponent(fullAddress);
+
+    // Try Google Maps Geocoding API first (requires env variable GOOGLE_MAPS_API_KEY)
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (apiKey) {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`);
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng
+        };
+      }
+    }
+
+    // Fallback to OpenStreetMap Nominatim API (free, no key needed)
+    console.log('Trying Nominatim API for:', fullAddress);
+    const nominatimResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}`, {
+      headers: {
+        'User-Agent': 'Fruiti-App/1.0 (fruit stand locator app)'
+      }
+    });
+
+    console.log('Nominatim response status:', nominatimResponse.status);
+
+    if (!nominatimResponse.ok) {
+      console.error('Nominatim API error:', nominatimResponse.status, nominatimResponse.statusText);
+      return null;
+    }
+
+    const nominatimData = await nominatimResponse.json();
+    console.log('Nominatim data:', nominatimData);
+
+    if (nominatimData && nominatimData.length > 0) {
+      const coords = {
+        latitude: parseFloat(nominatimData[0].lat),
+        longitude: parseFloat(nominatimData[0].lon)
+      };
+      console.log('Successfully geocoded to:', coords);
+      return coords;
+    }
+
+    // If both geocoding methods fail, return null
+    console.warn(`Could not geocode address: ${fullAddress}`);
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    console.error('Error details:', error.message);
+    return null;
+  }
+}
+
 // GET endpoint to search for nearby fruit stands
 module.exports = (app, supabase, supabaseAdmin) => {
+
+// GET endpoint to fetch fruit stand by user_id
+app.get('/api/fruitstands/user/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        const { data, error } = await supabase
+            .from('seller_applications')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return res.status(404).json({ error: 'Fruit stand not found for this user' });
+            }
+            console.error('Select error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/api/fruitstands/search', async (req, res) => {
     try 
     {
@@ -39,18 +129,21 @@ app.get('/api/fruitstands/search', async (req, res) => {
 
 
 app.post('/api/fruitstands', async (req, res) => {
-    try 
+    try
     {
         const { name, address, city, state, zip, phone } = req.body;
 
         // Basic validation
-        if (!name || !address || !city || !state) 
+        if (!name || !address || !city || !state)
         {
             return res.status(400).json(
               {
                 error: 'Missing required fields: name, address, city, and state are required.'
             });
         }
+
+        // Geocode the address to get latitude/longitude
+        const coordinates = await geocodeAddress(address, city, state, zip || '');
 
         // Insert into Supabase
         const { data, error } = await supabase
@@ -63,12 +156,14 @@ app.post('/api/fruitstands', async (req, res) => {
                     state,
                     zip: zip || null,
                     phone: phone || null,
+                    latitude: coordinates?.latitude || null,
+                    longitude: coordinates?.longitude || null,
                     created_at: new Date().toISOString()
                 }
             ])
             .select();
 
-        if (error) 
+        if (error)
         {
             console.error('Insert error:', error);
             return res.status(500).json({ error: error.message });
@@ -78,8 +173,8 @@ app.post('/api/fruitstands', async (req, res) => {
             message: 'Fruit stand created successfully!',
             fruitStand: data[0]
         });
-    } 
-    catch (error) 
+    }
+    catch (error)
     {
         console.error('Server error:', error); // error logging
         res.status(500).json({ error: 'Internal server error' });
@@ -135,22 +230,22 @@ app.delete('/api/fruitstands/:id', async (req, res) => {
 
 // PUT endpoint to update a fruit stand
 app.put('/api/fruitstands/:id', async (req, res) => {
-    try 
+    try
     {
         const id = Number(req.params.id);
-        const { 
-            business_name, 
-            phone_number, 
-            address, 
-            city, 
-            state, 
-            zipcode, 
+        const {
+            business_name,
+            phone_number,
+            address,
+            city,
+            state,
+            zipcode,
             description,
             working_hours,
-            produce 
+            produce
         } = req.body;
-        
-        if (!Number.isInteger(id) || id <= 0) 
+
+        if (!Number.isInteger(id) || id <= 0)
         {
             return res.status(400).json({ error: 'Invalid fruit stand ID' });
         }
@@ -162,30 +257,54 @@ app.put('/api/fruitstands/:id', async (req, res) => {
             .eq('user_id', id)
             .single();
 
-        if (checkError) 
+        if (checkError)
         {
             return res.status(404).json({ error: 'Fruit stand not found' });
         }
 
+        // Geocode the address if location fields are provided
+        console.log('Checking geocoding conditions - address:', address, 'city:', city, 'state:', state);
+        console.log('Condition result:', !!(address && city && state));
+        let coordinates = null;
+        if (address && city && state) {
+            console.log('Geocoding address:', address, city, state, zipcode);
+            coordinates = await geocodeAddress(address, city, state, zipcode || '');
+            console.log('Geocoding result:', coordinates);
+        }
+
+        // Prepare update data
+        const updateData = {
+            business_name: business_name,
+            address: address,
+            city: city,
+            state: state,
+            zipcode: zipcode,
+            phone_number: phone_number,
+            description: description,
+            working_hours: working_hours,
+            produce: produce,
+            updated_at: new Date().toISOString()
+        };
+
+        // Add latitude/longitude if geocoding was successful
+        if (coordinates) {
+            console.log('Adding coordinates to updateData:', coordinates.latitude, coordinates.longitude);
+            updateData.latitude = coordinates.latitude;
+            updateData.longitude = coordinates.longitude;
+        } else {
+            console.log('No coordinates to add');
+        }
+
+        console.log('Final updateData:', updateData);
+
         // Update in Supabase
         const { data, error } = await supabase
             .from('seller_applications')
-            .update({
-                business_name: business_name,
-                address: address,
-                city: city,
-                state: state,
-                zipcode: zipcode,
-                phone_number: phone_number,
-                description: description,
-                working_hours: working_hours,
-                produce: produce,
-                updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('user_id', id)
             .select();
 
-        if (error) 
+        if (error)
         {
             console.error('Update error:', error);
             return res.status(500).json({ error: error.message });
@@ -195,8 +314,8 @@ app.put('/api/fruitstands/:id', async (req, res) => {
             message: 'Fruit stand updated successfully.',
             fruitStand: data[0]
         });
-    } 
-    catch (error) 
+    }
+    catch (error)
     {
         console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });

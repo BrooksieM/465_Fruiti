@@ -1,0 +1,397 @@
+/* ========== RATING STYLES ========== */
+
+/* Star Rating Display */
+.rating-stars {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.rating-stars .star {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.rating-stars-small {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.rating-stars-small .star {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.star.filled {
+  color: #FFD700;
+  /* Gold color for filled stars */
+}
+
+.star.half {
+  color: #FFD700;
+  /* Gold color for half stars */
+  position: relative;
+}
+
+.star.empty {
+  color: #ddd;
+  /* Light gray for empty stars */
+}
+
+/* Rating Summary */
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.rating-average {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+}
+
+.rating-count {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Star Rating Input */
+.rating-input {
+  margin: 16px 0;
+}
+
+.stars-input {
+  display: flex;
+  gap: 8px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.star-btn:hover {
+  color: #FFD700;
+  transform: scale(1.2);
+}
+
+.star-btn.selected {
+  color: #FFD700;
+}
+
+/* Rating Form */
+.rating-form {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.rating-form h4 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.rating-form-group {
+  margin-bottom: 16px;
+}
+
+.rating-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.rating-comment-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.rating-comment-input:focus {
+  outline: none;
+  border-color: #019456;
+}
+
+.btn-submit-rating {
+  background: #019456;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-submit-rating:hover {
+  background: #017d49;
+}
+
+.btn-submit-rating:active {
+  transform: scale(0.98);
+}
+
+/* Ratings List */
+.ratings-list {
+  margin: 20px 0;
+}
+
+.rating-item {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.rating-item:last-child {
+  border-bottom: none;
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.rating-user {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rating-user strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.rating-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.rating-comment {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.no-ratings {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* Rating Section in Modal */
+.rating-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.rating-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+/* Login Required Message */
+.login-required-message {
+  padding: 16px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.login-required-message a {
+  color: #019456;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+/* Own Recipe/Stand Message */
+.own-entity-message {
+  padding: 16px;
+  background: #e7f3ff;
+  border: 1px solid #2196F3;
+  border-radius: 4px;
+  color: #0c5460;
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* Toast Notification Styles */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  max-width: 500px;
+  opacity: 0;
+  transform: translateY(-100px);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Success Toast */
+.toast-success {
+  background: linear-gradient(135deg, #019456 0%, #027348 100%);
+  color: white;
+  border-left: 4px solid #005a34;
+}
+
+.toast-success .toast-icon {
+  stroke: white;
+  animation: checkmark 0.5s ease forwards;
+}
+
+/* Error Toast */
+.toast-error {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border-left: 4px solid #bd2130;
+}
+
+.toast-error .toast-icon {
+  stroke: white;
+  animation: shake 0.4s ease;
+}
+
+/* Info Toast */
+.toast-info {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  border-left: 4px solid #0d47a1;
+}
+
+.toast-info .toast-icon {
+  stroke: white;
+}
+
+/* Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    stroke-dasharray: 0 50;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: 50 50;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Shake Animation for Error */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rating-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .rating-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .star-btn {
+    font-size: 28px;
+  }
+
+  .rating-number {
+    font-size: 28px;
+  }
+
+  .toast-container {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 20px);
+  }
+
+  .toast {
+    min-width: unset;
+    width: 100%;
+  }
+}

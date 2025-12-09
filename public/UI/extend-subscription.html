@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extend Subscription - Fruiti</title>
+<link rel="stylesheet" href="../css/standardLayout.css">
+<link rel="stylesheet" href="../css/footer/footer.css">
+<link rel="stylesheet" href="../css/become-a-seller/become-a-seller-page1.css">
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <a href="/">
+        <img src="../images/fruiti.png" alt="Fruiti logo - Click to go home" />
+      </a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+
+    <div class="auth-buttons" id="authButtons"></div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/become-seller" class="active">Become a Seller</a>
+    <a href="nutrition">Nutrition</a>
+    <a href="/recipe">Recipes</a>
+    <a href="/aboutus">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <!-- Hero Section -->
+  <section class="seller-hero">
+    <h1>Extend Your Subscription 🌱</h1>
+    <p>Keep your fruit stand active and continue reaching more customers!</p>
+  </section>
+
+  <!-- Current Subscription Info -->
+  <section class="benefits-section">
+    <div class="container">
+      <h2 class="section-heading">Your Current Subscription</h2>
+      <div id="currentSubscriptionInfo" style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 12px; margin-bottom: 40px;">
+        <p>Loading subscription details...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing-section">
+    <h2>Choose Your Extension Plan</h2>
+    
+    <div class="pricing-cards">
+      <!-- Monthly Plan -->
+      <div class="price-card">
+        <div class="plan-name">Monthly</div>
+        <div class="plan-price">$4.99<span>/mo</span></div>
+        <div class="price-period">Billed monthly</div>
+        <ul class="plan-features">
+          <br><br><br>
+          <li>List your fruit stand location</li>
+          <li>Update inventory daily</li>
+          <li>Customer reviews & ratings</li>
+          <!-- <li>Basic analytics dashboard</li> -->
+          <li>Email support</li>
+        </ul>
+        <button class="select-plan-btn" onclick="extendSubscription('monthly')">Get Started</button>
+      </div>
+
+      <!-- 3-Month Plan (Featured) -->
+      <div class="price-card featured">
+        <div class="plan-name">3 Months</div>
+        <div class="plan-price">$10<span>/3mo</span></div>
+        <div class="price-period">Just $3.33/month</div>
+        <div class="savings-badge">💰 Save 33%</div>
+        <ul class="plan-features">
+          <li>Everything in Monthly</li>
+          <li>Priority customer support</li>
+          <!-- <li>Featured stand placement</li>
+          <li>Advanced analytics</li> -->
+          <li>Photo gallery (up to 10 photos)</li>
+          <li>Social media integration</li>
+        </ul>
+        <button class="select-plan-btn" onclick="extendSubscription('3month')">Best Value!</button>
+      </div>
+
+      <!-- 6-Month Plan -->
+      <div class="price-card">
+        <div class="plan-name">6 Months</div>
+        <div class="plan-price">$15<span>/6mo</span></div>
+        <div class="price-period">Just $2.50/month</div>
+        <div class="savings-badge">🎉 Save 50%</div>
+        <ul class="plan-features">
+          <li>Everything in 3 Months</li>
+          <li>Premium stand badge</li>
+          <!-- <li>Unlimited photos</li>
+          <li>Custom stand URL</li>
+          <li>Priority listing in searches</li> -->
+          <li>Dedicated account manager</li>
+          <!-- <li>Promotional campaigns</li> -->
+        </ul>
+        <button class="select-plan-btn" onclick="extendSubscription('6month')">Maximum Savings</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+  <script src="../scripts/footer.js"></script>
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
+  <script>
+    // Load current subscription info
+    async function loadSubscriptionInfo() {
+      try {
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const user = JSON.parse(userData);
+        const userId = user.id;
+
+        if (!userId) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const response = await fetch(`/api/fruitstands/user/${userId}`);
+
+        if (response.ok) {
+          const fruitstand = await response.json();
+          const infoDiv = document.getElementById('currentSubscriptionInfo');
+          
+          console.log('Fruit stand data:', fruitstand);
+          
+          // Check if subscription_end_date exists
+          if (!fruitstand.subscription_end_date) {
+            infoDiv.innerHTML = `
+              <h3 style="color: #ff9800; margin-bottom: 10px;">No Subscription Date Set</h3>
+              <p style="font-size: 16px; color: #666;">Your fruit stand was created before subscription tracking. Choose a plan below to activate your subscription.</p>
+            `;
+            return;
+          }
+          
+          const expirationDate = new Date(fruitstand.subscription_end_date);
+          const today = new Date();
+          const daysLeft = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+          
+          console.log('Expiration date:', expirationDate);
+          console.log('Today:', today);
+          console.log('Days left:', daysLeft);
+          
+          let statusHTML = '';
+          if (daysLeft > 0) {
+            statusHTML = `
+              <h3 style="color: #017d49; margin-bottom: 10px;">Active Subscription</h3>
+              <p style="font-size: 18px; margin: 10px 0;"><strong>Expires:</strong> ${expirationDate.toLocaleDateString()}</p>
+              <p style="font-size: 16px; color: #666;">${daysLeft} days remaining</p>
+            `;
+          } else {
+            statusHTML = `
+              <h3 style="color: #dc3545; margin-bottom: 10px;">Subscription Expired</h3>
+              <p style="font-size: 18px; margin: 10px 0;"><strong>Expired:</strong> ${expirationDate.toLocaleDateString()}</p>
+              <p style="font-size: 16px; color: #666;">Renew now to keep your stand active!</p>
+            `;
+          }
+          
+          infoDiv.innerHTML = statusHTML;
+        } else {
+          // No fruit stand found - redirect to become-seller page
+          window.location.href = '/become-seller';
+        }
+      } catch (error) {
+        console.error('Error loading subscription info:', error);
+        document.getElementById('currentSubscriptionInfo').innerHTML = 
+          '<p style="color: #dc3545;">Error loading subscription information</p>';
+      }
+    }
+
+    function extendSubscription(plan) {
+      window.location.href = `/extension-payment?plan=${plan}`;
+    }
+
+    // Load subscription info on page load
+    document.addEventListener('DOMContentLoaded', loadSubscriptionInfo);
+  </script>
+</body>
+</html>

@@ -11,6 +11,7 @@ const routes = {
   '/aboutus': 'aboutus.html',
   '/recipe': 'recipe.html',
   '/become-seller': 'become-seller.html',
+  '/extend-subscription': 'extend-subscription.html',
   '/seller-dashboard': 'seller-dashboard.html',
   '/fruitstand-favorite': 'fruitstand-favorite.html',
   '/recipe-favorite': 'recipe-favorite.html',

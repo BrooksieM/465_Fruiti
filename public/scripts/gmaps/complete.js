@@ -1,6 +1,11 @@
 let map;
 let customMarkers = [];
 let sellerMarkers = [];
+let allSellers = []; // Store all sellers for filtering
+let filterCenter = null; // Store the center point for distance filtering
+let filterRadius = 50; // Default radius in miles
+let userLocation = null; // Store user's location
+let filterActive = false; // Track if filter is active
 
 // Initialize the map
 function initMap()
@@ -31,11 +36,14 @@ function initMap()
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const userLocation = {
+        userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
         map.setCenter(userLocation);
+
+        // Set as default filter center
+        filterCenter = userLocation;
 
         // blue marker for users location
         new google.maps.Marker({
@@ -69,6 +77,9 @@ function loadSellerMarkers() {
       console.log('Sellers data received:', data);
       console.log('Full sellers array:', JSON.stringify(data.sellers, null, 2));
       if (data.sellers && data.sellers.length > 0) {
+        // Store all sellers for filtering
+        allSellers = data.sellers;
+
         data.sellers.forEach(seller => {
           console.log(`Processing seller: ${seller.business_name}`, {
             working_hours: seller.working_hours,
@@ -81,8 +92,8 @@ function loadSellerMarkers() {
           if (seller.latitude && seller.longitude) {
             console.log(`Using pre-geocoded coordinates for ${seller.business_name}: ${seller.latitude}, ${seller.longitude}`);
             const location = {
-              lat: seller.latitude,
-              lng: seller.longitude
+              lat: parseFloat(seller.latitude),
+              lng: parseFloat(seller.longitude)
             };
             displaySellerMarker(seller, location, fullAddress);
           } else {
@@ -109,20 +120,29 @@ function loadSellerMarkers() {
 function displaySellerMarker(seller, location, fullAddress) {
   // Create a fruit stand SVG icon
   const fruitStandSVG = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
-      <!-- Tent/Roof -->
-      <polygon points="10,50 50,20 90,50" fill="#FF6B6B" stroke="#8B0000" stroke-width="2"/>
-      <!-- Left side of tent -->
-      <polygon points="10,50 50,20 50,80" fill="#FF8A8A" stroke="#8B0000" stroke-width="2" opacity="0.8"/>
-      <!-- Stand poles -->
-      <rect x="35" y="75" width="4" height="15" fill="#8B6F47"/>
-      <rect x="61" y="75" width="4" height="15" fill="#8B6F47"/>
-      <!-- Counter/Base -->
-      <rect x="20" y="80" width="60" height="12" fill="#D2B48C" stroke="#8B6F47" stroke-width="1"/>
-      <!-- Fruit decoration - oranges on top -->
-      <circle cx="35" cy="72" r="5" fill="#FF9500" stroke="#E67E22" stroke-width="1"/>
-      <circle cx="50" cy="70" r="5" fill="#FFB347" stroke="#E67E22" stroke-width="1"/>
-      <circle cx="65" cy="72" r="5" fill="#FF9500" stroke="#E67E22" stroke-width="1"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="45" height="45">
+      <!-- Umbrella/Canopy top -->
+      <path d="M50,20 Q30,30 25,45 L75,45 Q70,30 50,20 Z" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+      <!-- Umbrella pole -->
+      <rect x="48" y="20" width="4" height="35" fill="#795548"/>
+      <!-- Table/Counter -->
+      <rect x="20" y="55" width="60" height="8" fill="#8D6E63" stroke="#5D4037" stroke-width="2" rx="2"/>
+      <!-- Table legs -->
+      <rect x="23" y="63" width="4" height="25" fill="#6D4C41"/>
+      <rect x="73" y="63" width="4" height="25" fill="#6D4C41"/>
+      <!-- Produce display - basket outlines -->
+      <ellipse cx="35" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <ellipse cx="50" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <ellipse cx="65" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <!-- Fruits -->
+      <circle cx="33" cy="57" r="3" fill="#FF6B6B"/>
+      <circle cx="37" cy="58" r="3" fill="#FF8787"/>
+      <circle cx="48" cy="57" r="3" fill="#FFA726"/>
+      <circle cx="52" cy="58" r="3" fill="#FFB347"/>
+      <circle cx="63" cy="57" r="3" fill="#66BB6A"/>
+      <circle cx="67" cy="58" r="3" fill="#81C784"/>
+      <!-- Ground -->
+      <ellipse cx="50" cy="88" rx="30" ry="4" fill="#00000015"/>
     </svg>
   `;
 
@@ -312,7 +332,6 @@ function deleteThisMarker(index) {
 // Show seller modal
 async function showSellerModal(seller, fullAddress) {
   const sellerHandle = seller.handle || 'N/A';
-  const phoneNumber = seller.phone_number || 'N/A';
   const description = seller.description || 'No description provided';
 
   // Parse working_hours if it's a string (Supabase sometimes returns stringified JSON)
@@ -413,29 +432,32 @@ async function showSellerModal(seller, fullAddress) {
 
         <div class="modal-body seller-modal-body-vertical">
           <div class="seller-info-group">
-            <h4>Description</h4>
+            <h4>DESCRIPTION</h4>
             <p>${escapeHtml(description)}</p>
           </div>
 
           <div class="seller-info-group">
-            <h4>Contact Information</h4>
-            <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
+            <h4>USERNAME</h4>
+            <p>${escapeHtml(sellerHandle)}</p>
+          </div>
 
-            <p><strong>Stand Address:</strong> ${escapeHtml(fullAddress)}</p>
+          <div class="seller-info-group">
+            <h4>ADDRESS</h4>
+            <p>${escapeHtml(fullAddress)}</p>
           </div>
 
           ${produce && Array.isArray(produce) && produce.length > 0 ? `
             <div class="seller-info-group">
-              <h4>Available Produce</h4>
+              <h4>AVAILABLE PRODUCE</h4>
               <div class="produce-list">
                 ${produce.map(fruit => `<span class="produce-item">${escapeHtml(typeof fruit === 'string' ? fruit : JSON.stringify(fruit))}</span>`).join('')}
               </div>
             </div>
-          ` : `<div class="seller-info-group"><h4>Available Produce</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+          ` : `<div class="seller-info-group"><h4>AVAILABLE PRODUCE</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
 
           ${workingHours && typeof workingHours === 'object' && Object.keys(workingHours).length > 0 ? `
             <div class="seller-info-group">
-              <h4>Working Hours</h4>
+              <h4>WORKING HOURS</h4>
               <div class="hours-display">
                 ${Object.entries(workingHours).map(([day, hours]) => {
                   const isOpen = typeof hours === 'object' && hours.open;
@@ -444,7 +466,7 @@ async function showSellerModal(seller, fullAddress) {
                 }).join('')}
               </div>
             </div>
-          ` : `<div class="seller-info-group"><h4>Working Hours</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+          ` : `<div class="seller-info-group"><h4>WORKING HOURS</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
         </div>
 
         <div class="modal-footer">
@@ -492,6 +514,182 @@ function contactSeller(phoneNumber) {
   alert('Contact this seller at ' + phoneNumber);
 }
 
+// Calculate distance between two points in miles using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Clear all seller markers from map
+function clearSellerMarkers() {
+  sellerMarkers.forEach(marker => {
+    if (marker && marker.setMap) {
+      marker.setMap(null);
+    }
+  });
+  sellerMarkers = [];
+}
+
+// Filter and display sellers based on zipcode and radius
+function filterSellers() {
+  if (!filterActive || !filterCenter) {
+    // No filter active, show all sellers
+    clearSellerMarkers();
+    allSellers.forEach(seller => {
+      const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+      if (seller.latitude && seller.longitude) {
+        const location = {
+          lat: parseFloat(seller.latitude),
+          lng: parseFloat(seller.longitude)
+        };
+        displaySellerMarker(seller, location, fullAddress);
+      }
+    });
+    return;
+  }
+
+  // Filter sellers by distance
+  clearSellerMarkers();
+  let filteredCount = 0;
+  allSellers.forEach(seller => {
+    if (seller.latitude && seller.longitude) {
+      const distance = calculateDistance(
+        filterCenter.lat,
+        filterCenter.lng,
+        parseFloat(seller.latitude),
+        parseFloat(seller.longitude)
+      );
+
+      if (distance <= filterRadius) {
+        const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+        const location = {
+          lat: parseFloat(seller.latitude),
+          lng: parseFloat(seller.longitude)
+        };
+        displaySellerMarker(seller, location, fullAddress);
+        filteredCount++;
+      }
+    }
+  });
+
+  console.log(`Showing ${filteredCount} stands within ${filterRadius} miles`);
+}
+
+// Geocode zipcode and apply filter
+async function applyZipcodeFilter(zipcode) {
+  if (!zipcode || zipcode.length !== 5) {
+    console.error('Invalid zipcode');
+    return;
+  }
+
+  try {
+    // Use Nominatim API to geocode the ZIP code
+    const encodedZipcode = encodeURIComponent(zipcode + ', USA');
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedZipcode}&countrycodes=us&limit=1`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Fruiti-App/1.0 (fruit stand locator app)'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      filterCenter = {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+
+      // Center map on the zipcode
+      map.setCenter(filterCenter);
+      map.setZoom(10);
+
+      // Activate filter
+      filterActive = true;
+
+      // Apply the filter
+      filterSellers();
+
+      console.log(`Filter applied: ZIP ${zipcode}, Radius ${filterRadius} miles`);
+    } else {
+      alert('Invalid ZIP code. Please try again.');
+      console.error('No results found for ZIP code:', zipcode);
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    alert('Error geocoding ZIP code. Please try again.');
+  }
+}
+
+// Clear filter and show all sellers
+function clearFilter() {
+  // Reset to user location if available, otherwise null
+  filterCenter = userLocation;
+  filterActive = false;
+  document.getElementById('zipcodeSearch').value = '';
+  filterSellers();
+  console.log('Filter cleared, showing all sellers');
+}
+
+// Initialize filter controls
+function initializeFilterControls() {
+  const zipcodeInput = document.getElementById('zipcodeSearch');
+  const rangeSlider = document.getElementById('rangeSlider');
+  const rangeValue = document.getElementById('rangeValue');
+  const clearBtn = document.getElementById('clearFilter');
+
+  // Initialize slider gradient on page load
+  const initialValue = parseInt(rangeSlider.value);
+  const initialPercent = ((initialValue - 10) / (100 - 10)) * 100;
+  rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${initialPercent}%, #e0e0e0 ${initialPercent}%, #e0e0e0 100%)`;
+
+  // Only allow numbers in zipcode input
+  zipcodeInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  // Apply filter when user types 5 digits
+  zipcodeInput.addEventListener('input', function(e) {
+    if (this.value.length === 5) {
+      applyZipcodeFilter(this.value);
+    }
+  });
+
+  // Update range value display and gradient
+  rangeSlider.addEventListener('input', function(e) {
+    const value = parseInt(this.value);
+    rangeValue.textContent = value;
+    filterRadius = value;
+
+    // Update slider gradient
+    const percent = ((value - 10) / (100 - 10)) * 100;
+    this.style.background = `linear-gradient(to right, #019456 0%, #019456 ${percent}%, #e0e0e0 ${percent}%, #e0e0e0 100%)`;
+
+    // Activate filter if we have a center point (user location or zipcode)
+    if (filterCenter) {
+      filterActive = true;
+      filterSellers();
+    }
+  });
+
+  // Clear filter button
+  clearBtn.addEventListener('click', clearFilter);
+
+  console.log('Filter controls initialized');
+}
+
 // Make functions accessible globally
 window.placeMarkerByAddress = placeMarkerByAddress;
 window.clearAllCustomMarkers = clearAllCustomMarkers;
@@ -501,3 +699,11 @@ window.showSellerModal = showSellerModal;
 window.closeSellerModal = closeSellerModal;
 window.contactSeller = contactSeller;
 window.changeMainImage = changeMainImage;
+window.initializeFilterControls = initializeFilterControls;
+
+// Initialize filter controls when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeFilterControls);
+} else {
+  initializeFilterControls();
+}

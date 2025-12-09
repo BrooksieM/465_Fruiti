@@ -914,3 +914,23 @@
     top: 15px;
   }
 }
+
+/* Recipe Rating Styles (specific to recipe cards) */
+.recipe-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.recipe-rating .rating-stars {
+  display: flex;
+  gap: 2px;
+  font-size: 16px;
+}
+
+.recipe-rating .rating-count {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}

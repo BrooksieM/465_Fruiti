@@ -354,6 +354,167 @@ module.exports = function (app, supabase, supabaseAdmin)
         });
       }
     });
+
+  // ========== RECIPE RATING ENDPOINTS ==========
+
+  // Submit or update a recipe rating
+  app.post('/api/recipes/:recipeId/rating', async (req, res) => {
+    try {
+      const recipeId = Number(req.params.recipeId);
+      const { rating, user_id, comment } = req.body;
+
+      // Validate inputs
+      if (!Number.isInteger(recipeId) || recipeId <= 0) {
+        return res.status(400).json({ error: 'Invalid recipe ID' });
+      }
+
+      if (!rating || !user_id) {
+        return res.status(400).json({ error: 'Rating and user_id are required' });
+      }
+
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      }
+
+      // Check if recipe exists
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipe_new')
+        .select('id, user_id')
+        .eq('id', recipeId)
+        .single();
+
+      if (recipeError || !recipe) {
+        return res.status(404).json({ error: 'Recipe not found' });
+      }
+
+      // Prevent users from rating their own recipes
+      if (recipe.user_id === user_id) {
+        return res.status(403).json({ error: 'You cannot rate your own recipe' });
+      }
+
+      // Check if user has already rated this recipe
+      const { data: existingRating } = await supabase
+        .from('recipe_ratings')
+        .select('id')
+        .eq('recipe_id', recipeId)
+        .eq('user_id', user_id)
+        .single();
+
+      let result;
+      if (existingRating) {
+        // Update existing rating
+        const { data, error } = await supabase
+          .from('recipe_ratings')
+          .update({
+            rating,
+            comment: comment || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('recipe_id', recipeId)
+          .eq('user_id', user_id)
+          .select();
+
+        if (error) {
+          console.error('Error updating rating:', error);
+          return res.status(500).json({ error: 'Failed to update rating' });
+        }
+        result = data[0];
+      } else {
+        // Insert new rating
+        const { data, error } = await supabase
+          .from('recipe_ratings')
+          .insert([{
+            recipe_id: recipeId,
+            user_id: user_id,
+            rating,
+            comment: comment || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }])
+          .select();
+
+        if (error) {
+          console.error('Error inserting rating:', error);
+          return res.status(500).json({ error: 'Failed to submit rating' });
+        }
+        result = data[0];
+      }
+
+      res.status(200).json({
+        message: 'Rating submitted successfully',
+        rating: result
+      });
+    } catch (error) {
+      console.error('Error in recipe rating endpoint:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get all ratings for a recipe
+  app.get('/api/recipes/:recipeId/ratings', async (req, res) => {
+    try {
+      const recipeId = Number(req.params.recipeId);
+
+      if (!Number.isInteger(recipeId) || recipeId <= 0) {
+        return res.status(400).json({ error: 'Invalid recipe ID' });
+      }
+
+      // Fetch all ratings
+      const { data: ratings, error } = await supabase
+        .from('recipe_ratings')
+        .select('*')
+        .eq('recipe_id', recipeId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching ratings:', error);
+        return res.status(500).json({ error: 'Failed to fetch ratings' });
+      }
+
+      // Calculate average rating
+      const averageRating = ratings.length > 0
+        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+        : 0;
+
+      // Fetch user handles for each rating
+      const formattedRatings = await Promise.all(ratings.map(async (rating) => {
+        let userHandle = 'Unknown User';
+
+        try {
+          const { data: userData } = await supabase
+            .from('accounts')
+            .select('handle')
+            .eq('id', rating.user_id)
+            .single();
+
+          if (userData) {
+            userHandle = userData.handle;
+          }
+        } catch (err) {
+          console.error(`Error fetching user handle for user ${rating.user_id}:`, err);
+        }
+
+        return {
+          id: rating.id,
+          recipe_id: rating.recipe_id,
+          user_id: rating.user_id,
+          user_handle: userHandle,
+          rating: rating.rating,
+          comment: rating.comment,
+          created_at: rating.created_at,
+          updated_at: rating.updated_at
+        };
+      }));
+
+      res.status(200).json({
+        ratings: formattedRatings,
+        averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+        totalRatings: ratings.length
+      });
+    } catch (error) {
+      console.error('Error in get ratings endpoint:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 };
 
-  

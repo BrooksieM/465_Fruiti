@@ -588,8 +588,18 @@ async function displayRecipes() {
   if (allRecipes.length === 0) {
     recipesList.innerHTML = '<div class="no-recipes">No recipes yet. Be the first to create one!</div>';
   } else {
-    allRecipes.forEach(recipe => {
-      const card = createRecipeCard(recipe);
+    // Fetch ratings for all recipes in parallel
+    const ratingsPromises = allRecipes.map(recipe =>
+      fetch(`/api/recipes/${recipe.id}/ratings`)
+        .then(res => res.ok ? res.json() : { averageRating: 0, totalRatings: 0 })
+        .catch(() => ({ averageRating: 0, totalRatings: 0 }))
+    );
+
+    const ratingsData = await Promise.all(ratingsPromises);
+
+    // Create recipe cards with ratings
+    allRecipes.forEach((recipe, index) => {
+      const card = createRecipeCard(recipe, ratingsData[index]);
       recipesList.appendChild(card);
     });
   }
@@ -663,7 +673,7 @@ async function displayRecipes() {
 }
 
 // Create a recipe card element
-function createRecipeCard(recipe) {
+function createRecipeCard(recipe, ratingsData = null) {
   const card = document.createElement('div');
 
   // Add difficulty-based class
@@ -696,12 +706,21 @@ function createRecipeCard(recipe) {
     ? `<p class="recipe-season"><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
     : '';
 
+  // Rating display
+  const ratingHTML = ratingsData && ratingsData.totalRatings > 0
+    ? `<div class="recipe-rating">
+        <div class="rating-stars">${generateStarsHTML(ratingsData.averageRating)}</div>
+        <span class="rating-count">${ratingsData.averageRating.toFixed(1)} (${ratingsData.totalRatings})</span>
+       </div>`
+    : '<div class="recipe-rating"><span class="rating-count">No ratings yet</span></div>';
+
   card.innerHTML = `
     <div class="recipe-card-image-wrapper">
       ${imageHTML}
       ${favoriteButtonHTML}
     </div>
     <h3>${escapeHtml(recipe.name)}</h3>
+    ${ratingHTML}
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${recipe.estimated_time} min</p>
     ${seasonDisplay}
@@ -748,7 +767,7 @@ function createRecipeCard(recipe) {
 }
 
 // View recipe details in modal
-function viewRecipeDetail(recipe) {
+async function viewRecipeDetail(recipe) {
   const modal = document.getElementById('recipeModal');
   const recipeDetail = document.getElementById('recipeDetail');
 
@@ -804,6 +823,61 @@ function viewRecipeDetail(recipe) {
     ? `<p><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
     : '';
 
+  // Fetch ratings for this recipe
+  const ratingsResponse = await fetch(`/api/recipes/${recipe.id}/ratings`);
+  const ratingsData = ratingsResponse.ok
+    ? await ratingsResponse.json()
+    : { ratings: [], averageRating: 0, totalRatings: 0 };
+
+  // Generate ratings summary HTML
+  const ratingsSummaryHTML = ratingsData.totalRatings > 0
+    ? `<div class="rating-summary">
+        <div class="rating-average">
+          <div class="rating-number">${ratingsData.averageRating.toFixed(1)}</div>
+          <div class="rating-stars">${generateStarsHTML(ratingsData.averageRating)}</div>
+          <div class="rating-count">${ratingsData.totalRatings} rating${ratingsData.totalRatings !== 1 ? 's' : ''}</div>
+        </div>
+      </div>`
+    : '<div class="rating-summary"><p class="no-ratings">No ratings yet</p></div>';
+
+  // Check if user can rate this recipe (logged in and not the owner)
+  const currentUserId = user?.id;
+  const recipeOwnerId = recipe.user_id || recipe.userId;
+  const canRate = isLoggedIn && currentUserId !== recipeOwnerId;
+
+  // Generate rating form HTML
+  let ratingFormHTML = '';
+  if (!isLoggedIn) {
+    ratingFormHTML = `
+      <div class="login-required-message">
+        Please <a href="/login">log in</a> to rate this recipe
+      </div>
+    `;
+  } else if (currentUserId === recipeOwnerId) {
+    ratingFormHTML = `
+      <div class="own-entity-message">
+        You cannot rate your own recipe
+      </div>
+    `;
+  } else {
+    ratingFormHTML = `
+      <div class="rating-form">
+        <h4>Rate this recipe</h4>
+        <div class="rating-form-group">
+          <label>Your rating:</label>
+          ${generateRatingInput('recipe', recipe.id)}
+        </div>
+        <div class="rating-form-group">
+          <label for="recipeRatingComment-${recipe.id}">Comment (optional):</label>
+          <textarea class="rating-comment-input" id="recipeRatingComment-${recipe.id}"
+                    placeholder="Share your thoughts about this recipe..."></textarea>
+        </div>
+        <button type="button" class="btn-submit-rating"
+                onclick="submitRecipeRatingForm(${recipe.id})">Submit Rating</button>
+      </div>
+    `;
+  }
+
   let detailHTML = `
     <div class="recipe-header">
       <h2>${escapeHtml(recipe.name)}</h2>
@@ -823,6 +897,13 @@ function viewRecipeDetail(recipe) {
     <ol>
       ${instructionHTML}
     </ol>
+
+    <div class="rating-section">
+      <h3>Ratings & Reviews</h3>
+      ${ratingsSummaryHTML}
+      ${generateRatingsListHTML(ratingsData.ratings, 5)}
+      ${ratingFormHTML}
+    </div>
   `;
 
   // Add edit/delete buttons only if user is the recipe owner
