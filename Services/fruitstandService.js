@@ -61,6 +61,37 @@ async function geocodeAddress(address, city, state, zipcode) {
 
 // GET endpoint to search for nearby fruit stands
 module.exports = (app, supabase, supabaseAdmin) => {
+
+// GET endpoint to fetch fruit stand by user_id
+app.get('/api/fruitstands/user/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        const { data, error } = await supabase
+            .from('seller_applications')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return res.status(404).json({ error: 'Fruit stand not found for this user' });
+            }
+            console.error('Select error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/api/fruitstands/search', async (req, res) => {
     try 
     {

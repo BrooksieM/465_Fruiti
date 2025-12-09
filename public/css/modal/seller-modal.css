@@ -276,6 +276,52 @@
   color: #666;
 }
 
+/* Contact Information Grid */
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.contact-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.contact-value a {
+  color: #017d49;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact-value a:hover {
+  color: #019456;
+  text-decoration: underline;
+}
+
 .produce-list {
   display: flex;
   flex-wrap: wrap;
