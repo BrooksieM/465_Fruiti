@@ -281,10 +281,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
 }
 
 .contact-item {

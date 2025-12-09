@@ -332,7 +332,6 @@ function deleteThisMarker(index) {
 // Show seller modal
 async function showSellerModal(seller, fullAddress) {
   const sellerHandle = seller.handle || 'N/A';
-  const phoneNumber = seller.phone_number || 'N/A';
   const description = seller.description || 'No description provided';
 
   // Parse working_hours if it's a string (Supabase sometimes returns stringified JSON)
@@ -433,40 +432,32 @@ async function showSellerModal(seller, fullAddress) {
 
         <div class="modal-body seller-modal-body-vertical">
           <div class="seller-info-group">
-            <h4>Description</h4>
+            <h4>DESCRIPTION</h4>
             <p>${escapeHtml(description)}</p>
           </div>
 
           <div class="seller-info-group">
-            <h4>📞 Contact Information</h4>
-            <div class="contact-info-grid">
-              <div class="contact-item">
-                <span class="contact-label">👤 Username:</span>
-                <span class="contact-value">${escapeHtml(sellerHandle)}</span>
-              </div>
-              <div class="contact-item">
-                <span class="contact-label">📱 Phone:</span>
-                <span class="contact-value">${escapeHtml(phoneNumber)}</span>
-              </div>
-              <div class="contact-item full-width">
-                <span class="contact-label">📍 Address:</span>
-                <span class="contact-value">${escapeHtml(fullAddress)}</span>
-              </div>
-            </div>
+            <h4>USERNAME</h4>
+            <p>${escapeHtml(sellerHandle)}</p>
+          </div>
+
+          <div class="seller-info-group">
+            <h4>ADDRESS</h4>
+            <p>${escapeHtml(fullAddress)}</p>
           </div>
 
           ${produce && Array.isArray(produce) && produce.length > 0 ? `
             <div class="seller-info-group">
-              <h4>Available Produce</h4>
+              <h4>AVAILABLE PRODUCE</h4>
               <div class="produce-list">
                 ${produce.map(fruit => `<span class="produce-item">${escapeHtml(typeof fruit === 'string' ? fruit : JSON.stringify(fruit))}</span>`).join('')}
               </div>
             </div>
-          ` : `<div class="seller-info-group"><h4>Available Produce</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+          ` : `<div class="seller-info-group"><h4>AVAILABLE PRODUCE</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
 
           ${workingHours && typeof workingHours === 'object' && Object.keys(workingHours).length > 0 ? `
             <div class="seller-info-group">
-              <h4>Working Hours</h4>
+              <h4>WORKING HOURS</h4>
               <div class="hours-display">
                 ${Object.entries(workingHours).map(([day, hours]) => {
                   const isOpen = typeof hours === 'object' && hours.open;
@@ -475,7 +466,7 @@ async function showSellerModal(seller, fullAddress) {
                 }).join('')}
               </div>
             </div>
-          ` : `<div class="seller-info-group"><h4>Working Hours</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+          ` : `<div class="seller-info-group"><h4>WORKING HOURS</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
         </div>
 
         <div class="modal-footer">

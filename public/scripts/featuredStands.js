@@ -76,7 +76,6 @@ async function createStandCard(stand) {
     <div class="stand-info">
       <h3 class="stand-name">${escapeHtml(businessName)}</h3>
       <div class="stand-location">
-        <span>📍</span>
         <span>${escapeHtml(location)}</span>
       </div>
       <p class="stand-description">${escapeHtml(description)}</p>
