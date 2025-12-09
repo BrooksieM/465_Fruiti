@@ -44,12 +44,10 @@
 
   <div class="black-bar"></div>
 
-  <div class="section-heading">Fruit Stands Near you!</div>
-
-  <!-- Filter Controls -->
-  <div class="map-filter-container">
+  <div class="heading-filter-wrapper">
+    <!-- Filter Controls -->
     <div class="filter-controls">
-      <div class="filter-group">
+      <div class="filter-group zipcode-group">
         <label for="zipcodeSearch">ZIP Code:</label>
         <input
           type="text"
@@ -61,8 +59,8 @@
         <button id="clearFilter" class="clear-filter-btn">Clear</button>
       </div>
 
-      <div class="filter-group">
-        <label for="rangeSlider">Radius:</label>
+      <div class="filter-group range-group">
+        <label for="rangeSlider">Distance:</label>
         <input
           type="range"
           id="rangeSlider"
@@ -75,6 +73,8 @@
         <span style="color: #999; font-size: 14px;">mi</span>
       </div>
     </div>
+
+    <div class="section-heading">Fruit Stands Near you!</div>
   </div>
 
   <div id="map"></div>

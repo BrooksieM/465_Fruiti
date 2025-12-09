@@ -68,31 +68,48 @@
   color: #222222;
 }
 
-/* Map Filter Container */
-.map-filter-container {
+/* Heading and Filter Wrapper */
+.heading-filter-wrapper {
   width: 80%;
   margin: 2vh auto;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 24px 32px;
-  border: 1px solid #e8e8e8;
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heading-filter-wrapper .section-heading {
+  margin: 0;
+}
+
+.heading-filter-wrapper .filter-controls {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .filter-controls {
   display: flex;
-  gap: 40px;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex: 1;
-  min-width: 280px;
+  gap: 18px;
+  width: 100%;
+}
+
+.filter-group.zipcode-group {
+  gap: 12px;
+}
+
+.filter-group.range-group {
+  gap: 18px;
 }
 
 .filter-group label {
@@ -107,10 +124,11 @@
   padding: 10px 16px;
   border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   transition: all 0.2s ease;
   background-color: #ffffff;
-  width: 140px;
+  width: 150px;
+  font-weight: 400;
 }
 
 #zipcodeSearch:focus {
@@ -121,6 +139,7 @@
 
 #zipcodeSearch::placeholder {
   color: #aaa;
+  font-weight: 400;
 }
 
 .clear-filter-btn {
@@ -156,59 +175,64 @@
 
 #rangeSlider {
   flex: 1;
-  height: 6px;
-  border-radius: 10px;
+  height: 8px;
+  border-radius: 12px;
   background: #e0e0e0;
   outline: none;
   -webkit-appearance: none;
   cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #rangeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #019456;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.15s ease;
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  transition: all 0.2s ease;
+  border: 3px solid #ffffff;
 }
 
 #rangeSlider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(1, 148, 86, 0.5);
 }
 
 #rangeSlider::-webkit-slider-thumb:active {
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.3);
 }
 
 #rangeSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #019456;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  border: none;
-  transition: all 0.15s ease;
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  border: 3px solid #ffffff;
+  transition: all 0.2s ease;
 }
 
 #rangeSlider::-moz-range-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(1, 148, 86, 0.5);
 }
 
 #rangeSlider::-moz-range-thumb:active {
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.3);
 }
 
 #rangeSlider::-moz-range-track {
   background: #e0e0e0;
-  border-radius: 10px;
-  height: 6px;
+  border-radius: 12px;
+  height: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .range-labels {
@@ -232,7 +256,7 @@
   width: 80%;
 }
 
-.section-heading 
+.section-heading
 {
   text-align: center;
   font-size: 28px;
