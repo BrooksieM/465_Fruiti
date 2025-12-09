@@ -71,76 +71,97 @@
 /* Map Filter Container */
 .map-filter-container {
   width: 80%;
-  margin: 2vh auto 2vh;
-  background-color: #ffffff;
+  margin: 2vh auto;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(1, 125, 73, 0.15);
-  padding: 20px 30px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px 32px;
+  border: 1px solid #e8e8e8;
 }
 
 .filter-controls {
   display: flex;
   gap: 40px;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 
 .filter-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 250px;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 280px;
 }
 
 .filter-group label {
   font-size: 14px;
   font-weight: 600;
-  color: #019456;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #333;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 #zipcodeSearch {
-  padding: 10px 15px;
-  border: 2px solid #e0e0e0;
+  padding: 10px 16px;
+  border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.2s ease;
-  width: 150px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  width: 140px;
 }
 
 #zipcodeSearch:focus {
   outline: none;
   border-color: #019456;
+  box-shadow: 0 0 0 3px rgba(1, 148, 86, 0.1);
+}
+
+#zipcodeSearch::placeholder {
+  color: #aaa;
 }
 
 .clear-filter-btn {
   padding: 10px 20px;
-  background-color: #f5f5f5;
-  border: 2px solid #e0e0e0;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #666;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .clear-filter-btn:hover {
-  background-color: #019456;
+  background: #019456;
   border-color: #019456;
   color: white;
 }
 
+.clear-filter-btn:active {
+  transform: scale(0.98);
+}
+
+#rangeValue {
+  font-weight: 700;
+  color: #019456;
+  font-size: 15px;
+  min-width: 50px;
+  text-align: center;
+}
+
 #rangeSlider {
-  width: 100%;
+  flex: 1;
   height: 6px;
-  border-radius: 5px;
-  background: linear-gradient(to right, #019456 0%, #019456 50%, #e0e0e0 50%, #e0e0e0 100%);
+  border-radius: 10px;
+  background: #e0e0e0;
   outline: none;
   -webkit-appearance: none;
+  cursor: pointer;
 }
 
 #rangeSlider::-webkit-slider-thumb {
@@ -151,12 +172,17 @@
   border-radius: 50%;
   background: #019456;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
 }
 
 #rangeSlider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+}
+
+#rangeSlider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
 }
 
 #rangeSlider::-moz-range-thumb {
@@ -165,26 +191,33 @@
   border-radius: 50%;
   background: #019456;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   border: none;
-  transition: transform 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 #rangeSlider::-moz-range-thumb:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+}
+
+#rangeSlider::-moz-range-thumb:active {
+  transform: scale(1.05);
+}
+
+#rangeSlider::-moz-range-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+  height: 6px;
 }
 
 .range-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: #999;
   margin-top: 4px;
-}
-
-#rangeValue {
-  font-weight: bold;
-  color: #017d49;
+  padding: 0 2px;
 }
 
 #map

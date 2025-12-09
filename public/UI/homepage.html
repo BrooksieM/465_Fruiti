@@ -50,11 +50,11 @@
   <div class="map-filter-container">
     <div class="filter-controls">
       <div class="filter-group">
-        <label for="zipcodeSearch">Search by ZIP Code:</label>
+        <label for="zipcodeSearch">ZIP Code:</label>
         <input
           type="text"
           id="zipcodeSearch"
-          placeholder="Enter ZIP code"
+          placeholder="Enter ZIP"
           maxlength="5"
           pattern="[0-9]{5}"
         />
@@ -62,7 +62,7 @@
       </div>
 
       <div class="filter-group">
-        <label for="rangeSlider">Distance: <span id="rangeValue">50</span> miles</label>
+        <label for="rangeSlider">Radius:</label>
         <input
           type="range"
           id="rangeSlider"
@@ -71,10 +71,8 @@
           value="50"
           step="5"
         />
-        <div class="range-labels">
-          <span>10 mi</span>
-          <span>100 mi</span>
-        </div>
+        <span id="rangeValue">50</span>
+        <span style="color: #999; font-size: 14px;">mi</span>
       </div>
     </div>
   </div>

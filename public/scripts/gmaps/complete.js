@@ -639,6 +639,11 @@ function initializeFilterControls() {
   const rangeValue = document.getElementById('rangeValue');
   const clearBtn = document.getElementById('clearFilter');
 
+  // Initialize slider gradient on page load
+  const initialValue = parseInt(rangeSlider.value);
+  const initialPercent = ((initialValue - 10) / (100 - 10)) * 100;
+  rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${initialPercent}%, #e0e0e0 ${initialPercent}%, #e0e0e0 100%)`;
+
   // Only allow numbers in zipcode input
   zipcodeInput.addEventListener('input', function(e) {
     this.value = this.value.replace(/[^0-9]/g, '');
