@@ -1,6 +1,11 @@
 let map;
 let customMarkers = [];
 let sellerMarkers = [];
+let allSellers = []; // Store all sellers for filtering
+let filterCenter = null; // Store the center point for distance filtering
+let filterRadius = 50; // Default radius in miles
+let userLocation = null; // Store user's location
+let filterActive = false; // Track if filter is active
 
 // Initialize the map
 function initMap()
@@ -31,11 +36,14 @@ function initMap()
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const userLocation = {
+        userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
         map.setCenter(userLocation);
+
+        // Set as default filter center
+        filterCenter = userLocation;
 
         // blue marker for users location
         new google.maps.Marker({
@@ -69,6 +77,9 @@ function loadSellerMarkers() {
       console.log('Sellers data received:', data);
       console.log('Full sellers array:', JSON.stringify(data.sellers, null, 2));
       if (data.sellers && data.sellers.length > 0) {
+        // Store all sellers for filtering
+        allSellers = data.sellers;
+
         data.sellers.forEach(seller => {
           console.log(`Processing seller: ${seller.business_name}`, {
             working_hours: seller.working_hours,
@@ -81,8 +92,8 @@ function loadSellerMarkers() {
           if (seller.latitude && seller.longitude) {
             console.log(`Using pre-geocoded coordinates for ${seller.business_name}: ${seller.latitude}, ${seller.longitude}`);
             const location = {
-              lat: seller.latitude,
-              lng: seller.longitude
+              lat: parseFloat(seller.latitude),
+              lng: parseFloat(seller.longitude)
             };
             displaySellerMarker(seller, location, fullAddress);
           } else {
@@ -492,6 +503,182 @@ function contactSeller(phoneNumber) {
   alert('Contact this seller at ' + phoneNumber);
 }
 
+// Calculate distance between two points in miles using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Clear all seller markers from map
+function clearSellerMarkers() {
+  sellerMarkers.forEach(marker => {
+    if (marker && marker.setMap) {
+      marker.setMap(null);
+    }
+  });
+  sellerMarkers = [];
+}
+
+// Filter and display sellers based on zipcode and radius
+function filterSellers() {
+  if (!filterActive || !filterCenter) {
+    // No filter active, show all sellers
+    clearSellerMarkers();
+    allSellers.forEach(seller => {
+      const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+      if (seller.latitude && seller.longitude) {
+        const location = {
+          lat: parseFloat(seller.latitude),
+          lng: parseFloat(seller.longitude)
+        };
+        displaySellerMarker(seller, location, fullAddress);
+      }
+    });
+    return;
+  }
+
+  // Filter sellers by distance
+  clearSellerMarkers();
+  let filteredCount = 0;
+  allSellers.forEach(seller => {
+    if (seller.latitude && seller.longitude) {
+      const distance = calculateDistance(
+        filterCenter.lat,
+        filterCenter.lng,
+        parseFloat(seller.latitude),
+        parseFloat(seller.longitude)
+      );
+
+      if (distance <= filterRadius) {
+        const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+        const location = {
+          lat: parseFloat(seller.latitude),
+          lng: parseFloat(seller.longitude)
+        };
+        displaySellerMarker(seller, location, fullAddress);
+        filteredCount++;
+      }
+    }
+  });
+
+  console.log(`Showing ${filteredCount} stands within ${filterRadius} miles`);
+}
+
+// Geocode zipcode and apply filter
+async function applyZipcodeFilter(zipcode) {
+  if (!zipcode || zipcode.length !== 5) {
+    console.error('Invalid zipcode');
+    return;
+  }
+
+  try {
+    // Use Nominatim API to geocode the ZIP code
+    const encodedZipcode = encodeURIComponent(zipcode + ', USA');
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedZipcode}&countrycodes=us&limit=1`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Fruiti-App/1.0 (fruit stand locator app)'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      filterCenter = {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+
+      // Center map on the zipcode
+      map.setCenter(filterCenter);
+      map.setZoom(10);
+
+      // Activate filter
+      filterActive = true;
+
+      // Apply the filter
+      filterSellers();
+
+      console.log(`Filter applied: ZIP ${zipcode}, Radius ${filterRadius} miles`);
+    } else {
+      alert('Invalid ZIP code. Please try again.');
+      console.error('No results found for ZIP code:', zipcode);
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    alert('Error geocoding ZIP code. Please try again.');
+  }
+}
+
+// Clear filter and show all sellers
+function clearFilter() {
+  // Reset to user location if available, otherwise null
+  filterCenter = userLocation;
+  filterActive = false;
+  document.getElementById('zipcodeSearch').value = '';
+  filterSellers();
+  console.log('Filter cleared, showing all sellers');
+}
+
+// Initialize filter controls
+function initializeFilterControls() {
+  const zipcodeInput = document.getElementById('zipcodeSearch');
+  const rangeSlider = document.getElementById('rangeSlider');
+  const rangeValue = document.getElementById('rangeValue');
+  const clearBtn = document.getElementById('clearFilter');
+
+  // Initialize slider gradient on page load
+  const initialValue = parseInt(rangeSlider.value);
+  const initialPercent = ((initialValue - 10) / (100 - 10)) * 100;
+  rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${initialPercent}%, #e0e0e0 ${initialPercent}%, #e0e0e0 100%)`;
+
+  // Only allow numbers in zipcode input
+  zipcodeInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  // Apply filter when user types 5 digits
+  zipcodeInput.addEventListener('input', function(e) {
+    if (this.value.length === 5) {
+      applyZipcodeFilter(this.value);
+    }
+  });
+
+  // Update range value display and gradient
+  rangeSlider.addEventListener('input', function(e) {
+    const value = parseInt(this.value);
+    rangeValue.textContent = value;
+    filterRadius = value;
+
+    // Update slider gradient
+    const percent = ((value - 10) / (100 - 10)) * 100;
+    this.style.background = `linear-gradient(to right, #019456 0%, #019456 ${percent}%, #e0e0e0 ${percent}%, #e0e0e0 100%)`;
+
+    // Activate filter if we have a center point (user location or zipcode)
+    if (filterCenter) {
+      filterActive = true;
+      filterSellers();
+    }
+  });
+
+  // Clear filter button
+  clearBtn.addEventListener('click', clearFilter);
+
+  console.log('Filter controls initialized');
+}
+
 // Make functions accessible globally
 window.placeMarkerByAddress = placeMarkerByAddress;
 window.clearAllCustomMarkers = clearAllCustomMarkers;
@@ -501,3 +688,11 @@ window.showSellerModal = showSellerModal;
 window.closeSellerModal = closeSellerModal;
 window.contactSeller = contactSeller;
 window.changeMainImage = changeMainImage;
+window.initializeFilterControls = initializeFilterControls;
+
+// Initialize filter controls when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeFilterControls);
+} else {
+  initializeFilterControls();
+}

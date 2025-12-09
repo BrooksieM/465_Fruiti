@@ -68,19 +68,196 @@
   color: #222222;
 }
 
-#map 
+/* Heading and Filter Wrapper */
+.heading-filter-wrapper {
+  width: 80%;
+  margin: 2vh auto;
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heading-filter-wrapper .section-heading {
+  margin: 0;
+  margin-top: 40px;
+}
+
+.heading-filter-wrapper .filter-controls {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.filter-group.zipcode-group {
+  gap: 12px;
+}
+
+.filter-group.range-group {
+  gap: 18px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+#zipcodeSearch {
+  padding: 10px 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  width: 150px;
+  font-weight: 400;
+}
+
+#zipcodeSearch:focus {
+  outline: none;
+  border-color: #019456;
+  box-shadow: 0 0 0 3px rgba(1, 148, 86, 0.1);
+}
+
+#zipcodeSearch::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.clear-filter-btn {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.clear-filter-btn:hover {
+  background: #019456;
+  border-color: #019456;
+  color: white;
+}
+
+.clear-filter-btn:active {
+  transform: scale(0.98);
+}
+
+#rangeValue {
+  font-weight: 700;
+  color: #019456;
+  font-size: 15px;
+  min-width: 50px;
+  text-align: center;
+}
+
+#rangeSlider {
+  flex: 1;
+  height: 8px;
+  border-radius: 12px;
+  background: #e0e0e0;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#rangeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  transition: all 0.2s ease;
+  border: 3px solid #ffffff;
+}
+
+#rangeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(1, 148, 86, 0.5);
+}
+
+#rangeSlider::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.3);
+}
+
+#rangeSlider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.4);
+  border: 3px solid #ffffff;
+  transition: all 0.2s ease;
+}
+
+#rangeSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(1, 148, 86, 0.5);
+}
+
+#rangeSlider::-moz-range-thumb:active {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.3);
+}
+
+#rangeSlider::-moz-range-track {
+  background: #e0e0e0;
+  border-radius: 12px;
+  height: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+#map
 {
   box-shadow: 0 4px 12px rgba(1, 125, 73, 0.4);
   border-radius: 12px;
-  margin-top: 1vh; 
-  margin-bottom: 5vh; 
+  margin-top: 1vh;
+  margin-bottom: 5vh;
   margin-left: auto;
   margin-right: auto;
   height: 60vh;
   width: 80%;
 }
 
-.section-heading 
+.section-heading
 {
   text-align: center;
   font-size: 28px;
@@ -95,26 +272,154 @@
   margin-bottom: 10vh;
 }
 
-/* Grid container below the map */
-.info-grid {
+/* Featured Stands Container */
+.featured-stands-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
   width: 80%;
-  margin: 0 auto 8vh;
+  margin: 3vh auto 8vh;
+  padding: 0 20px;
 }
 
-/* Each section box */
-.info-section {
+/* Featured Stand Card */
+.featured-stand-card {
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(1, 125, 73, 0.2);
-  padding: 25px;
-  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(1, 125, 73, 0.15);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Reuse your section heading style */
-.info-section .section-heading {
-  margin-bottom: 0px;
-  color: #019456;
+.featured-stand-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(1, 125, 73, 0.25);
+}
+
+/* Stand Image */
+.stand-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+}
+
+/* Stand Info */
+.stand-info {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stand-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #222222;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.stand-location {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stand-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stand-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.stand-badge {
+  background-color: #019456;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.view-details-btn {
+  background-color: #017d49;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.view-details-btn:hover {
+  background-color: #019456;
+}
+
+/* Loading placeholder */
+.loading-placeholder {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .featured-stands-container {
+    width: 90%;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stand-image {
+    height: 180px;
+  }
+
+  .map-filter-container {
+    width: 90%;
+    padding: 15px 20px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    min-width: 100%;
+  }
+
+  #zipcodeSearch {
+    width: 100%;
+  }
+
+  #map {
+    width: 90%;
+    height: 50vh;
+  }
 }

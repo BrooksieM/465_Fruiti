@@ -44,21 +44,45 @@
 
   <div class="black-bar"></div>
 
-  <div class="section-heading">Fruit Stands Near you!</div>
-  <div id="map"></div>
+  <div class="heading-filter-wrapper">
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+      <div class="filter-group zipcode-group">
+        <label for="zipcodeSearch">ZIP Code:</label>
+        <input
+          type="text"
+          id="zipcodeSearch"
+          placeholder="Enter ZIP"
+          maxlength="5"
+          pattern="[0-9]{5}"
+        />
+        <button id="clearFilter" class="clear-filter-btn">Clear</button>
+      </div>
 
-<div class="info-grid">
-  <!-- Left section: Interesting Facts -->
-  <div class="info-section">
-  <div class="section-heading">Interesting Facts</div>
-    <div class="homepage-images top-row"></div>
-    <div class="homepage-images bottom-row"></div>
-</div>
-  <!-- Right section -->
-  <div class="info-section">
-    <div class="section-heading">Hot Recipes</div>
+      <div class="filter-group range-group">
+        <label for="rangeSlider">Distance:</label>
+        <input
+          type="range"
+          id="rangeSlider"
+          min="10"
+          max="100"
+          value="50"
+          step="5"
+        />
+        <span id="rangeValue">50</span>
+        <span style="color: #999; font-size: 14px;">mi</span>
+      </div>
+    </div>
+
+    <div class="section-heading">Fruit Stands Near you!</div>
   </div>
 
+  <div id="map"></div>
+
+<div class="section-heading">Featured Fruit Stands</div>
+<div class="featured-stands-container" id="featuredStands">
+  <!-- Featured stands will be dynamically loaded here -->
+  <div class="loading-placeholder">Loading featured stands...</div>
 </div>
 <div class="spacing"></div>
 
@@ -70,6 +94,8 @@
 <script src="/scripts/favoriteFruitStand.js"></script>
 
 <script src="/scripts/randomizer.js"></script>
+
+<script src="/scripts/featuredStands.js"></script>
 
 <script>
   // Fetch Google Maps API key from server and load the Maps script
