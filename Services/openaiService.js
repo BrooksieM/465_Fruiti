@@ -1,9 +1,15 @@
 const OpenAI = require('openai');
 require('dotenv').config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI only if API key is available
+let openai = null;
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+} else {
+  console.warn('⚠️  OpenAI API key not found. Recipe image analysis will not be available.');
+}
 
 /**
  * Analyze a recipe image and determine the most appropriate season
@@ -12,6 +18,10 @@ const openai = new OpenAI({
  */
 async function analyzeRecipeImageForSeason(imageUrl) {
   try {
+    if (!openai) {
+      throw new Error('OpenAI API is not configured. Please set OPENAI_API_KEY environment variable.');
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Using gpt-4o-mini for cost efficiency
       messages: [

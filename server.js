@@ -84,15 +84,16 @@ app.get('/seller-payment', (req, res) => {
 });
 
 async function testConnection() {
-  // Simple test - adjust based on your table structure
+  // Simple test - using accounts table to verify database connection
   const { data, error } = await supabase
-    .from('userInfo')  // Replace with your actual table
-    .select('*');
+    .from('accounts')
+    .select('id')
+    .limit(1);
 
   if (error) {
     console.error('Connection failed:', error);
   } else {
-    console.log('Connection successful!');
+    console.log('✓ Database connection successful!');
   }
 }
 testConnection();
