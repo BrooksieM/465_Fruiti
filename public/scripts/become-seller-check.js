@@ -14,6 +14,12 @@ async function checkExistingFruitstand() {
       return;
     }
 
+    // Check if user is a seller
+    if (!user.is_seller) {
+      // Not a seller, allow to view become-seller page
+      return;
+    }
+
     const response = await fetch(`/api/fruitstands/user/${userId}`);
 
     if (response.ok) {

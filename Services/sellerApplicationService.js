@@ -716,4 +716,131 @@ module.exports = function (app, supabase)
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  // POST /api/extend-subscription -> extend existing subscription (no stand info needed)
+  app.post('/api/extend-subscription', async (req, res) =>
+  {
+    try
+    {
+      const {
+        email,
+        subscriptionType,
+        paymentMethod
+      } = req.body;
+
+      // Validate required fields
+      if (!email || !subscriptionType)
+      {
+        return res.status(400).json({
+          error: 'Missing required fields'
+        });
+      }
+
+      // Get user by email
+      const { data: existingAccounts, error: checkError } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('email', email)
+        .limit(1);
+
+      if (checkError)
+      {
+        console.error('Account check error:', checkError);
+        return res.status(500).json({ error: 'Error checking existing account' });
+      }
+
+      if (!existingAccounts || existingAccounts.length === 0)
+      {
+        return res.status(404).json({ error: 'Account not found' });
+      }
+
+      const userId = existingAccounts[0].id;
+
+      // Get existing fruit stand
+      const { data: existingStand, error: standError } = await supabase
+        .from('seller_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (standError || !existingStand)
+      {
+        return res.status(404).json({ error: 'No existing fruit stand found for this user' });
+      }
+
+      // Map subscription type to ID
+      const subscriptionMap = {
+        'monthly': 1,
+        '3month': 2,
+        '6month': 3
+      };
+
+      const subscriptionId = subscriptionMap[subscriptionType];
+      if (!subscriptionId)
+      {
+        return res.status(400).json({ error: 'Invalid subscription type' });
+      }
+
+      // Get subscription details
+      const { data: subscription } = await supabase
+        .from('seller_subscriptions')
+        .select('*')
+        .eq('id', subscriptionId)
+        .single();
+
+      // Update payment method
+      await supabase
+        .from('accounts')
+        .update({
+          payment_method: { type: paymentMethod || 'card', status: 'active' },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      // Calculate new end date
+      const now = new Date();
+      const durationMap = {
+        '1 month': 1,
+        '3 months': 3,
+        '6 months': 6
+      };
+      const months = durationMap[subscription.duration] || 1;
+
+      // Calculate new end date from current expiration (or now if already expired)
+      const currentEndDate = new Date(existingStand.subscription_end_date || now);
+      const extendFrom = currentEndDate > now ? currentEndDate : now;
+      const endDate = new Date(extendFrom);
+      endDate.setMonth(endDate.getMonth() + months);
+
+      // Update existing fruit stand with new subscription info
+      const { data: application, error: updateError } = await supabase
+        .from('seller_applications')
+        .update({
+          subscription_plan_id: subscriptionId,
+          subscription_end_date: endDate.toISOString(),
+          updated_at: now.toISOString()
+        })
+        .eq('user_id', userId)
+        .select();
+
+      if (updateError)
+      {
+        console.error('Subscription update error:', updateError);
+        return res.status(500).json({ error: 'Failed to update subscription' });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Subscription extended successfully!',
+        userId: userId,
+        applicationId: application[0].id,
+        subscriptionEnd: endDate.toISOString()
+      });
+    }
+    catch (error)
+    {
+      console.error('Extension error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 };
