@@ -287,3 +287,189 @@
     font-size: 12px;
   }
 }
+
+/* Recipe Ratings Section in Modal */
+.recipe-ratings-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.recipe-ratings-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+/* Rating Summary */
+.recipe-rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(1, 125, 73, 0.05) 0%, rgba(230, 230, 250, 0.15) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(1, 125, 73, 0.1);
+}
+
+.rating-stars {
+  display: flex;
+  gap: 4px;
+  font-size: 24px;
+}
+
+.rating-stars .star {
+  color: #ffc107;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rating-stars .star.empty {
+  color: #ddd;
+}
+
+.rating-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Ratings List */
+.ratings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom scrollbar for ratings list */
+.ratings-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ratings-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.ratings-list::-webkit-scrollbar-thumb {
+  background: #017d49;
+  border-radius: 10px;
+}
+
+.ratings-list::-webkit-scrollbar-thumb:hover {
+  background: #019456;
+}
+
+/* Individual Rating Item */
+.rating-item {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rating-user {
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.rating-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.rating-value {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.rating-value .star {
+  color: #ffc107;
+}
+
+.rating-value .star.empty {
+  color: #ddd;
+}
+
+.rating-comment {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Empty State for Ratings */
+.no-ratings {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.no-ratings p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Responsive adjustments for ratings */
+@media (max-width: 768px) {
+  .recipe-ratings-section h3 {
+    font-size: 18px;
+  }
+
+  .recipe-rating-summary {
+    padding: 12px;
+  }
+
+  .rating-stars {
+    font-size: 20px;
+  }
+
+  .rating-text {
+    font-size: 14px;
+  }
+
+  .ratings-list {
+    max-height: 300px;
+  }
+
+  .rating-item {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipe-ratings-section {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .recipe-rating-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .rating-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .rating-date {
+    font-size: 12px;
+  }
+}

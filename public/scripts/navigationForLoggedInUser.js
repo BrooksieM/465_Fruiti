@@ -150,12 +150,20 @@ function logout() {
 function checkAuthStatus() {
     console.log('🔍 Checking authentication status...');
     const user = debugUserData();
+    const authButtons = document.getElementById('authButtons');
     
     if (user && user.id) {
         console.log('✅ User is authenticated, updating navigation...');
         updateNavigationForLoggedInUser(user);
     } else {
-        console.log('❌ User not authenticated, keeping default buttons');
+        console.log('❌ User not authenticated, showing default buttons');
+        // Show the default login/signup buttons
+        if (authButtons) {
+            authButtons.innerHTML = `
+                <button class="login-btn" onclick="location.href='/login'">Log In</button>
+                <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
+            `;
+        }
     }
 }
 

@@ -39,8 +39,8 @@ async function loadSellerData(userId) {
     try {
         console.log('Loading seller data for user:', userId);
 
-        // Fetch seller application data
-        const response = await fetch(`/api/fruitstands/${userId}`, {
+        // Fetch seller application data by user_id
+        const response = await fetch(`/api/fruitstands/user/${userId}`, {
             method: 'GET'
         });
 

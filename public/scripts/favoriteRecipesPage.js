@@ -56,12 +56,14 @@ async function loadAndDisplayFavoriteRecipes(userId) {
     }
 
     console.log(`📍 Found ${favoriteRecipeIds.length} favorite recipes`);
+    console.log('📍 Favorite recipe IDs:', favoriteRecipeIds);
 
     // Hide loading spinner
     loadingSpinner.style.display = 'none';
 
     // If no favorites, show empty state
     if (favoriteRecipeIds.length === 0) {
+      console.log('✅ No favorites found - showing empty state');
       showEmptyState();
       return;
     }
@@ -155,7 +157,7 @@ function createRecipeCard(recipe) {
 }
 
 // Open recipe modal with full details
-function openRecipeModal(recipe) {
+async function openRecipeModal(recipe) {
   console.log('Opening modal for recipe:', recipe.name);
 
   // Parse ingredients
@@ -188,6 +190,24 @@ function openRecipeModal(recipe) {
 
   const estimatedTime = recipe.estimated_time !== undefined ? recipe.estimated_time : (recipe.estimatedTime !== undefined ? recipe.estimatedTime : 'N/A');
 
+  // Fetch ratings for this recipe
+  let ratingsHTML = '<p>Loading ratings...</p>';
+  try {
+    const ratingsData = await getRecipeRatings(recipe.id);
+    if (ratingsData && typeof generateStarsHTML === 'function') {
+      ratingsHTML = `
+        <div class="recipe-rating-summary">
+          <div class="rating-stars">${generateStarsHTML(ratingsData.averageRating)}</div>
+          <span class="rating-text">${ratingsData.averageRating.toFixed(1)} (${ratingsData.totalRatings} ${ratingsData.totalRatings === 1 ? 'rating' : 'ratings'})</span>
+        </div>
+        ${ratingsData.ratings && ratingsData.ratings.length > 0 ? generateRatingsListHTML(ratingsData.ratings, 3) : ''}
+      `;
+    }
+  } catch (error) {
+    console.error('Error loading ratings:', error);
+    ratingsHTML = '<p>No ratings yet</p>';
+  }
+
   const modal = document.getElementById('recipeModal');
   const recipeDetail = document.getElementById('recipeDetail');
 
@@ -195,6 +215,12 @@ function openRecipeModal(recipe) {
     <h2>${escapeHtml(recipe.name)}</h2>
     <p><strong>Difficulty:</strong> ${escapeHtml(recipe.difficulty)}</p>
     <p><strong>Time:</strong> ${estimatedTime} ${estimatedTime !== 'N/A' ? 'min' : ''}</p>
+    
+    <div class="recipe-ratings-section">
+      <h3>Ratings & Reviews</h3>
+      ${ratingsHTML}
+    </div>
+    
     <h3>Ingredients:</h3>
     <ul>
       ${ingredientHTML}

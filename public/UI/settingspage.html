@@ -19,11 +19,7 @@
     <div class="search-bar">
       <input type="text" placeholder="Search Fruit" />
     </div>
-    <div class="auth-buttons" id="authButtons">
-        <!-- Default state - show login/signup -->
-        <button class="login-btn" onclick="location.href='/login'">Log In</button>
-        <button class="signup-btn" onclick="location.href='/signup'">Sign Up</button>
-    </div>
+    <div class="auth-buttons" id="authButtons"></div>
   </div>
 
   <nav class="nav-links">
@@ -49,6 +45,7 @@
         <div class="settings-nav">
           <button class="nav-btn active" data-tab="profile">Profile</button>
           <button class="nav-btn" data-tab="security">Security</button>
+          <button class="nav-btn" data-tab="subscription">Subscription</button>
           <button class="nav-btn" data-tab="notifications">Notifications</button>
           <button class="nav-btn" data-tab="danger">Delete Account</button>
           <button class="nav-btn" data-tab="sign-out">Sign Out</button>
@@ -177,6 +174,40 @@
               </button>
             </div>
           </form>
+        </div>
+
+        <!-- Subscription Tab -->
+        <div class="settings-tab" id="subscription-tab">
+          <div class="tab-header">
+            <h2>Seller Subscription</h2>
+            <p>Manage your fruit stand subscription</p>
+          </div>
+          
+          <div class="settings-form">
+            <div id="subscriptionInfo" style="padding: 20px; background: #f9f9f9; border-radius: 12px; margin-bottom: 20px;">
+              <p style="color: #666;">Loading subscription information...</p>
+            </div>
+            
+            <div id="sellerOnlySection" style="display: none;">
+              <div style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e0e0e0;">
+                <h3 style="color: #017d49; margin-bottom: 16px;">Manage Subscription</h3>
+                <p style="color: #666; margin-bottom: 20px;">Extend your subscription to keep your fruit stand active and visible to customers.</p>
+                <button type="button" class="save-btn" onclick="window.location.href='/extend-subscription'">
+                  <span class="btn-text">Extend Subscription</span>
+                </button>
+              </div>
+            </div>
+            
+            <div id="nonSellerSection" style="display: none;">
+              <div style="padding: 20px; background: white; border-radius: 12px; border: 1px solid #e0e0e0;">
+                <h3 style="color: #017d49; margin-bottom: 16px;">Become a Seller</h3>
+                <p style="color: #666; margin-bottom: 20px;">You don't have a fruit stand yet. Join hundreds of local farmers reaching more customers!</p>
+                <button type="button" class="save-btn" onclick="window.location.href='/become-seller'">
+                  <span class="btn-text">Get Started</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Notifications Tab -->
@@ -871,10 +902,111 @@ document.querySelectorAll('.form-group input, .form-group textarea').forEach(inp
     });
 });
 
+// Load subscription information
+async function loadSubscriptionInfo() {
+    try {
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            return;
+        }
+
+        const user = JSON.parse(userData);
+        const userId = user.id;
+
+        if (!userId) {
+            return;
+        }
+
+        const response = await fetch(`/api/fruitstands/user/${userId}`);
+        const subscriptionInfo = document.getElementById('subscriptionInfo');
+        
+        if (response.ok) {
+            // User has a fruit stand
+            const fruitstand = await response.json();
+            document.getElementById('sellerOnlySection').style.display = 'block';
+            document.getElementById('nonSellerSection').style.display = 'none';
+            
+            if (fruitstand.subscription_end_date) {
+                const expirationDate = new Date(fruitstand.subscription_end_date);
+                const today = new Date();
+                const daysLeft = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+                
+                let statusHTML = '';
+                if (daysLeft > 0) {
+                    statusHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="font-size: 32px;">✅</span>
+                            <div>
+                                <h3 style="color: #017d49; margin: 0 0 4px 0;">Active Subscription</h3>
+                                <p style="margin: 0; color: #666;">Your fruit stand is live and visible to customers</p>
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">Expires on</p>
+                                    <p style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">${expirationDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; font-size: 28px; font-weight: 700; color: #017d49;">${daysLeft}</p>
+                                    <p style="margin: 0; font-size: 14px; color: #666;">days left</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="font-size: 32px;">⚠️</span>
+                            <div>
+                                <h3 style="color: #dc3545; margin: 0 0 4px 0;">Subscription Expired</h3>
+                                <p style="margin: 0; color: #666;">Renew your subscription to reactivate your fruit stand</p>
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #dc3545;">
+                            <p style="margin: 0; color: #666;">Expired on <strong>${expirationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>
+                        </div>
+                    `;
+                }
+                
+                subscriptionInfo.innerHTML = statusHTML;
+            } else {
+                subscriptionInfo.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 32px;">ℹ️</span>
+                        <div>
+                            <h3 style="color: #ff9800; margin: 0 0 4px 0;">No Subscription Date Set</h3>
+                            <p style="margin: 0; color: #666;">Choose a plan below to activate your subscription</p>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            // User doesn't have a fruit stand
+            document.getElementById('sellerOnlySection').style.display = 'none';
+            document.getElementById('nonSellerSection').style.display = 'block';
+            subscriptionInfo.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 32px;">🌱</span>
+                    <div>
+                        <h3 style="color: #017d49; margin: 0 0 4px 0;">No Subscription</h3>
+                        <p style="margin: 0; color: #666;">You're not currently a seller</p>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading subscription info:', error);
+        document.getElementById('subscriptionInfo').innerHTML = 
+            '<p style="color: #dc3545;">Error loading subscription information</p>';
+    }
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Settings page loaded');
     checkAuthStatus();
+    loadSubscriptionInfo();
     
     // Add keyboard shortcut for cancel (ESC)
     document.addEventListener('keydown', function(e) {

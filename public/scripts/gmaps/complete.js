@@ -120,20 +120,29 @@ function loadSellerMarkers() {
 function displaySellerMarker(seller, location, fullAddress) {
   // Create a fruit stand SVG icon
   const fruitStandSVG = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
-      <!-- Tent/Roof -->
-      <polygon points="10,50 50,20 90,50" fill="#FF6B6B" stroke="#8B0000" stroke-width="2"/>
-      <!-- Left side of tent -->
-      <polygon points="10,50 50,20 50,80" fill="#FF8A8A" stroke="#8B0000" stroke-width="2" opacity="0.8"/>
-      <!-- Stand poles -->
-      <rect x="35" y="75" width="4" height="15" fill="#8B6F47"/>
-      <rect x="61" y="75" width="4" height="15" fill="#8B6F47"/>
-      <!-- Counter/Base -->
-      <rect x="20" y="80" width="60" height="12" fill="#D2B48C" stroke="#8B6F47" stroke-width="1"/>
-      <!-- Fruit decoration - oranges on top -->
-      <circle cx="35" cy="72" r="5" fill="#FF9500" stroke="#E67E22" stroke-width="1"/>
-      <circle cx="50" cy="70" r="5" fill="#FFB347" stroke="#E67E22" stroke-width="1"/>
-      <circle cx="65" cy="72" r="5" fill="#FF9500" stroke="#E67E22" stroke-width="1"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="45" height="45">
+      <!-- Umbrella/Canopy top -->
+      <path d="M50,20 Q30,30 25,45 L75,45 Q70,30 50,20 Z" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+      <!-- Umbrella pole -->
+      <rect x="48" y="20" width="4" height="35" fill="#795548"/>
+      <!-- Table/Counter -->
+      <rect x="20" y="55" width="60" height="8" fill="#8D6E63" stroke="#5D4037" stroke-width="2" rx="2"/>
+      <!-- Table legs -->
+      <rect x="23" y="63" width="4" height="25" fill="#6D4C41"/>
+      <rect x="73" y="63" width="4" height="25" fill="#6D4C41"/>
+      <!-- Produce display - basket outlines -->
+      <ellipse cx="35" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <ellipse cx="50" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <ellipse cx="65" cy="60" rx="8" ry="6" fill="#D7CCC8" stroke="#8D6E63" stroke-width="1.5"/>
+      <!-- Fruits -->
+      <circle cx="33" cy="57" r="3" fill="#FF6B6B"/>
+      <circle cx="37" cy="58" r="3" fill="#FF8787"/>
+      <circle cx="48" cy="57" r="3" fill="#FFA726"/>
+      <circle cx="52" cy="58" r="3" fill="#FFB347"/>
+      <circle cx="63" cy="57" r="3" fill="#66BB6A"/>
+      <circle cx="67" cy="58" r="3" fill="#81C784"/>
+      <!-- Ground -->
+      <ellipse cx="50" cy="88" rx="30" ry="4" fill="#00000015"/>
     </svg>
   `;
 
@@ -429,10 +438,21 @@ async function showSellerModal(seller, fullAddress) {
           </div>
 
           <div class="seller-info-group">
-            <h4>Contact Information</h4>
-            <p><strong>Username:</strong> ${escapeHtml(sellerHandle)}</p>
-
-            <p><strong>Stand Address:</strong> ${escapeHtml(fullAddress)}</p>
+            <h4>📞 Contact Information</h4>
+            <div class="contact-info-grid">
+              <div class="contact-item">
+                <span class="contact-label">👤 Username:</span>
+                <span class="contact-value">${escapeHtml(sellerHandle)}</span>
+              </div>
+              <div class="contact-item">
+                <span class="contact-label">📱 Phone:</span>
+                <span class="contact-value">${escapeHtml(phoneNumber)}</span>
+              </div>
+              <div class="contact-item full-width">
+                <span class="contact-label">📍 Address:</span>
+                <span class="contact-value">${escapeHtml(fullAddress)}</span>
+              </div>
+            </div>
           </div>
 
           ${produce && Array.isArray(produce) && produce.length > 0 ? `
