@@ -339,8 +339,20 @@ module.exports = function (app, supabase)
         return res.status(500).json({ error: error.message });
       }
 
-      // Fetch handles for all sellers
-      const userIds = data.map(seller => seller.user_id);
+      // Filter out sellers with expired subscriptions
+      const today = new Date();
+      const activeSellers = data.filter(seller => {
+        // If no subscription end date, consider it as expired/inactive
+        if (!seller.subscription_end_date) {
+          return false;
+        }
+        
+        const endDate = new Date(seller.subscription_end_date);
+        return endDate > today;
+      });
+
+      // Fetch handles for all active sellers
+      const userIds = activeSellers.map(seller => seller.user_id);
       const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
         .select('id, handle')
@@ -359,7 +371,7 @@ module.exports = function (app, supabase)
       });
 
       // Add handle to each seller
-      const enrichedSellers = data.map(seller => ({
+      const enrichedSellers = activeSellers.map(seller => ({
         ...seller,
         handle: handleMap[seller.user_id] || null
       }));
@@ -446,6 +458,7 @@ module.exports = function (app, supabase)
         handle,
         // Subscription info
         subscriptionType,
+        isExtension,
         // Payment info (placeholder until Stripe integration)
         paymentMethod,
         // Stand info
@@ -583,33 +596,91 @@ module.exports = function (app, supabase)
         '6 months': 6
       };
       const months = durationMap[subscription.duration] || 1;
-      const endDate = new Date(now);
-      endDate.setMonth(endDate.getMonth() + months);
+      
+      let endDate;
+      let application;
+      let appError;
 
-      // Geocode the address before creating the application
-      const coordinates = await geocodeAddress(standAddress, city, state, zipcode);
+      // Check if this is a subscription extension
+      if (isExtension) {
+        // Get existing fruit stand
+        const { data: existingStand, error: standError } = await supabase
+          .from('seller_applications')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
 
-      // Create seller application with subscription
-      const { data: application, error: appError } = await supabase
-        .from('seller_applications')
-        .insert([
-          {
-            user_id: userId,
-            business_name: standName,
-            description: standDescription || '',
+        if (standError || !existingStand) {
+          return res.status(404).json({ error: 'No existing fruit stand found for this user' });
+        }
+
+        // Calculate new end date from current expiration (or now if already expired)
+        const currentEndDate = new Date(existingStand.subscription_end_date || now);
+        const extendFrom = currentEndDate > now ? currentEndDate : now;
+        endDate = new Date(extendFrom);
+        endDate.setMonth(endDate.getMonth() + months);
+
+        // Update existing fruit stand with new subscription info
+        const updateResult = await supabase
+          .from('seller_applications')
+          .update({
             subscription_plan_id: subscriptionId,
-            status: 'approved', // Auto-approve upon payment
-            phone_number: phone_number,
-            address: standAddress,
-            city: city,
-            state: state,
-            zipcode: zipcode,
-            latitude: coordinates?.latitude || null,
-            longitude: coordinates?.longitude || null,
-            created_at: now.toISOString()
-          }
-        ])
-        .select();
+            subscription_end_date: endDate.toISOString(),
+            updated_at: now.toISOString()
+          })
+          .eq('user_id', userId)
+          .select();
+
+        application = updateResult.data;
+        appError = updateResult.error;
+      } else {
+        // Check if user already has a fruit stand
+        const { data: existingStand } = await supabase
+          .from('seller_applications')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
+
+        if (existingStand && existingStand.length > 0) {
+          return res.status(409).json({ 
+            error: 'You already have a fruit stand. Please use the extension page to extend your subscription.',
+            shouldRedirect: true
+          });
+        }
+
+        // Calculate subscription end date for new subscription
+        endDate = new Date(now);
+        endDate.setMonth(endDate.getMonth() + months);
+
+        // Geocode the address before creating the application
+        const coordinates = await geocodeAddress(standAddress, city, state, zipcode);
+
+        // Create new seller application with subscription
+        const insertResult = await supabase
+          .from('seller_applications')
+          .insert([
+            {
+              user_id: userId,
+              business_name: standName,
+              description: standDescription || '',
+              subscription_plan_id: subscriptionId,
+              subscription_end_date: endDate.toISOString(),
+              status: 'approved', // Auto-approve upon payment
+              phone_number: phone_number,
+              address: standAddress,
+              city: city,
+              state: state,
+              zipcode: zipcode,
+              latitude: coordinates?.latitude || null,
+              longitude: coordinates?.longitude || null,
+              created_at: now.toISOString()
+            }
+          ])
+          .select();
+
+        application = insertResult.data;
+        appError = insertResult.error;
+      }
 
       //Change account seller status to TRUE
       if (!appError) {
@@ -625,12 +696,17 @@ module.exports = function (app, supabase)
         return res.status(500).json({ error: 'Failed to create seller application' });
       }
 
+      const successMessage = isExtension 
+        ? 'Subscription extended successfully!' 
+        : 'Seller subscription purchased successfully!';
+
       res.status(201).json({
         success: true,
-        message: 'Seller subscription purchased successfully!',
+        message: successMessage,
         userId: userId,
         applicationId: application[0].id,
         isNewUser: isNewUser,
+        isExtension: isExtension,
         subscriptionEnd: endDate.toISOString()
       });
     }

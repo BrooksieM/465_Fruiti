@@ -80,7 +80,10 @@ app.use('/api', apiRoutes);
 
 app.get('/seller-payment', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/UI/payment/seller-payment.html'));
-  
+});
+
+app.get('/extension-payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/UI/payment/extension-payment.html'));
 });
 
 async function testConnection() {

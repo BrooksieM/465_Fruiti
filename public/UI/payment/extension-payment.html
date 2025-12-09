@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extend Subscription - Payment</title>
+<link rel="stylesheet" href="/css/standardLayout.css">
+<link rel="stylesheet" href="/css/footer/footer.css">
+<link rel="stylesheet" href="/css/become-a-seller/payment.css">
+</head>
+
+<body>
+  <div class="navbar">
+<div class="logo">
+      <a href="/">
+        <img src="../images/fruiti.png" alt="Fruiti logo - Click to go home" />
+      </a>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search Fruit" />
+    </div>
+    <div class="auth-buttons" id="authButtons"></div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/become-seller" class="active">Become a Seller</a>
+    <a href="nutrition">Nutrition</a>
+    <a href="/recipe">Recipes</a>
+    <a href="/aboutus">About Us</a>
+  </nav>
+
+  <div class="black-bar"></div>
+
+  <div class="payment-container">
+    <!-- Left Side - Payment Form -->
+    <div class="payment-section">
+      <h2 class="section-title">Extend Your Subscription</h2>
+      
+      <div class="account-notice">
+        <p><strong>Subscription Extension</strong> Complete your payment to extend your fruit stand subscription!</p>
+      </div>
+
+      <form id="paymentForm">
+        <!-- Email (read-only for logged in users) -->
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" readonly required>
+        </div>
+
+        <!-- Payment Information -->
+        <h3 style="color: #017d49; font-size: 20px; margin: 32px 0 16px;">Payment Information</h3>
+
+        <div class="payment-methods">
+          <div class="payment-method active" data-method="card">
+            <div class="card-icons">💳</div>
+            <div>Credit Card</div>
+          </div>
+          <div class="payment-method" data-method="paypal">
+            <div class="card-icons">🅿️</div>
+            <div>PayPal</div>
+          </div>
+        </div>
+
+        <div id="cardPaymentSection">
+          <div class="form-group">
+            <label for="cardNumber">Card Number *</label>
+            <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cardName">Name on Card *</label>
+              <input type="text" id="cardName" name="cardName" required>
+            </div>
+            <div class="form-group">
+              <label for="expiryDate">Expiry Date *</label>
+              <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cvv">CVV *</label>
+            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" required>
+          </div>
+        </div>
+
+        <div class="terms-checkbox">
+          <input type="checkbox" id="terms" name="terms" required>
+          <label for="terms">
+            I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. 
+            I understand my subscription will auto-renew and I can cancel anytime.
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn">Complete Payment & Extend Subscription</button>
+        
+        <p class="security-notice">Your payment information is secure and encrypted by Stripe!</p>
+      </form>
+    </div>
+
+    <!-- Right Side - Order Summary -->
+    <div class="payment-section">
+      <h2 class="section-title">Order Summary</h2>
+      
+      <div class="order-summary">
+        <div class="plan-details">
+          <div>
+            <div class="plan-name-display" id="selectedPlanName">3 Months Plan</div>
+            <div class="savings-display" id="savingsDisplay">💰 Save 33%</div>
+          </div>
+          <div class="plan-price-display" id="selectedPlanPrice">$10</div>
+        </div>
+        
+        <div class="features-summary">
+          <h4>What's Included:</h4>
+          <ul id="planFeaturesList">
+            <li>Everything in Monthly</li>
+            <li>Priority customer support</li>
+            <li>Photo gallery (up to 10 photos)</li>
+            <li>Social media integration</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="total-section">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span id="subtotal">$10.00</span>
+        </div>
+        <div class="total-row">
+          <span>Tax</span>
+          <span id="tax">$0.00</span>
+        </div>
+        <div class="total-row final">
+          <span>Total</span>
+          <span id="total">$10.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="/scripts/footer.js"></script>
+  <script src="/scripts/navigationForLoggedInUser.js"></script>
+
+  <script>
+    // Get plan details from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const plan = urlParams.get('plan') || '3month';
+
+    const plans = {
+      'monthly': {
+        name: 'Monthly Plan',
+        price: '$4.99',
+        period: '/mo',
+        savings: null,
+        features: [
+          'List your fruit stand location',
+          'Update inventory daily',
+          'Customer reviews & ratings',
+          'Email support'
+        ],
+        amount: 4.99
+      },
+      '3month': {
+        name: '3 Months Plan',
+        price: '$10',
+        period: '/3mo',
+        savings: '💰 Save 33%',
+        features: [
+          'Everything in Monthly',
+          'Priority customer support',
+          'Photo gallery (up to 10 photos)',
+          'Social media integration'
+        ],
+        amount: 10.00
+      },
+      '6month': {
+        name: '6 Months Plan',
+        price: '$15',
+        period: '/6mo',
+        savings: '🎉 Save 50%',
+        features: [
+          'Everything in 3 Months',
+          'Premium stand badge',
+          'Dedicated account manager'
+        ],
+        amount: 15.00
+      }
+    };
+
+    const selectedPlan = plans[plan];
+
+    // Update UI with selected plan
+    document.getElementById('selectedPlanName').textContent = selectedPlan.name;
+    document.getElementById('selectedPlanPrice').textContent = selectedPlan.price;
+    
+    if (selectedPlan.savings) {
+      document.getElementById('savingsDisplay').textContent = selectedPlan.savings;
+      document.getElementById('savingsDisplay').style.display = 'inline-block';
+    } else {
+      document.getElementById('savingsDisplay').style.display = 'none';
+    }
+
+    // Update features list
+    const featuresList = document.getElementById('planFeaturesList');
+    featuresList.innerHTML = selectedPlan.features.map(feature => `<li>${feature}</li>`).join('');
+
+    // Update totals
+    const subtotal = selectedPlan.amount;
+    const tax = 0;
+    const total = subtotal + tax;
+
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+
+    // Check if user is logged in and fetch email
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      window.location.href = '/login';
+    } else {
+      const user = JSON.parse(userData);
+      const userId = user.id;
+
+      // Fetch user email to pre-fill
+      fetch(`/api/accounts/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+          if (user && user.email) {
+            document.getElementById('email').value = user.email;
+          }
+        })
+        .catch(err => console.error('Error fetching user:', err));
+    }
+
+    // Payment method toggle
+    document.querySelectorAll('.payment-method').forEach(method => {
+      method.addEventListener('click', function() {
+        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+        this.classList.add('active');
+        
+        const selectedMethod = this.dataset.method;
+        if (selectedMethod === 'paypal') {
+          document.getElementById('cardPaymentSection').style.display = 'none';
+        } else {
+          document.getElementById('cardPaymentSection').style.display = 'block';
+        }
+      });
+    });
+
+    // Card number formatting
+    document.getElementById('cardNumber').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\s/g, '');
+      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+      e.target.value = formattedValue;
+    });
+
+    // Expiry date formatting
+    document.getElementById('expiryDate').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+      }
+      e.target.value = value;
+    });
+
+    // CVV formatting (numbers only, max 3 digits)
+    document.getElementById('cvv').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+    });
+
+    // Form submission
+    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        alert('Please log in to continue');
+        window.location.href = '/login';
+        return;
+      }
+
+      const user = JSON.parse(userData);
+
+      // Get form data (minimal for extension - just payment info)
+      const formData = {
+        email: document.getElementById('email').value,
+        subscriptionType: plan,
+        paymentMethod: document.querySelector('.payment-method.active').dataset.method,
+        isExtension: true
+      };
+
+      // Disable submit button
+      const submitBtn = document.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      try {
+        // Send data to backend
+        const response = await fetch('/api/purchase-seller-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`Success! ${result.message}\n\nYour subscription is now active until ${new Date(result.subscriptionEnd).toLocaleDateString()}`);
+
+          // Redirect to seller dashboard
+          window.location.href = '/seller-dashboard';
+        } else {
+          alert(`Error: ${result.error}`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Complete Payment & Extend Subscription';
+        }
+      } catch (error) {
+        console.error('Payment error:', error);
+        alert('An error occurred while processing your payment. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Payment & Extend Subscription';
+      }
+    });
+  </script>
+</body>
+</html>
