@@ -45,6 +45,40 @@
   <div class="black-bar"></div>
 
   <div class="section-heading">Fruit Stands Near you!</div>
+
+  <!-- Filter Controls -->
+  <div class="map-filter-container">
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label for="zipcodeSearch">Search by ZIP Code:</label>
+        <input
+          type="text"
+          id="zipcodeSearch"
+          placeholder="Enter ZIP code"
+          maxlength="5"
+          pattern="[0-9]{5}"
+        />
+        <button id="clearFilter" class="clear-filter-btn">Clear</button>
+      </div>
+
+      <div class="filter-group">
+        <label for="rangeSlider">Distance: <span id="rangeValue">50</span> miles</label>
+        <input
+          type="range"
+          id="rangeSlider"
+          min="10"
+          max="100"
+          value="50"
+          step="5"
+        />
+        <div class="range-labels">
+          <span>10 mi</span>
+          <span>100 mi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="map"></div>
 
 <div class="section-heading">Featured Fruit Stands</div>
