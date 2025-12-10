@@ -68,6 +68,89 @@
   color: #222222;
 }
 
+/* Hero Banner */
+.hero-banner {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: '🍎🍊🍇🍓🍌🍉🍑';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  font-size: 60px;
+  opacity: 0.1;
+  letter-spacing: 40px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-banner h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  animation: fadeInDown 0.8s ease;
+}
+
+.hero-banner p {
+  font-size: 20px;
+  opacity: 0.95;
+  animation: fadeInUp 0.8s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive hero banner */
+@media (max-width: 768px) {
+  .hero-banner {
+    padding: 60px 20px;
+  }
+  
+  .hero-banner h1 {
+    font-size: 32px;
+  }
+  
+  .hero-banner p {
+    font-size: 16px;
+  }
+  
+  .hero-banner::before {
+    font-size: 40px;
+    letter-spacing: 20px;
+  }
+}
+
 /* Heading and Filter Wrapper */
 .heading-filter-wrapper {
   width: 80%;
