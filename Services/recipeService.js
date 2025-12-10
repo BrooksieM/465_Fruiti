@@ -516,5 +516,66 @@ module.exports = function (app, supabase, supabaseAdmin)
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  // Get top-rated recipes
+  app.get('/api/recipes/top-rated/featured', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit) || 3;
+
+      // Get all recipes with their ratings
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipe_new')
+        .select('*, accounts(handle)')
+        .order('created_at', { ascending: false });
+
+      if (recipesError) {
+        return res.status(500).json({ error: recipesError.message });
+      }
+
+      // For each recipe, get its average rating
+      const recipesWithRatings = await Promise.all(recipes.map(async (recipe) => {
+        const { data: ratings, error: ratingsError } = await supabase
+          .from('recipe_ratings')
+          .select('rating')
+          .eq('recipe_id', recipe.id);
+
+        if (ratingsError) {
+          console.error(`Error fetching ratings for recipe ${recipe.id}:`, ratingsError);
+          return {
+            ...recipe,
+            creator_handle: recipe.accounts?.handle || 'Unknown',
+            averageRating: 0,
+            totalRatings: 0
+          };
+        }
+
+        const averageRating = ratings.length > 0
+          ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+          : 0;
+
+        return {
+          ...recipe,
+          creator_handle: recipe.accounts?.handle || 'Unknown',
+          averageRating: Math.round(averageRating * 10) / 10,
+          totalRatings: ratings.length
+        };
+      }));
+
+      // Sort by average rating (desc), then by total ratings (desc)
+      recipesWithRatings.sort((a, b) => {
+        if (b.averageRating !== a.averageRating) {
+          return b.averageRating - a.averageRating;
+        }
+        return b.totalRatings - a.totalRatings;
+      });
+
+      // Return top N recipes
+      res.json(recipesWithRatings.slice(0, limit));
+    } catch (error) {
+      console.error('Error fetching top-rated recipes:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 };
+
 
