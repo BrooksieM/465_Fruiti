@@ -12,7 +12,6 @@ let activeFilters = {
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthStatusAndSetup();
   loadRecipes();
-  initializeIngredientSearch();
 
   // Handle form submission
   const recipeForm = document.getElementById('createRecipeForm');
@@ -112,10 +111,14 @@ function closeCreateRecipeModal() {
   const preview = document.getElementById('imagePreview');
   preview.innerHTML = '';
   preview.classList.remove('show');
-  // Reset selected ingredients
-  selectedIngredients = [];
-  document.getElementById('selectedIngredientsContainer').innerHTML = '';
-  document.getElementById('ingredientSearch').value = '';
+  // Reset ingredients to single input
+  const ingredientsContainer = document.getElementById('ingredientsContainer');
+  ingredientsContainer.innerHTML = `
+    <div class="ingredient-input-wrapper">
+      <input type="text" class="ingredient-input" placeholder="Enter ingredient" required>
+      <button type="button" class="btn-remove-ingredient hidden" onclick="removeIngredient(this)">Remove</button>
+    </div>
+  `;
   // Reset instructions to single input
   const instructionsContainer = document.getElementById('instructionsContainer');
   instructionsContainer.innerHTML = `
@@ -277,114 +280,53 @@ const COMMON_INGREDIENTS = [
   'Parsley', 'Cilantro', 'Dill', 'Chives', 'Cayenne Pepper', 'Red Pepper Flakes'
 ];
 
-let selectedIngredients = [];
+// Add ingredient input field
+function addIngredient() {
+  const container = document.getElementById('ingredientsContainer');
+  const MAX_INGREDIENTS = 50;
+  const currentCount = container.querySelectorAll('.ingredient-input-wrapper').length;
 
-// Initialize ingredient search
-function initializeIngredientSearch() {
-  const searchInput = document.getElementById('ingredientSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', handleIngredientSearch);
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const value = searchInput.value.trim();
-        if (value && !selectedIngredients.includes(value)) {
-          addSelectedIngredient(value);
-          searchInput.value = '';
-          hideIngredientSearchResults();
-        }
-      }
-    });
-    // Close results when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.ingredient-search-box')) {
-        hideIngredientSearchResults();
-      }
-    });
-  }
-}
-
-// Handle ingredient search
-function handleIngredientSearch(e) {
-  let inputValue = e.target.value;
-
-  // Remove any numbers from input
-  const cleanValue = inputValue.replace(/[0-9]/g, '');
-  if (inputValue !== cleanValue) {
-    e.target.value = cleanValue;
-    inputValue = cleanValue;
-  }
-
-  const searchTerm = inputValue.toLowerCase().trim();
-  const resultsContainer = document.getElementById('ingredientSearchResults');
-
-  if (!searchTerm) {
-    hideIngredientSearchResults();
+  if (currentCount >= MAX_INGREDIENTS) {
+    alert(`Maximum of ${MAX_INGREDIENTS} ingredients allowed`);
     return;
   }
 
-  // Filter ingredients
-  const filtered = COMMON_INGREDIENTS.filter(ing =>
-    ing.toLowerCase().includes(searchTerm) &&
-    !selectedIngredients.includes(ing)
-  );
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ingredient-input-wrapper';
+  wrapper.innerHTML = `
+    <input type="text" class="ingredient-input" placeholder="Enter ingredient" required>
+    <button type="button" class="btn-remove-ingredient" onclick="removeIngredient(this)">Remove</button>
+  `;
+  container.appendChild(wrapper);
 
-  if (filtered.length === 0) {
-    hideIngredientSearchResults();
-    return;
-  }
-
-  // Display results
-  resultsContainer.innerHTML = filtered.map(ing =>
-    `<div class="ingredient-result-item" onclick="addSelectedIngredient('${ing}')">${ing}</div>`
-  ).join('');
-  resultsContainer.classList.remove('hidden');
+  // Show remove buttons if there's more than one ingredient
+  updateIngredientRemoveButtons();
 }
 
-// Add selected ingredient
-function addSelectedIngredient(ingredient) {
-  if (selectedIngredients.length >= 50) {
-    alert('Maximum 50 ingredients allowed');
-    return;
-  }
-
-  if (!selectedIngredients.includes(ingredient)) {
-    selectedIngredients.push(ingredient);
-    displaySelectedIngredients();
-    document.getElementById('ingredientSearch').value = '';
-    hideIngredientSearchResults();
+// Remove ingredient input field
+function removeIngredient(button) {
+  const wrapper = button.closest('.ingredient-input-wrapper');
+  const container = document.getElementById('ingredientsContainer');
+  
+  if (container.querySelectorAll('.ingredient-input-wrapper').length > 1) {
+    wrapper.remove();
+    updateIngredientRemoveButtons();
   }
 }
 
-// Remove selected ingredient
-function removeSelectedIngredient(ingredient) {
-  selectedIngredients = selectedIngredients.filter(ing => ing !== ingredient);
-  displaySelectedIngredients();
-}
+// Update visibility of ingredient remove buttons
+function updateIngredientRemoveButtons() {
+  const container = document.getElementById('ingredientsContainer');
+  const wrappers = container.querySelectorAll('.ingredient-input-wrapper');
+  const removeButtons = container.querySelectorAll('.btn-remove-ingredient');
 
-// Remove all selected ingredients
-function removeAllIngredients() {
-  selectedIngredients = [];
-  displaySelectedIngredients();
-  document.getElementById('ingredientSearch').value = '';
-  hideIngredientSearchResults();
-}
-
-// Display selected ingredients as tags
-function displaySelectedIngredients() {
-  const container = document.getElementById('selectedIngredientsContainer');
-  container.innerHTML = selectedIngredients.map(ing =>
-    `<div class="ingredient-tag">
-      ${ing}
-      <button type="button" onclick="removeSelectedIngredient('${ing}')">×</button>
-    </div>`
-  ).join('');
-}
-
-// Hide search results
-function hideIngredientSearchResults() {
-  const resultsContainer = document.getElementById('ingredientSearchResults');
-  resultsContainer.classList.add('hidden');
+  removeButtons.forEach((btn, index) => {
+    if (wrappers.length === 1) {
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+    }
+  });
 }
 
 // Add instruction input field
@@ -463,8 +405,11 @@ async function handleCreateRecipe(e) {
   const season = document.getElementById('seasonInput').value.trim();
   const imageFile = document.getElementById('recipeImage').files[0];
 
-  // Get ingredients from selected ingredients array
-  const ingredients = selectedIngredients;
+  // Get ingredients from input fields
+  const ingredientInputs = document.querySelectorAll('.ingredient-input');
+  const ingredients = Array.from(ingredientInputs)
+    .map(input => input.value.trim())
+    .filter(ingredient => ingredient.length > 0);
 
   // Get instructions from input fields
   const instructionInputs = document.querySelectorAll('.instruction-input');
