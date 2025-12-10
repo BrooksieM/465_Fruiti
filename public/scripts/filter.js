@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupFilterListeners() {
   const difficultyFilters = document.querySelectorAll('.difficulty-filter');
   const timeFilters = document.querySelectorAll('.time-filter');
+  const seasonFilters = document.querySelectorAll('.season-filter');
 
   difficultyFilters.forEach(checkbox => {
     checkbox.addEventListener('change', (e) => handleDifficultyFilterChange(e));
@@ -16,6 +17,10 @@ function setupFilterListeners() {
 
   timeFilters.forEach(checkbox => {
     checkbox.addEventListener('change', (e) => handleTimeFilterChange(e));
+  });
+
+  seasonFilters.forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => handleSeasonFilterChange(e));
   });
 }
 
@@ -57,6 +62,25 @@ function handleTimeFilterChange(e) {
   applyFilters();
 }
 
+// Handle season filter changes - only allow one selection
+function handleSeasonFilterChange(e) {
+  const seasonFilters = document.querySelectorAll('.season-filter');
+
+  // Uncheck all other season filters
+  seasonFilters.forEach(checkbox => {
+    if (checkbox !== e.target) {
+      checkbox.checked = false;
+    }
+  });
+
+  // Get active season filter
+  const activeSeason = e.target.checked ? e.target.value : null;
+  activeFilters.season = activeSeason ? [activeSeason] : [];
+
+  // Apply filters and display results
+  applyFilters();
+}
+
 // Apply filters to recipes
 function applyFilters() {
   // Start with all recipes
@@ -69,7 +93,10 @@ function applyFilters() {
                        return isRecipeInTimeRange(recipe.estimated_time || recipe.estimatedTime, timeRange);
                      });
 
-    return difficultyMatch && timeMatch;
+    const seasonMatch = activeFilters.season.length === 0 ||
+                       activeFilters.season.includes(recipe.season_name || recipe.season);
+
+    return difficultyMatch && timeMatch && seasonMatch;
   });
 
   // Display filtered recipes
@@ -173,9 +200,15 @@ function clearFilters() {
     checkbox.checked = false;
   });
 
+  const seasonFilters = document.querySelectorAll('.season-filter');
+  seasonFilters.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+
   // Reset active filters
   activeFilters.difficulty = [];
   activeFilters.time = [];
+  activeFilters.season = [];
 
   // Display all recipes
   filteredRecipes = [...allRecipes];
