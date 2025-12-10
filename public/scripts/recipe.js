@@ -5,7 +5,8 @@ let filteredRecipes = [];
 let isEditingRecipe = null;
 let activeFilters = {
   difficulty: [],
-  time: []
+  time: [],
+  season: []
 };
 
 // Initialize page on load
