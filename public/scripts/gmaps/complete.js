@@ -6,6 +6,7 @@ let filterCenter = null; // Store the center point for distance filtering
 let filterRadius = 50; // Default radius in miles
 let userLocation = null; // Store user's location
 let filterActive = false; // Track if filter is active
+let searchQuery = ''; // Track search query for fruit stand names
 
 // Initialize the map
 function initMap()
@@ -102,6 +103,9 @@ function loadSellerMarkers() {
             geocodeWithNominatim(fullAddress, function(location) {
               if (location) {
                 console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
+                // Store the geocoded coordinates back to the seller object
+                seller.latitude = location.lat;
+                seller.longitude = location.lng;
                 displaySellerMarker(seller, location, fullAddress);
               } else {
                 console.error(`Failed to geocode ${seller.business_name}`);
@@ -550,38 +554,38 @@ function clearSellerMarkers() {
   sellerMarkers = [];
 }
 
-// Filter and display sellers based on zipcode and radius
+// Filter and display sellers based on search query, zipcode and radius
 function filterSellers() {
-  if (!filterActive || !filterCenter) {
-    // No filter active, show all sellers
-    clearSellerMarkers();
-    allSellers.forEach(seller => {
-      const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
-      if (seller.latitude && seller.longitude) {
-        const location = {
-          lat: parseFloat(seller.latitude),
-          lng: parseFloat(seller.longitude)
-        };
-        displaySellerMarker(seller, location, fullAddress);
-      }
-    });
-    return;
-  }
-
-  // Filter sellers by distance
   clearSellerMarkers();
   let filteredCount = 0;
-  allSellers.forEach(seller => {
-    if (seller.latitude && seller.longitude) {
-      const distance = calculateDistance(
-        filterCenter.lat,
-        filterCenter.lng,
-        parseFloat(seller.latitude),
-        parseFloat(seller.longitude)
-      );
 
-      if (distance <= filterRadius) {
-        const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+  allSellers.forEach(seller => {
+    const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+    
+    // Check name search filter
+    let matchesSearch = true;
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const businessName = seller.business_name.toLowerCase();
+      matchesSearch = businessName.includes(searchLower);
+    }
+
+    // If seller has coordinates, check distance and display
+    if (seller.latitude && seller.longitude) {
+      // Check distance filter
+      let matchesDistance = true;
+      if (filterActive && filterCenter) {
+        const distance = calculateDistance(
+          filterCenter.lat,
+          filterCenter.lng,
+          parseFloat(seller.latitude),
+          parseFloat(seller.longitude)
+        );
+        matchesDistance = distance <= filterRadius;
+      }
+
+      // Display marker if it matches all active filters
+      if (matchesSearch && matchesDistance) {
         const location = {
           lat: parseFloat(seller.latitude),
           lng: parseFloat(seller.longitude)
@@ -589,10 +593,23 @@ function filterSellers() {
         displaySellerMarker(seller, location, fullAddress);
         filteredCount++;
       }
+    } else if (matchesSearch && !filterActive) {
+      // If no coordinates and no distance filter active, try geocoding
+      console.warn(`No coordinates for ${seller.business_name}, attempting geocoding...`);
+      geocodeWithNominatim(fullAddress, function(location) {
+        if (location) {
+          console.log(`Geocoded ${seller.business_name} to:`, location.lat, location.lng);
+          seller.latitude = location.lat;
+          seller.longitude = location.lng;
+          displaySellerMarker(seller, location, fullAddress);
+        } else {
+          console.error(`Failed to geocode ${seller.business_name}`);
+        }
+      });
     }
   });
 
-  console.log(`Showing ${filteredCount} stands within ${filterRadius} miles`);
+  console.log(`Showing ${filteredCount} stands`);
 }
 
 // Geocode zipcode and apply filter
@@ -651,17 +668,26 @@ function clearFilter() {
   // Reset to user location if available, otherwise null
   filterCenter = userLocation;
   filterActive = false;
+  searchQuery = '';
   document.getElementById('zipcodeSearch').value = '';
+  document.getElementById('standSearch').value = '';
   filterSellers();
   console.log('Filter cleared, showing all sellers');
 }
 
 // Initialize filter controls
 function initializeFilterControls() {
+  const standSearch = document.getElementById('standSearch');
   const zipcodeInput = document.getElementById('zipcodeSearch');
   const rangeSlider = document.getElementById('rangeSlider');
   const rangeValue = document.getElementById('rangeValue');
   const clearBtn = document.getElementById('clearFilter');
+
+  // Search input for fruit stand names
+  standSearch.addEventListener('input', function(e) {
+    searchQuery = this.value.trim();
+    filterSellers();
+  });
 
   // Initialize slider gradient on page load
   const initialValue = parseInt(rangeSlider.value);
