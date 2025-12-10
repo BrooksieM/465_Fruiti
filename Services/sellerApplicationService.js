@@ -10,23 +10,67 @@ async function geocodeAddress(address, city, state, zipcode) {
     // Try Google Maps Geocoding API first (requires env variable GOOGLE_MAPS_API_KEY)
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     if (apiKey) {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`);
-      const data = await response.json();
-
-      if (data.results && data.results.length > 0) {
-        const location = data.results[0].geometry.location;
-        return {
-          latitude: location.lat,
-          longitude: location.lng
-        };
+      try {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`);
+        
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            
+            if (data.status === 'OK' && data.results && data.results.length > 0) {
+              const location = data.results[0].geometry.location;
+              console.log(`Google Maps geocoded: ${fullAddress}`);
+              return {
+                latitude: location.lat,
+                longitude: location.lng
+              };
+            } else {
+              console.warn(`Google Maps API returned status: ${data.status}`);
+            }
+          } else {
+            console.warn('Google Maps returned non-JSON response, skipping...');
+          }
+        }
+      } catch (googleError) {
+        console.warn('Google Maps geocoding failed, trying Nominatim:', googleError.message);
       }
     }
 
     // Fallback to OpenStreetMap Nominatim API (free, no key needed)
-    const nominatimResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}`);
+    // Add delay to respect Nominatim usage policy
+    console.log('Waiting 1 second before Nominatim request...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log('Calling Nominatim API for:', fullAddress);
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&countrycodes=us&limit=1`;
+    const nominatimResponse = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'Fruiti-App/1.0 (fruit stand locator)',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log('Nominatim response status:', nominatimResponse.status);
+    console.log('Nominatim response headers:', Object.fromEntries(nominatimResponse.headers));
+
+    if (!nominatimResponse.ok) {
+      throw new Error(`Nominatim HTTP error: ${nominatimResponse.status}`);
+    }
+
+    const contentType = nominatimResponse.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const responseText = await nominatimResponse.text();
+      console.error('Nominatim non-JSON response:', responseText.substring(0, 200));
+      throw new Error(`Nominatim returned non-JSON response: ${contentType}`);
+    }
+
+    console.log('Parsing Nominatim JSON response...');
     const nominatimData = await nominatimResponse.json();
+    console.log('Nominatim data:', nominatimData);
 
     if (nominatimData && nominatimData.length > 0) {
+      console.log(`Nominatim geocoded: ${fullAddress}`);
       return {
         latitude: parseFloat(nominatimData[0].lat),
         longitude: parseFloat(nominatimData[0].lon)
@@ -653,7 +697,9 @@ module.exports = function (app, supabase)
         endDate.setMonth(endDate.getMonth() + months);
 
         // Geocode the address before creating the application
+        console.log('Attempting to geocode:', standAddress, city, state, zipcode);
         const coordinates = await geocodeAddress(standAddress, city, state, zipcode);
+        console.log('Geocoding result:', coordinates);
 
         // Create new seller application with subscription
         const insertResult = await supabase
@@ -840,6 +886,105 @@ module.exports = function (app, supabase)
     catch (error)
     {
       console.error('Extension error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // POST /api/geocode-sellers -> re-geocode sellers without coordinates (admin tool)
+  app.post('/api/geocode-sellers', async (req, res) => {
+    try {
+      // Get all approved sellers without coordinates
+      const { data: sellers, error } = await supabase
+        .from('seller_applications')
+        .select('*')
+        .eq('status', 'approved')
+        .not('address', 'is', null)
+        .or('latitude.is.null,longitude.is.null');
+
+      if (error) {
+        console.error('Query error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      if (!sellers || sellers.length === 0) {
+        return res.json({ 
+          message: 'No sellers found that need geocoding',
+          geocoded: 0 
+        });
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      const results = [];
+
+      // Geocode each seller
+      for (const seller of sellers) {
+        try {
+          const coordinates = await geocodeAddress(
+            seller.address,
+            seller.city,
+            seller.state,
+            seller.zipcode
+          );
+
+          if (coordinates) {
+            // Update the seller with new coordinates
+            const { error: updateError } = await supabase
+              .from('seller_applications')
+              .update({
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude
+              })
+              .eq('id', seller.id);
+
+            if (!updateError) {
+              successCount++;
+              results.push({
+                id: seller.id,
+                business_name: seller.business_name,
+                status: 'success',
+                coordinates
+              });
+            } else {
+              failCount++;
+              results.push({
+                id: seller.id,
+                business_name: seller.business_name,
+                status: 'update_failed',
+                error: updateError.message
+              });
+            }
+          } else {
+            failCount++;
+            results.push({
+              id: seller.id,
+              business_name: seller.business_name,
+              status: 'geocoding_failed'
+            });
+          }
+
+          // Add delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (err) {
+          failCount++;
+          results.push({
+            id: seller.id,
+            business_name: seller.business_name,
+            status: 'error',
+            error: err.message
+          });
+        }
+      }
+
+      res.json({
+        message: `Geocoding complete. Success: ${successCount}, Failed: ${failCount}`,
+        total: sellers.length,
+        success: successCount,
+        failed: failCount,
+        results
+      });
+    } catch (error) {
+      console.error('Geocoding error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

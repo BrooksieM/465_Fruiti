@@ -68,6 +68,89 @@
   color: #222222;
 }
 
+/* Hero Banner */
+.hero-banner {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: '🍎🍊🍇🍓🍌🍉🍑';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  font-size: 60px;
+  opacity: 0.1;
+  letter-spacing: 40px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-banner h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  animation: fadeInDown 0.8s ease;
+}
+
+.hero-banner p {
+  font-size: 20px;
+  opacity: 0.95;
+  animation: fadeInUp 0.8s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive hero banner */
+@media (max-width: 768px) {
+  .hero-banner {
+    padding: 60px 20px;
+  }
+  
+  .hero-banner h1 {
+    font-size: 32px;
+  }
+  
+  .hero-banner p {
+    font-size: 16px;
+  }
+  
+  .hero-banner::before {
+    font-size: 40px;
+    letter-spacing: 20px;
+  }
+}
+
 /* Heading and Filter Wrapper */
 .heading-filter-wrapper {
   width: 80%;
@@ -92,7 +175,7 @@
 }
 
 .filter-controls {
-  display: flex;
+  display: none; /* Hidden - controls now in map */
   flex-direction: column;
   gap: 24px;
   align-items: flex-start;
@@ -119,6 +202,60 @@
   color: #333;
   white-space: nowrap;
   min-width: fit-content;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  width: 280px;
+}
+
+.search-box:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-box:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: #019456;
+}
+
+.search-icon-btn,
+.clear-search-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6368;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-icon-btn:hover,
+.clear-search-btn:hover {
+  color: #019456;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  background: transparent;
+  color: #333;
+}
+
+.search-box input::placeholder {
+  color: #9aa0a6;
 }
 
 #zipcodeSearch {
@@ -154,6 +291,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .clear-filter-btn:hover {
@@ -553,4 +693,176 @@
   .recipe-image {
     height: 180px;
   }
+}
+
+/* ========== MAP FILTER PANEL STYLES ========== */
+.map-filter-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin: 10px;
+  padding: 20px;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+.map-filter-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.map-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.map-search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.map-search-box:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-search-box:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: #019456;
+}
+
+.map-search-icon-btn,
+.map-clear-search-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6368;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.map-search-icon-btn:hover,
+.map-clear-search-btn:hover {
+  color: #019456;
+}
+
+.map-search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  background: transparent;
+  color: #333;
+}
+
+.map-search-box input::placeholder {
+  color: #9aa0a6;
+}
+
+
+
+.map-distance-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#mapRangeSlider {
+  flex: 1;
+  height: 8px;
+  border-radius: 12px;
+  background: #e0e0e0;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#mapRangeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.4);
+  transition: all 0.2s ease;
+  border: 2px solid #ffffff;
+}
+
+#mapRangeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.5);
+}
+
+#mapRangeSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #019456 0%, #017d49 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(1, 148, 86, 0.4);
+  border: 2px solid #ffffff;
+  transition: all 0.2s ease;
+}
+
+#mapRangeSlider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(1, 148, 86, 0.5);
+}
+
+#mapRangeValue {
+  font-weight: 700;
+  color: #019456;
+  font-size: 16px;
+  min-width: 35px;
+  text-align: right;
+}
+
+.map-distance-unit {
+  color: #999;
+  font-size: 14px;
+}
+
+.map-clear-btn {
+  width: 100%;
+  padding: 12px;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.map-clear-btn:hover {
+  background: #019456;
+  border-color: #019456;
+  color: white;
+}
+
+.map-clear-btn:active {
+  transform: scale(0.98);
 }

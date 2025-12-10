@@ -6,6 +6,7 @@ let filterCenter = null; // Store the center point for distance filtering
 let filterRadius = 50; // Default radius in miles
 let userLocation = null; // Store user's location
 let filterActive = false; // Track if filter is active
+let searchQuery = ''; // Track search query for fruit stand names
 
 // Initialize the map
 function initMap()
@@ -64,8 +65,201 @@ function initMap()
     placeMarker(event.latLng);
   });
 
+  // Add filter controls to the map after it's initialized
+  google.maps.event.addListenerOnce(map, 'idle', function() {
+    addFilterControlsToMap();
+  });
+
   // Load and display approved sellers on the map
   loadSellerMarkers();
+}
+
+// Add custom filter controls overlay to the left side of the map
+function addFilterControlsToMap() {
+  const controlDiv = document.createElement('div');
+  controlDiv.className = 'map-filter-panel';
+  controlDiv.innerHTML = `
+    <div class="map-filter-content">
+      <!-- Search -->
+      <div class="map-filter-group">
+        <div class="map-search-box">
+          <input
+            type="text"
+            id="mapStandSearch"
+            placeholder="Search fruit stands..."
+          />
+          <button id="mapClearSearchBtn" class="map-clear-search-btn" title="Clear search" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button id="mapSearchBtn" class="map-search-icon-btn" title="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ZIP Code -->
+      <div class="map-filter-group">
+        <label for="mapZipcodeSearch">ZIP Code:</label>
+        <div class="map-search-box">
+          <input
+            type="text"
+            id="mapZipcodeSearch"
+            placeholder="Enter ZIP Code"
+            maxlength="5"
+            pattern="[0-9]{5}"
+          />
+          <button id="mapZipcodeSearchBtn" class="map-search-icon-btn" title="Search by ZIP">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Distance -->
+      <div class="map-filter-group">
+        <label for="mapRangeSlider">Distance:</label>
+        <div class="map-distance-slider-wrapper">
+          <input
+            type="range"
+            id="mapRangeSlider"
+            min="10"
+            max="100"
+            value="50"
+            step="5"
+          />
+          <span id="mapRangeValue">50</span>
+          <span class="map-distance-unit">mi</span>
+        </div>
+      </div>
+
+      <!-- Clear Button -->
+      <button id="mapClearFilter" class="map-clear-btn">Clear</button>
+    </div>
+  `;
+
+  // Get references to the elements before adding to map
+  const standSearch = controlDiv.querySelector('#mapStandSearch');
+  const searchBtn = controlDiv.querySelector('#mapSearchBtn');
+  const clearSearchBtn = controlDiv.querySelector('#mapClearSearchBtn');
+  const zipcodeInput = controlDiv.querySelector('#mapZipcodeSearch');
+  const zipcodeSearchBtn = controlDiv.querySelector('#mapZipcodeSearchBtn');
+  const rangeSlider = controlDiv.querySelector('#mapRangeSlider');
+  const rangeValue = controlDiv.querySelector('#mapRangeValue');
+  const clearBtn = controlDiv.querySelector('#mapClearFilter');
+
+  console.log('Setting up map filter controls');
+  
+  // Initialize slider gradient
+  const initialValue = parseInt(rangeSlider.value);
+  const initialPercent = ((initialValue - 10) / (100 - 10)) * 100;
+  rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${initialPercent}%, #e0e0e0 ${initialPercent}%, #e0e0e0 100%)`;
+
+  // Show/hide clear search button based on input
+  standSearch.addEventListener('input', function() {
+    if (this.value.trim()) {
+      clearSearchBtn.style.display = 'flex';
+    } else {
+      clearSearchBtn.style.display = 'none';
+    }
+  });
+
+  // Search input - trigger on Enter key
+  standSearch.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchQuery = this.value.trim();
+      console.log('Searching for:', searchQuery);
+      filterSellers();
+    }
+  });
+
+  // Search button click
+  searchBtn.addEventListener('click', function() {
+    searchQuery = standSearch.value.trim();
+    console.log('Search button clicked, query:', searchQuery);
+    filterSellers();
+  });
+
+  // Clear search button
+  clearSearchBtn.addEventListener('click', function() {
+    standSearch.value = '';
+    searchQuery = '';
+    clearSearchBtn.style.display = 'none';
+    console.log('Search cleared');
+    filterSellers();
+  });
+
+  // Only allow numbers in zipcode input
+  zipcodeInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  // ZIP code search - trigger on Enter key
+  zipcodeInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && this.value.length === 5) {
+      console.log('Applying zipcode filter:', this.value);
+      applyZipcodeFilter(this.value);
+    }
+  });
+
+  // ZIP code search button click
+  zipcodeSearchBtn.addEventListener('click', function() {
+    if (zipcodeInput.value.length === 5) {
+      console.log('ZIP search button clicked:', zipcodeInput.value);
+      applyZipcodeFilter(zipcodeInput.value);
+    }
+  });
+
+  // Update range value display and gradient
+  rangeSlider.addEventListener('input', function(e) {
+    const value = parseInt(this.value);
+    rangeValue.textContent = value;
+    filterRadius = value;
+
+    console.log('Slider changed to:', value);
+
+    // Update slider gradient
+    const percent = ((value - 10) / (100 - 10)) * 100;
+    this.style.background = `linear-gradient(to right, #019456 0%, #019456 ${percent}%, #e0e0e0 ${percent}%, #e0e0e0 100%)`;
+
+    // Activate filter if we have a center point
+    if (filterCenter) {
+      filterActive = true;
+      filterSellers();
+    }
+  });
+
+  // Clear filter button
+  clearBtn.addEventListener('click', function() {
+    filterCenter = userLocation;
+    filterActive = false;
+    searchQuery = '';
+    zipcodeInput.value = '';
+    standSearch.value = '';
+    clearSearchBtn.style.display = 'none';
+    rangeSlider.value = 50;
+    rangeValue.textContent = 50;
+    filterRadius = 50;
+    
+    // Reset slider gradient
+    const resetPercent = ((50 - 10) / (100 - 10)) * 100;
+    rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${resetPercent}%, #e0e0e0 ${resetPercent}%, #e0e0e0 100%)`;
+    
+    filterSellers();
+    console.log('Filter cleared, showing all sellers');
+  });
+
+  // Add to map controls
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlDiv);
+  
+  console.log('Map filter controls added and initialized');
 }
 
 // Fetch approved sellers and display them as markers
@@ -102,6 +296,9 @@ function loadSellerMarkers() {
             geocodeWithNominatim(fullAddress, function(location) {
               if (location) {
                 console.log(`Nominatim geocoded ${seller.business_name} to:`, location.lat, location.lng);
+                // Store the geocoded coordinates back to the seller object
+                seller.latitude = location.lat;
+                seller.longitude = location.lng;
                 displaySellerMarker(seller, location, fullAddress);
               } else {
                 console.error(`Failed to geocode ${seller.business_name}`);
@@ -550,49 +747,85 @@ function clearSellerMarkers() {
   sellerMarkers = [];
 }
 
-// Filter and display sellers based on zipcode and radius
+// Filter and display sellers based on search query, zipcode and radius
 function filterSellers() {
-  if (!filterActive || !filterCenter) {
-    // No filter active, show all sellers
-    clearSellerMarkers();
-    allSellers.forEach(seller => {
-      const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
-      if (seller.latitude && seller.longitude) {
-        const location = {
-          lat: parseFloat(seller.latitude),
-          lng: parseFloat(seller.longitude)
-        };
-        displaySellerMarker(seller, location, fullAddress);
-      }
-    });
-    return;
-  }
-
-  // Filter sellers by distance
   clearSellerMarkers();
   let filteredCount = 0;
-  allSellers.forEach(seller => {
-    if (seller.latitude && seller.longitude) {
-      const distance = calculateDistance(
-        filterCenter.lat,
-        filterCenter.lng,
-        parseFloat(seller.latitude),
-        parseFloat(seller.longitude)
-      );
+  let matchedSellers = [];
 
-      if (distance <= filterRadius) {
-        const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+  allSellers.forEach(seller => {
+    const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
+    
+    // Check name search filter
+    let matchesSearch = true;
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const businessName = seller.business_name.toLowerCase();
+      matchesSearch = businessName.includes(searchLower);
+    }
+
+    // If seller has coordinates, check distance and display
+    if (seller.latitude && seller.longitude) {
+      // Check distance filter
+      let matchesDistance = true;
+      if (filterActive && filterCenter) {
+        const distance = calculateDistance(
+          filterCenter.lat,
+          filterCenter.lng,
+          parseFloat(seller.latitude),
+          parseFloat(seller.longitude)
+        );
+        matchesDistance = distance <= filterRadius;
+      }
+
+      // Display marker if it matches all active filters
+      if (matchesSearch && matchesDistance) {
         const location = {
           lat: parseFloat(seller.latitude),
           lng: parseFloat(seller.longitude)
         };
         displaySellerMarker(seller, location, fullAddress);
         filteredCount++;
+        
+        // Store matched sellers for map centering
+        if (searchQuery) {
+          matchedSellers.push({ seller, location });
+        }
       }
+    } else if (matchesSearch && !filterActive) {
+      // If no coordinates and no distance filter active, try geocoding
+      console.warn(`No coordinates for ${seller.business_name}, attempting geocoding...`);
+      geocodeWithNominatim(fullAddress, function(location) {
+        if (location) {
+          console.log(`Geocoded ${seller.business_name} to:`, location.lat, location.lng);
+          seller.latitude = location.lat;
+          seller.longitude = location.lng;
+          displaySellerMarker(seller, location, fullAddress);
+        } else {
+          console.error(`Failed to geocode ${seller.business_name}`);
+        }
+      });
     }
   });
 
-  console.log(`Showing ${filteredCount} stands within ${filterRadius} miles`);
+  // If searching and found matches, center map on results
+  if (searchQuery && matchedSellers.length > 0) {
+    if (matchedSellers.length === 1) {
+      // Single result: zoom in and center on it
+      const target = matchedSellers[0];
+      map.setCenter(target.location);
+      map.setZoom(15);
+    } else {
+      // Multiple results: fit bounds to show all
+      const bounds = new google.maps.LatLngBounds();
+      matchedSellers.forEach(item => {
+        bounds.extend(item.location);
+      });
+      map.fitBounds(bounds);
+    }
+  }
+
+  console.log(`Showing ${filteredCount} stands`);
 }
 
 // Geocode zipcode and apply filter
@@ -651,17 +884,53 @@ function clearFilter() {
   // Reset to user location if available, otherwise null
   filterCenter = userLocation;
   filterActive = false;
+  searchQuery = '';
   document.getElementById('zipcodeSearch').value = '';
+  document.getElementById('standSearch').value = '';
   filterSellers();
   console.log('Filter cleared, showing all sellers');
 }
 
 // Initialize filter controls
 function initializeFilterControls() {
+  const standSearch = document.getElementById('standSearch');
+  const searchBtn = document.getElementById('searchBtn');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
   const zipcodeInput = document.getElementById('zipcodeSearch');
   const rangeSlider = document.getElementById('rangeSlider');
   const rangeValue = document.getElementById('rangeValue');
   const clearBtn = document.getElementById('clearFilter');
+
+  // Show/hide clear search button based on input
+  standSearch.addEventListener('input', function() {
+    if (this.value.trim()) {
+      clearSearchBtn.style.display = 'flex';
+    } else {
+      clearSearchBtn.style.display = 'none';
+    }
+  });
+
+  // Search input for fruit stand names - trigger on Enter key
+  standSearch.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchQuery = this.value.trim();
+      filterSellers();
+    }
+  });
+
+  // Search button click
+  searchBtn.addEventListener('click', function() {
+    searchQuery = standSearch.value.trim();
+    filterSellers();
+  });
+
+  // Clear search button
+  clearSearchBtn.addEventListener('click', function() {
+    standSearch.value = '';
+    searchQuery = '';
+    clearSearchBtn.style.display = 'none';
+    filterSellers();
+  });
 
   // Initialize slider gradient on page load
   const initialValue = parseInt(rangeSlider.value);
@@ -698,7 +967,16 @@ function initializeFilterControls() {
   });
 
   // Clear filter button
-  clearBtn.addEventListener('click', clearFilter);
+  clearBtn.addEventListener('click', function() {
+    clearFilter();
+    // Reset slider to 50 miles
+    filterRadius = 50;
+    rangeSlider.value = 50;
+    rangeValue.textContent = 50;
+    // Reset slider gradient
+    const resetPercent = ((50 - 10) / (100 - 10)) * 100;
+    rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${resetPercent}%, #e0e0e0 ${resetPercent}%, #e0e0e0 100%)`;
+  });
 
   console.log('Filter controls initialized');
 }
