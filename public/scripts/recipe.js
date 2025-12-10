@@ -146,7 +146,7 @@ function handleDifficultySelect(e) {
 }
 
 // Handle season button selection
-function handleSeasonSelect(e) {
+async function handleSeasonSelect(e) {
   const selectedButton = e.target.closest('.season-button');
   const allButtons = document.querySelectorAll('.season-button');
   const seasonInput = document.getElementById('seasonInput');
@@ -158,7 +158,17 @@ function handleSeasonSelect(e) {
   selectedButton.classList.add('selected');
 
   // Update hidden input
-  seasonInput.value = selectedButton.getAttribute('data-season');
+  const selectedSeason = selectedButton.getAttribute('data-season');
+  seasonInput.value = selectedSeason;
+
+  // If user selects "auto" and there's an image, analyze it
+  if (selectedSeason === 'auto') {
+    const preview = document.getElementById('imagePreview');
+    const img = preview.querySelector('img');
+    if (img && img.src) {
+      await analyzeImageForSeason(img.src);
+    }
+  }
 }
 
 // Handle image preview
@@ -173,8 +183,11 @@ async function handleImagePreview(e) {
       preview.innerHTML = `<img src="${imageDataUrl}" alt="Recipe preview">`;
       preview.classList.add('show');
 
-      // Automatically analyze the image for season detection
-      await analyzeImageForSeason(imageDataUrl);
+      // Only analyze the image for season detection if "auto" is selected
+      const seasonInput = document.getElementById('seasonInput');
+      if (seasonInput && seasonInput.value === 'auto') {
+        await analyzeImageForSeason(imageDataUrl);
+      }
     };
     reader.readAsDataURL(file);
   } else {
