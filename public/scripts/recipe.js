@@ -14,6 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuthStatusAndSetup();
   loadRecipes();
 
+  // Check if there's a recipe ID in the URL and open that recipe
+  const urlParams = new URLSearchParams(window.location.search);
+  const recipeId = urlParams.get('id');
+  if (recipeId) {
+    // Wait for recipes to load, then open the modal
+    setTimeout(() => {
+      openRecipeById(recipeId);
+    }, 1000);
+  }
+
   // Handle form submission
   const recipeForm = document.getElementById('createRecipeForm');
   if (recipeForm) {
@@ -724,6 +734,36 @@ function createRecipeCard(recipe, ratingsData = null) {
   }
 
   return card;
+}
+
+// Open recipe modal by ID (used when navigating from homepage)
+async function openRecipeById(recipeId) {
+  console.log('Opening recipe with ID:', recipeId);
+  
+  // Try to find the recipe in allRecipes
+  let recipe = allRecipes.find(r => r.id == recipeId);
+  
+  if (!recipe) {
+    // If not found in allRecipes, fetch it from the API
+    try {
+      const response = await fetch(`/api/recipes/${recipeId}`);
+      if (response.ok) {
+        recipe = await response.json();
+      }
+    } catch (error) {
+      console.error('Error fetching recipe:', error);
+    }
+  }
+  
+  if (recipe) {
+    viewRecipeDetail(recipe);
+    // Clear the URL parameter after opening (optional - keeps URL clean)
+    const url = new URL(window.location);
+    url.searchParams.delete('id');
+    window.history.replaceState({}, '', url);
+  } else {
+    console.error('Recipe not found:', recipeId);
+  }
 }
 
 // View recipe details in modal
