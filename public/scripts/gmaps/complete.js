@@ -467,6 +467,16 @@ async function showSellerModal(seller, fullAddress) {
               </div>
             </div>
           ` : `<div class="seller-info-group"><h4>WORKING HOURS</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
+
+          <!-- Ratings & Comments Section -->
+          <div class="ratings-section" id="ratingsSection-${seller.user_id}">
+            <div class="ratings-header">
+              <h4>RATINGS & REVIEWS</h4>
+            </div>
+            <div id="ratingsContent-${seller.user_id}">
+              <div class="loading-placeholder">Loading reviews...</div>
+            </div>
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -484,6 +494,9 @@ async function showSellerModal(seller, fullAddress) {
 
   // Insert new modal
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // Load ratings and reviews
+  loadFruitStandRatings(seller.user_id);
 }
 
 // Change main gallery image
@@ -690,6 +703,165 @@ function initializeFilterControls() {
   console.log('Filter controls initialized');
 }
 
+// ========== FRUIT STAND RATINGS FUNCTIONS ==========
+
+async function loadFruitStandRatings(standId) {
+  const ratingsContent = document.getElementById(`ratingsContent-${standId}`);
+  if (!ratingsContent) return;
+
+  try {
+    const response = await fetch(`/api/fruitstands/${standId}/ratings`);
+    if (!response.ok) throw new Error('Failed to fetch ratings');
+
+    const data = await response.json();
+    const { ratings, averageRating, totalRatings } = data;
+
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const isLoggedIn = user && user.id;
+
+    let overallRatingHTML = '';
+    if (totalRatings > 0) {
+      overallRatingHTML = `
+        <div class="overall-rating">
+          <div class="overall-rating-number">${averageRating.toFixed(1)}</div>
+          <div class="overall-rating-details">
+            <div class="overall-rating-stars">
+              ${generateStarsHTML(averageRating)}
+            </div>
+            <div class="overall-rating-count">${totalRatings} ${totalRatings === 1 ? 'review' : 'reviews'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    let addReviewHTML = '';
+    if (isLoggedIn) {
+      addReviewHTML = `
+        <div class="add-review-form">
+          <h5>Write a Review</h5>
+          <div class="review-form-group">
+            <label>Your Rating *</label>
+            ${generateRatingInput('fruitstand', standId)}
+          </div>
+          <div class="review-form-group">
+            <label for="reviewComment-${standId}">Your Review (Optional)</label>
+            <textarea
+              id="reviewComment-${standId}"
+              class="review-textarea"
+              placeholder="Share your experience with this fruit stand..."
+              maxlength="500"
+            ></textarea>
+          </div>
+          <button class="submit-review-btn" onclick="submitFruitStandRating(${standId})">
+            Submit Review
+          </button>
+        </div>
+      `;
+    } else {
+      addReviewHTML = `
+        <div class="login-prompt">
+          <p>Log in to leave a review</p>
+          <a href="/login" class="login-prompt-btn">Log In</a>
+        </div>
+      `;
+    }
+
+    let reviewsHTML = '';
+    if (ratings && ratings.length > 0) {
+      reviewsHTML = `
+        <div class="reviews-list">
+          ${ratings.map(review => `
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-user-info">
+                  <img
+                    src="${review.avatar || '../images/default-avatar.png'}"
+                    alt="${escapeHtml(review.handle || 'User')}"
+                    class="review-avatar"
+                    onerror="this.src='../images/default-avatar.png'"
+                  >
+                  <div class="review-user-details">
+                    <div class="review-username">${escapeHtml(review.handle || 'Anonymous')}</div>
+                    <div class="review-date">${new Date(review.created_at).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                <div class="review-rating">
+                  ${generateStarsHTML(review.rating)}
+                </div>
+              </div>
+              ${review.comment ? `<div class="review-comment">${escapeHtml(review.comment)}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (!isLoggedIn || totalRatings === 0) {
+      reviewsHTML = `
+        <div class="no-reviews-message">
+          No reviews yet. Be the first to review this fruit stand!
+        </div>
+      `;
+    }
+
+    ratingsContent.innerHTML = overallRatingHTML + addReviewHTML + reviewsHTML;
+
+  } catch (error) {
+    console.error('Error loading fruit stand ratings:', error);
+    ratingsContent.innerHTML = `
+      <div class="no-reviews-message">
+        Unable to load reviews at this time.
+      </div>
+    `;
+  }
+}
+
+async function submitFruitStandRating(standId) {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (!user || !user.id) {
+    alert('Please log in to submit a review');
+    window.location.href = '/login';
+    return;
+  }
+
+  const ratingInput = document.getElementById(`fruitstandRatingValue-${standId}`);
+  if (!ratingInput) {
+    alert('Please select a rating');
+    return;
+  }
+
+  const rating = parseInt(ratingInput.getAttribute('data-rating'));
+  if (!rating || rating < 1 || rating > 5) {
+    alert('Please select a rating from 1 to 5 stars');
+    return;
+  }
+
+  const commentInput = document.getElementById(`reviewComment-${standId}`);
+  const comment = commentInput ? commentInput.value.trim() : '';
+
+  const submitBtn = event.target;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try {
+    const response = await fetch(`/api/fruitstands/${standId}/rating`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, user_id: user.id, comment })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to submit rating');
+
+    showToast('Review submitted successfully!');
+    await loadFruitStandRatings(standId);
+
+  } catch (error) {
+    console.error('Error submitting rating:', error);
+    alert(error.message || 'Failed to submit review. Please try again.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Review';
+  }
+}
+
 // Make functions accessible globally
 window.placeMarkerByAddress = placeMarkerByAddress;
 window.clearAllCustomMarkers = clearAllCustomMarkers;
@@ -700,6 +872,8 @@ window.closeSellerModal = closeSellerModal;
 window.contactSeller = contactSeller;
 window.changeMainImage = changeMainImage;
 window.initializeFilterControls = initializeFilterControls;
+window.loadFruitStandRatings = loadFruitStandRatings;
+window.submitFruitStandRating = submitFruitStandRating;
 
 // Initialize filter controls when DOM is ready
 if (document.readyState === 'loading') {

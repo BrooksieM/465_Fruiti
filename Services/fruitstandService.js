@@ -358,67 +358,6 @@ app.get('/api/fruitstands/:id', async (req, res) => {
 });
 
 // POST endpoint to rate a fruit stand
-app.post('/api/fruitstands/:id/rating', async (req, res) => {
-    try 
-    {
-        const id = Number(req.params.id);
-        const { rating, user_id, comment } = req.body;
-        
-        if (!Number.isInteger(id) || id <= 0) 
-        {
-            return res.status(400).json({ error: 'Invalid fruit stand ID' });
-        }
-
-        // Validate rating
-        if (!rating || rating < 1 || rating > 5) 
-        {
-            return res.status(400).json({ error: 'Rating must be between 1 and 5' });
-        }
-
-        // Check if fruit stand exists
-        const { data: existingFruitStand, error: checkError } = await supabase
-            .from('fruitstands')
-            .select('id')
-            .eq('id', id)
-            .single();
-
-        if (checkError) 
-        {
-            return res.status(404).json({ error: 'Fruit stand not found' });
-        }
-
-        // Insert rating into ratings table (you'll need to create this table)
-        const { data, error } = await supabase
-            .from('ratings')
-            .insert([
-                {
-                    fruitstand_id: id,
-                    rating,
-                    user_id: user_id || null,
-                    comment: comment || null,
-                    created_at: new Date().toISOString()
-                }
-            ])
-            .select();
-
-        if (error) 
-        {
-            console.error('Rating insert error:', error);
-            return res.status(500).json({ error: error.message });
-        }
-
-        res.json({ 
-            message: 'Rating submitted successfully.',
-            rating: data[0]
-        });
-    } 
-    catch (error) 
-    {
-        console.error('Server error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
 // GET endpoint to get fruit stand address
 app.get('/api/fruitstands/:id/address', async (req, res) => {
     try 
@@ -722,6 +661,133 @@ app.post('/api/fruitstand-images/:userId', async (req, res) => {
             message: error.message,
             stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
+    }
+});
+
+// ========== FRUIT STAND RATINGS ENDPOINTS ==========
+
+// GET /api/fruitstands/:standId/ratings - Get all ratings for a fruit stand
+app.get('/api/fruitstands/:standId/ratings', async (req, res) => {
+    try {
+        const standId = Number(req.params.standId);
+
+        if (!Number.isInteger(standId) || standId <= 0) {
+            return res.status(400).json({ error: 'Invalid stand ID' });
+        }
+
+        // Fetch all ratings with user info
+        const { data: ratings, error } = await supabase
+            .from('fruitstand_ratings')
+            .select(`
+                *,
+                accounts!fruitstand_ratings_user_id_fkey (
+                    handle,
+                    avatar
+                )
+            `)
+            .eq('stand_id', standId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching ratings:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Flatten the nested accounts data
+        const flattenedRatings = ratings.map(rating => ({
+            ...rating,
+            handle: rating.accounts?.handle,
+            avatar: rating.accounts?.avatar
+        }));
+
+        // Calculate average rating
+        const averageRating = ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : 0;
+
+        res.json({
+            ratings: flattenedRatings,
+            averageRating,
+            totalRatings: ratings.length
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/fruitstands/:standId/rating - Submit or update a rating
+app.post('/api/fruitstands/:standId/rating', async (req, res) => {
+    try {
+        const standId = Number(req.params.standId);
+        const { user_id, rating, comment } = req.body;
+
+        if (!Number.isInteger(standId) || standId <= 0) {
+            return res.status(400).json({ error: 'Invalid stand ID' });
+        }
+
+        if (!Number.isInteger(user_id) || user_id <= 0) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+        }
+
+        // Check if user already rated this stand
+        const { data: existingRating } = await supabase
+            .from('fruitstand_ratings')
+            .select('id')
+            .eq('stand_id', standId)
+            .eq('user_id', user_id)
+            .maybeSingle();
+
+        let result;
+        if (existingRating) {
+            // Update existing rating
+            const { data, error } = await supabase
+                .from('fruitstand_ratings')
+                .update({
+                    rating,
+                    comment: comment || null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existingRating.id)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error updating rating:', error);
+                return res.status(500).json({ error: error.message });
+            }
+            result = data;
+        } else {
+            // Insert new rating
+            const { data, error } = await supabase
+                .from('fruitstand_ratings')
+                .insert({
+                    stand_id: standId,
+                    user_id,
+                    rating,
+                    comment: comment || null
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error inserting rating:', error);
+                return res.status(500).json({ error: error.message });
+            }
+            result = data;
+        }
+
+        res.status(200).json({
+            message: existingRating ? 'Rating updated successfully' : 'Rating submitted successfully',
+            rating: result
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 };
