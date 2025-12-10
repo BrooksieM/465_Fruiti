@@ -1,5 +1,39 @@
 /* Recipe Page Styles */
 
+/* Hero Banner */
+.recipe-hero {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.recipe-hero::before {
+  content: '🍎🥗🍓🥑🍊';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  font-size: 60px;
+  opacity: 0.1;
+  letter-spacing: 40px;
+}
+
+.recipe-hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.recipe-hero p {
+  font-size: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  opacity: 0.95;
+}
+
 .recipe-container {
   max-width: 1400px;
   margin: 40px auto;
