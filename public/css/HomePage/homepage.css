@@ -121,7 +121,60 @@
   min-width: fit-content;
 }
 
-#standSearch,
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  width: 280px;
+}
+
+.search-box:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-box:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: #019456;
+}
+
+.search-icon-btn,
+.clear-search-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6368;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-icon-btn:hover,
+.clear-search-btn:hover {
+  color: #019456;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  background: transparent;
+  color: #333;
+}
+
+.search-box input::placeholder {
+  color: #9aa0a6;
+}
+
 #zipcodeSearch {
   padding: 10px 16px;
   border: 2px solid #ddd;
@@ -133,18 +186,12 @@
   font-weight: 400;
 }
 
-#standSearch {
-  width: 200px;
-}
-
-#standSearch:focus,
 #zipcodeSearch:focus {
   outline: none;
   border-color: #019456;
   box-shadow: 0 0 0 3px rgba(1, 148, 86, 0.1);
 }
 
-#standSearch::placeholder,
 #zipcodeSearch::placeholder {
   color: #aaa;
   font-weight: 400;
@@ -161,6 +208,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .clear-filter-btn:hover {

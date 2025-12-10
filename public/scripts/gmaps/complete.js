@@ -558,6 +558,7 @@ function clearSellerMarkers() {
 function filterSellers() {
   clearSellerMarkers();
   let filteredCount = 0;
+  let matchedSellers = [];
 
   allSellers.forEach(seller => {
     const fullAddress = `${seller.address}, ${seller.city}, ${seller.state} ${seller.zipcode}`;
@@ -592,6 +593,11 @@ function filterSellers() {
         };
         displaySellerMarker(seller, location, fullAddress);
         filteredCount++;
+        
+        // Store matched sellers for map centering
+        if (searchQuery) {
+          matchedSellers.push({ seller, location });
+        }
       }
     } else if (matchesSearch && !filterActive) {
       // If no coordinates and no distance filter active, try geocoding
@@ -608,6 +614,23 @@ function filterSellers() {
       });
     }
   });
+
+  // If searching and found matches, center map on results
+  if (searchQuery && matchedSellers.length > 0) {
+    if (matchedSellers.length === 1) {
+      // Single result: zoom in and center on it
+      const target = matchedSellers[0];
+      map.setCenter(target.location);
+      map.setZoom(15);
+    } else {
+      // Multiple results: fit bounds to show all
+      const bounds = new google.maps.LatLngBounds();
+      matchedSellers.forEach(item => {
+        bounds.extend(item.location);
+      });
+      map.fitBounds(bounds);
+    }
+  }
 
   console.log(`Showing ${filteredCount} stands`);
 }
@@ -678,14 +701,41 @@ function clearFilter() {
 // Initialize filter controls
 function initializeFilterControls() {
   const standSearch = document.getElementById('standSearch');
+  const searchBtn = document.getElementById('searchBtn');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
   const zipcodeInput = document.getElementById('zipcodeSearch');
   const rangeSlider = document.getElementById('rangeSlider');
   const rangeValue = document.getElementById('rangeValue');
   const clearBtn = document.getElementById('clearFilter');
 
-  // Search input for fruit stand names
-  standSearch.addEventListener('input', function(e) {
-    searchQuery = this.value.trim();
+  // Show/hide clear search button based on input
+  standSearch.addEventListener('input', function() {
+    if (this.value.trim()) {
+      clearSearchBtn.style.display = 'flex';
+    } else {
+      clearSearchBtn.style.display = 'none';
+    }
+  });
+
+  // Search input for fruit stand names - trigger on Enter key
+  standSearch.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchQuery = this.value.trim();
+      filterSellers();
+    }
+  });
+
+  // Search button click
+  searchBtn.addEventListener('click', function() {
+    searchQuery = standSearch.value.trim();
+    filterSellers();
+  });
+
+  // Clear search button
+  clearSearchBtn.addEventListener('click', function() {
+    standSearch.value = '';
+    searchQuery = '';
+    clearSearchBtn.style.display = 'none';
     filterSellers();
   });
 
@@ -724,7 +774,16 @@ function initializeFilterControls() {
   });
 
   // Clear filter button
-  clearBtn.addEventListener('click', clearFilter);
+  clearBtn.addEventListener('click', function() {
+    clearFilter();
+    // Reset slider to 50 miles
+    filterRadius = 50;
+    rangeSlider.value = 50;
+    rangeValue.textContent = 50;
+    // Reset slider gradient
+    const resetPercent = ((50 - 10) / (100 - 10)) * 100;
+    rangeSlider.style.background = `linear-gradient(to right, #019456 0%, #019456 ${resetPercent}%, #e0e0e0 ${resetPercent}%, #e0e0e0 100%)`;
+  });
 
   console.log('Filter controls initialized');
 }
