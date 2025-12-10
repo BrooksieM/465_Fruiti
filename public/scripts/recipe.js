@@ -660,8 +660,9 @@ function createRecipeCard(recipe, ratingsData = null) {
 
   // Get season display
   const seasonName = recipe.season_name || recipe.season || 'auto';
-  const seasonDisplay = seasonName !== 'none' && seasonName !== 'auto'
-    ? `<p class="recipe-season"><strong>Season:</strong> ${seasonName.charAt(0).toUpperCase() + seasonName.slice(1)}</p>`
+  let seasonDisplayText = seasonName.charAt(0).toUpperCase() + seasonName.slice(1);
+  const seasonDisplay = seasonName !== 'auto'
+    ? `<p class="recipe-season"><strong>Season:</strong> ${seasonDisplayText}</p>`
     : '';
 
   // Rating display
@@ -942,9 +943,29 @@ function editRecipe(recipe) {
   // Populate form with recipe data
   document.getElementById('recipeName').value = recipe.name;
 
-  // Set selected ingredients
-  selectedIngredients = [...ingredientsList];
-  displaySelectedIngredients();
+  // Set ingredients - clear existing and add new ones
+  const ingredientsContainer = document.getElementById('ingredientsContainer');
+  ingredientsContainer.innerHTML = '';
+  ingredientsList.forEach((ingredient, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ingredient-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="ingredient-input" placeholder="Enter ingredient" required value="${ingredient.replace(/"/g, '&quot;')}">
+      <button type="button" class="btn-remove-ingredient ${index === 0 && ingredientsList.length === 1 ? 'hidden' : ''}" onclick="removeIngredient(this)">Remove</button>
+    `;
+    ingredientsContainer.appendChild(wrapper);
+  });
+
+  // If no ingredients, add one empty field
+  if (ingredientsList.length === 0) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ingredient-input-wrapper';
+    wrapper.innerHTML = `
+      <input type="text" class="ingredient-input" placeholder="Enter ingredient" required>
+      <button type="button" class="btn-remove-ingredient hidden" onclick="removeIngredient(this)">Remove</button>
+    `;
+    ingredientsContainer.appendChild(wrapper);
+  }
 
   // Set instructions - clear existing and add new ones
   const instructionsContainer = document.getElementById('instructionsContainer');
