@@ -86,8 +86,13 @@ async function geocodeAddress(address, city, state, zipcode) {
   }
 }
 
-module.exports = function (app, supabase)
+module.exports = function (app, supabase, stripe)
 {
+  const stripePriceMap = {
+    'monthly': 199,   // $1.99
+    '3month': 499,    // $4.99
+    '6month': 799     // $7.99
+  };
   // GET /api/seller_subscriptions -> get all subscription plans
   app.get('/api/seller_subscriptions', async (req, res) => 
   {
@@ -486,6 +491,52 @@ module.exports = function (app, supabase)
       message: 'This is the payment information page',
       instructions: 'Use POST /api/seller_payments to submit payment information'
     });
+  });
+
+  // ========== STRIPE PAYMENT INTEGRATION ==========
+
+  // GET /api/stripe-publishable-key -> get Stripe publishable key for frontend
+  app.get('/api/stripe-publishable-key', (req, res) => {
+    res.json({
+      publishableKey: process.env.STRIPE_API_PERISHABLE_KEY
+    });
+  });
+
+  // POST /api/create-payment-intent -> create Stripe payment intent
+  app.post('/api/create-payment-intent', async (req, res) => {
+    try {
+      const { subscriptionType, email } = req.body;
+
+      if (!subscriptionType) {
+        return res.status(400).json({ error: 'Subscription type is required' });
+      }
+
+      const amount = stripePriceMap[subscriptionType];
+      if (!amount) {
+        return res.status(400).json({ error: 'Invalid subscription type' });
+      }
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          subscriptionType: subscriptionType,
+          email: email || 'unknown'
+        }
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        amount: amount
+      });
+    } catch (error) {
+      console.error('Payment Intent creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // ========== SELLER SUBSCRIPTION PURCHASE ==========
