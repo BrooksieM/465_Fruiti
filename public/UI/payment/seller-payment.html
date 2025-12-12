@@ -174,25 +174,13 @@
         </div>
 
         <div id="cardPaymentSection">
+          <!-- Stripe Card Element will be inserted here -->
           <div class="form-group">
-            <label for="cardNumber">Card Number *</label>
-            <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cardName">Name on Card *</label>
-              <input type="text" id="cardName" name="cardName" required>
+            <label for="card-element">Credit or Debit Card *</label>
+            <div id="card-element" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+              <!-- Stripe Elements will insert the card input here -->
             </div>
-            <div class="form-group">
-              <label for="expiryDate">Expiry Date *</label>
-              <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="cvv">CVV *</label>
-            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" required>
+            <div id="card-errors" role="alert" style="color: #e74c3c; margin-top: 8px; font-size: 14px;"></div>
           </div>
         </div>
 
@@ -257,7 +245,56 @@
   <script src="/scripts/footer.js"></script>
   <script src="/scripts/navigationForLoggedInUser.js"></script>
 
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+
   <script>
+    // Initialize Stripe - fetch publishable key from backend
+    let stripe;
+    let elements;
+    let cardElement;
+
+    // Fetch Stripe publishable key and initialize
+    fetch('/api/stripe-publishable-key')
+      .then(response => response.json())
+      .then(data => {
+        stripe = Stripe(data.publishableKey);
+        elements = stripe.elements();
+
+        // Create card element
+        cardElement = elements.create('card', {
+          style: {
+            base: {
+              fontSize: '16px',
+              color: '#424770',
+              '::placeholder': {
+                color: '#aab7c4',
+              },
+            },
+            invalid: {
+              color: '#e74c3c',
+            },
+          },
+        });
+
+        // Mount card element
+        cardElement.mount('#card-element');
+
+        // Handle real-time validation errors from the card Element
+        cardElement.on('change', function(event) {
+          const displayError = document.getElementById('card-errors');
+          if (event.error) {
+            displayError.textContent = event.error.message;
+          } else {
+            displayError.textContent = '';
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error loading Stripe:', error);
+        alert('Error loading payment system. Please refresh the page.');
+      });
+
     // Get plan details from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const plan = urlParams.get('plan') || '3month';
@@ -373,30 +410,15 @@
       method.addEventListener('click', function() {
         document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
         this.classList.add('active');
-        
+
         const selectedMethod = this.dataset.method;
         if (selectedMethod === 'paypal') {
-          document.getElementById('cardPaymentSection').style.display = 'none';
-        } else {
-          document.getElementById('cardPaymentSection').style.display = 'block';
+          alert('PayPal integration coming soon! Please use credit card for now.');
+          // Switch back to card
+          document.querySelector('[data-method="card"]').classList.add('active');
+          this.classList.remove('active');
         }
       });
-    });
-
-    // Card number formatting
-    document.getElementById('cardNumber').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\s/g, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      e.target.value = formattedValue;
-    });
-
-    // Expiry date formatting
-    document.getElementById('expiryDate').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.slice(0, 2) + '/' + value.slice(2, 4);
-      }
-      e.target.value = value;
     });
 
     // ZIP code formatting (numbers only)
@@ -419,11 +441,6 @@
       }
 
       e.target.value = value;
-    });
-
-    // CVV formatting (numbers only, max 3 digits)
-    document.getElementById('cvv').addEventListener('input', function(e) {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
     });
 
     // Form submission
@@ -479,49 +496,102 @@
       // Disable submit button
       const submitBtn = document.querySelector('.submit-btn');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Processing...';
+      submitBtn.textContent = 'Processing payment...';
 
       try {
-        // Send data to backend
-        const response = await fetch('/api/purchase-seller-subscription', {
+        // Step 1: Create Payment Intent
+        const paymentIntentResponse = await fetch('/api/create-payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            subscriptionType: plan,
+            email: formData.email
+          })
         });
 
-        const result = await response.json();
+        if (!paymentIntentResponse.ok) {
+          throw new Error('Failed to create payment intent');
+        }
 
-        if (response.ok) {
-          alert(`Success! ${result.message}\n\nYour subscription is active until ${new Date(result.subscriptionEnd).toLocaleDateString()}`);
+        const { clientSecret } = await paymentIntentResponse.json();
 
-          // Store user info in localStorage (temporary until proper auth is implemented)
-          localStorage.setItem('userId', result.userId);
-          localStorage.setItem('isLoggedIn', 'true');
-
-          // Fetch updated user data with is_seller: true
-          try {
-            const userResponse = await fetch(`/api/accounts/${result.userId}`);
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              localStorage.setItem('user', JSON.stringify(userData));
-              console.log('Updated user data stored in localStorage:', userData);
+        // Step 2: Confirm payment with Stripe
+        submitBtn.textContent = 'Confirming payment...';
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              email: formData.email,
+              address: {
+                line1: formData.standAddress,
+                city: formData.city,
+                state: formData.state,
+                postal_code: formData.zipcode
+              }
             }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
           }
+        });
 
-          // Redirect to homepage or seller dashboard
-          window.location.href = '/';
-        } else {
-          alert(`Error: ${result.error}`);
+        if (stripeError) {
+          // Show error to customer
+          const errorElement = document.getElementById('card-errors');
+          errorElement.textContent = stripeError.message;
           submitBtn.disabled = false;
           submitBtn.textContent = 'Complete Purchase & Become a Seller';
+          return;
+        }
+
+        // Step 3: Payment succeeded - create seller subscription
+        if (paymentIntent.status === 'succeeded') {
+          submitBtn.textContent = 'Creating your seller account...';
+
+          // Add payment info to formData
+          formData.stripePaymentIntentId = paymentIntent.id;
+          formData.paymentStatus = 'succeeded';
+          formData.paymentMethod = 'card';
+
+          const response = await fetch('/api/purchase-seller-subscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert(`Success! ${result.message}\n\nYour subscription is active until ${new Date(result.subscriptionEnd).toLocaleDateString()}`);
+
+            // Store user info in localStorage
+            localStorage.setItem('userId', result.userId);
+            localStorage.setItem('isLoggedIn', 'true');
+
+            // Fetch updated user data with is_seller: true
+            try {
+              const userResponse = await fetch(`/api/accounts/${result.userId}`);
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                localStorage.setItem('user', JSON.stringify(userData));
+                console.log('Updated user data stored in localStorage:', userData);
+              }
+            } catch (error) {
+              console.error('Error fetching user data:', error);
+            }
+
+            // Redirect to homepage or seller dashboard
+            window.location.href = '/';
+          } else {
+            alert(`Error: ${result.error}`);
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Complete Purchase & Become a Seller';
+          }
         }
       } catch (error) {
-        console.error('Purchase error:', error);
-        alert('An error occurred while processing your purchase. Please try again.');
+        console.error('Payment error:', error);
+        alert('An error occurred while processing your payment. Please try again.');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Complete Purchase & Become a Seller';
       }
