@@ -19,6 +19,9 @@ require('dotenv').config({ path: './gmaps_api/.env' });
 // Load OpenAI API key from openai_api/.env
 require('dotenv').config({ path: './openai_api/.env' });
 
+// Load Stripe API key from stripe_api/.env
+require('dotenv').config({ path: './stripe_api/.env' });
+
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client using environment variables
@@ -32,6 +35,9 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// Initialize Stripe
+const stripe = require('stripe')(process.env.STRIPE_API_KEY);
 
 const pageRoutes = require('./routes/pages');
 const apiRoutes = require('./routes/api');
@@ -113,7 +119,7 @@ require('./Services/commentService')(app, supabase);
 require('./Services/fruitstandService')(app, supabase, supabaseAdmin);
 require('./Services/nutritionService')(app, supabase);
 require('./Services/recipeService')(app, supabase, supabaseAdmin);
-require('./Services/sellerApplicationService')(app, supabase);
+require('./Services/sellerApplicationService')(app, supabase, stripe);
 require('./Services/uploadService')(app, supabaseAdmin);
 
 //swagger 

@@ -1,5 +1,39 @@
 /* Recipe Page Styles */
 
+/* Hero Banner */
+.recipe-hero {
+  background: linear-gradient(135deg, #017d49 0%, #019456 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.recipe-hero::before {
+  content: '🍎🥗🍓🥑🍊';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  font-size: 60px;
+  opacity: 0.1;
+  letter-spacing: 40px;
+}
+
+.recipe-hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.recipe-hero p {
+  font-size: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  opacity: 0.95;
+}
+
 .recipe-container {
   max-width: 1400px;
   margin: 40px auto;
@@ -37,6 +71,13 @@
   margin-bottom: 8px;
   color: #333;
   font-weight: 500;
+}
+
+.field-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: #666;
+  font-style: italic;
 }
 
 .form-group input,
@@ -269,6 +310,75 @@
   background-color: #c82333;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+/* Ingredients Container */
+.ingredients-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ingredient-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.ingredient-input {
+  flex: 1;
+  padding: 10px 12px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  min-height: auto !important;
+}
+
+.ingredient-input:focus {
+  outline: none;
+  border-color: #017d49 !important;
+  box-shadow: 0 0 0 3px rgba(1, 125, 73, 0.1) !important;
+}
+
+.btn-remove-ingredient {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.btn-remove-ingredient:hover {
+  background-color: #c82333;
+}
+
+.btn-remove-ingredient.hidden {
+  visibility: hidden;
+  cursor: default;
+}
+
+.btn-add-ingredient {
+  background-color: #017d49;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-ingredient:hover {
+  background-color: #019456;
 }
 
 /* Instructions Container */

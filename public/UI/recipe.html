@@ -21,12 +21,7 @@
       </a>
     </div>
 
-    <div class="search-bar">
-      <input type="text" placeholder="Search Fruit" />
-    </div>
-
-
-<div class="auth-buttons" id="authButtons"></div>
+    <div class="auth-buttons" id="authButtons"></div>
 
 
   </div>
@@ -40,6 +35,12 @@
     </nav>
 
   <div class="black-bar"></div>
+
+  <!-- Hero Section -->
+  <section class="recipe-hero">
+    <h1>Discover Delicious Recipes 🍎</h1>
+    <p>Explore fresh fruit recipes from our community. Share your favorite creations and find inspiration for your next meal!</p>
+  </section>
 
   <!-- Main Content -->
   <div class="recipe-container">
@@ -91,6 +92,30 @@
         </div>
 
         <div class="filter-group">
+          <h4>Season</h4>
+          <label class="filter-label">
+            <input type="checkbox" class="season-filter" value="spring">
+            Spring
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="season-filter" value="summer">
+            Summer
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="season-filter" value="fall">
+            Fall
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="season-filter" value="winter">
+            Winter
+          </label>
+          <label class="filter-label">
+            <input type="checkbox" class="season-filter" value="none">
+            None
+          </label>
+        </div>
+
+        <div class="filter-group">
           <p id="recipeCount">0 recipes found</p>
           <button class="btn-clear-filters" onclick="clearFilters()">Clear Filters</button>
         </div>
@@ -124,14 +149,13 @@
 
         <div class="form-group">
           <label>Ingredients:</label>
-          <div id="selectedIngredientsContainer" class="selected-ingredients"></div>
-          <div class="ingredient-search-wrapper">
-            <div class="ingredient-search-box">
-              <input type="text" id="ingredientSearch" class="ingredient-search-input" placeholder="Search for ingredients" maxlength="20">
-              <div id="ingredientSearchResults" class="ingredient-search-results hidden"></div>
+          <div id="ingredientsContainer" class="ingredients-container">
+            <div class="ingredient-input-wrapper">
+              <input type="text" class="ingredient-input" placeholder="Enter ingredient" required>
+              <button type="button" class="btn-remove-ingredient hidden" onclick="removeIngredient(this)">Remove</button>
             </div>
-            <button type="button" class="btn-remove-all-ingredients" onclick="removeAllIngredients()">Remove All</button>
           </div>
+          <button type="button" class="btn-add-ingredient" onclick="addIngredient()">+ Add Ingredient</button>
         </div>
 
         <div class="form-group">
@@ -152,7 +176,7 @@
         </div>
 
         <div class="form-group">
-          <label>Season:</label>
+          <label>Season: <span class="field-hint">Select "Auto" to detect season from image, or choose manually</span></label>
           <div class="season-options">
             <input type="hidden" id="seasonInput" name="season" value="auto">
             <div class="season-button" data-season="auto" id="seasonAuto">

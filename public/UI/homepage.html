@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../css/HomePage/homepage.css">
 <link rel="stylesheet" href="../css/footer/footer.css">
 <link rel="stylesheet" href="../css/modal/seller-modal.css">
+<link rel="stylesheet" href="../css/ratings.css">
 
 </head>
 
@@ -20,12 +21,7 @@
       </a>
     </div>
 
-    <div class="search-bar">
-      <input type="text" placeholder="Search Fruit" />
-    </div>
-
-
-<div class="auth-buttons" id="authButtons"></div>
+    <div class="auth-buttons" id="authButtons"></div>
 
 
   </div>
@@ -40,9 +36,39 @@
 
   <div class="black-bar"></div>
 
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <h1>Discover Fresh, Local Fruit Stands Near You 🍎🍊</h1>
+      <p>Support local farmers & find fruit stands in your neighborhood!</p>
+    </div>
+  </section>
+
   <div class="heading-filter-wrapper">
     <!-- Filter Controls -->
     <div class="filter-controls">
+      <div class="filter-group search-group">
+        <div class="search-box">
+          <input
+            type="text"
+            id="standSearch"
+            placeholder="Search fruit stands..."
+          />
+          <button id="clearSearchBtn" class="clear-search-btn" title="Clear search" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button id="searchBtn" class="search-icon-btn" title="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="filter-group zipcode-group">
         <label for="zipcodeSearch">ZIP Code:</label>
         <input
@@ -82,6 +108,13 @@
 </div>
 <div class="spacing"></div>
 
+<div class="section-heading">Featured Recipes</div>
+<div class="featured-recipes-container" id="featuredRecipes">
+  <!-- Featured recipes will be dynamically loaded here -->
+  <div class="loading-placeholder">Loading featured recipes...</div>
+</div>
+<div class="spacing"></div>
+
 <div id="footer-placeholder"></div>
 <script src="../scripts/footer.js"></script>
 
@@ -92,6 +125,10 @@
 <script src="/scripts/randomizer.js"></script>
 
 <script src="/scripts/featuredStands.js"></script>
+
+<script src="/scripts/featuredRecipes.js"></script>
+
+<script src="/scripts/rating.js"></script>
 
 <script>
   // Fetch Google Maps API key from server and load the Maps script
