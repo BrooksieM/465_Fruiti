@@ -607,17 +607,18 @@ async function showSellerModal(seller, fullAddress) {
   // Check if user is logged in
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const isLoggedIn = user && user.id;
-  const isFavorited = isLoggedIn ? await isFruitStandFavorited(seller.user_id) : false;
+  const standId = seller.id || seller.user_id; // Use seller.id (stand ID), fallback to user_id for compatibility
+  const isFavorited = isLoggedIn ? await isFruitStandFavorited(standId) : false;
 
   const modalHTML = `
-    <div class="custom-modal" id="sellerModal" data-seller-id="${seller.user_id}">
+    <div class="custom-modal" id="sellerModal" data-seller-id="${standId}">
       <div class="modal-overlay" onclick="closeSellerModal()"></div>
       <div class="modal-content seller-modal-large">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
             <h3>${escapeHtml(seller.business_name)}</h3>
             ${isLoggedIn ? `
-              <button class="btn-heart" onclick="toggleFavoriteFruitStand(${seller.user_id})" title="${isFavorited ? 'Unfavorite this stand' : 'Favorite this stand'}">
+              <button class="btn-heart" onclick="toggleFavoriteFruitStand(${standId})" title="${isFavorited ? 'Unfavorite this stand' : 'Favorite this stand'}">
                 ${isFavorited ? '❤️' : '🤍'}
               </button>
             ` : ''}
@@ -666,11 +667,11 @@ async function showSellerModal(seller, fullAddress) {
           ` : `<div class="seller-info-group"><h4>WORKING HOURS</h4><p style="color: #999; font-style: italic;">Not available</p></div>`}
 
           <!-- Ratings & Comments Section -->
-          <div class="ratings-section" id="ratingsSection-${seller.user_id}">
+          <div class="ratings-section" id="ratingsSection-${standId}">
             <div class="ratings-header">
               <h4>RATINGS & REVIEWS</h4>
             </div>
-            <div id="ratingsContent-${seller.user_id}">
+            <div id="ratingsContent-${standId}">
               <div class="loading-placeholder">Loading reviews...</div>
             </div>
           </div>
@@ -693,7 +694,7 @@ async function showSellerModal(seller, fullAddress) {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
   // Load ratings and reviews
-  loadFruitStandRatings(seller.user_id);
+  loadFruitStandRatings(standId);
 }
 
 // Change main gallery image

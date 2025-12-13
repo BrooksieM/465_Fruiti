@@ -71,16 +71,31 @@ async function loadAndDisplayFavoriteFruitStands(userId) {
 
         if (standResponse.ok) {
           const standData = await standResponse.json();
-          fruitStandsMap.set(standId, standData);
-          displayedStands++;
+          // Only add if standData is valid and not null
+          if (standData && standData.id) {
+            fruitStandsMap.set(standId, standData);
+            displayedStands++;
+          } else {
+            console.warn(`Stand ${standId} returned invalid data:`, standData);
+          }
+        } else {
+          console.warn(`Failed to fetch stand ${standId}: ${standResponse.status}`);
         }
       } catch (error) {
         console.error(`Error fetching stand ${standId}:`, error);
       }
     }
 
-    // Display the stands
-    renderFruitStands(Array.from(fruitStandsMap.values()), userId);
+    // Display the stands (filter out any null values just in case)
+    const validStands = Array.from(fruitStandsMap.values()).filter(stand => stand && stand.id);
+
+    // Check if we have any valid stands to display
+    if (validStands.length === 0) {
+      showEmptyState();
+      return;
+    }
+
+    renderFruitStands(validStands, userId);
 
     // Show max favorites message if at limit
     if (favoriteStandIds.length >= MAX_FAVORITES) {
@@ -108,6 +123,12 @@ function renderFruitStands(stands, userId) {
 
 // Create a stand card element
 function createStandCard(stand, userId) {
+  // Check if stand data is valid
+  if (!stand || !stand.id) {
+    console.error('Invalid stand data:', stand);
+    return document.createElement('div'); // Return empty div if invalid
+  }
+
   const card = document.createElement('div');
   card.className = 'stand-card';
   card.setAttribute('data-seller-id', stand.id);
